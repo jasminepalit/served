@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         
         title: 'servd',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         ),
         home: MyHomePage(),
       ),
