@@ -1,0 +1,7 @@
+CONSTANTS IN SNAKE_CASE
+variables and methods in lowerCamelCase
+Classes In CamelCase
+
+Always make a branch--never directly edit the master!
+Make your branches off of development, so we can have development be separate from master.
+Always include commit messages.
