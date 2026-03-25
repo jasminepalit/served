@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "990221643407",
+    "project_id": "servd-4430e",
+    "storage_bucket": "servd-4430e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:990221643407:android:1966dbc27696a500c08afa",
+        "android_client_info": {
+          "package_name": "com.example.served"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyD2-5T6W0NeVM4CHsnLKLKbN2CQOgj6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
