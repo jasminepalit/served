@@ -17,83 +17,121 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Firebase Word App',
-      theme: ThemeData(
-        primarySwatch: Colors.deepOrange,
-      ),
-      home: const WordHomePage(),
+      title: 'Firestore Volunteer App',
+      theme: ThemeData(primarySwatch: Colors.deepOrange),
+      home: const VolunteerFormPage(),
     );
   }
 }
 
-class WordHomePage extends StatefulWidget {
-  const WordHomePage({super.key});
+class VolunteerFormPage extends StatefulWidget {
+  const VolunteerFormPage({super.key});
 
   @override
-  State<WordHomePage> createState() => _WordHomePageState();
+  State<VolunteerFormPage> createState() => _VolunteerFormPageState();
 }
 
-class _WordHomePageState extends State<WordHomePage> {
-  final TextEditingController _controller = TextEditingController();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class _VolunteerFormPageState extends State<VolunteerFormPage> {
+  final _nameController = TextEditingController();
+  final _placeController = TextEditingController();
+  final _hoursController = TextEditingController();
+  DateTime? _selectedDate;
 
-  // Add word to Firestore
-  Future<void> _addWord() async {
-    final word = _controller.text.trim();
-    if (word.isEmpty) return;
+  final _firestore = FirebaseFirestore.instance;
 
-    await _firestore.collection('words').add({
-      'word': word,
-      'timestamp': FieldValue.serverTimestamp(),
+  Future<void> _addEntry() async {
+    final name = _nameController.text.trim();
+    final place = _placeController.text.trim();
+    final hours = double.tryParse(_hoursController.text.trim());
+    final date = _selectedDate;
+
+    if (name.isEmpty || place.isEmpty || hours == null || date == null) return;
+
+    await _firestore.collection('adrika2').add({
+      'name': name,
+      'place': place,
+      'hours': hours,
+      'date': Timestamp.fromDate(date),
     });
 
-    _controller.clear();
+    // Clear form
+    _nameController.clear();
+    _placeController.clear();
+    _hoursController.clear();
+    setState(() {
+      _selectedDate = null;
+    });
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Firebase Word App')),
+      appBar: AppBar(title: const Text('Volunteer Form')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
-              controller: _controller,
-              decoration: const InputDecoration(
-                labelText: 'Enter a word',
-                border: OutlineInputBorder(),
-              ),
+            // Form Fields
+            TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Name')),
+            TextField(controller: _placeController, decoration: const InputDecoration(labelText: 'Place')),
+            TextField(controller: _hoursController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Hours')),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(_selectedDate == null
+                      ? 'No date selected'
+                      : 'Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}'),
+                ),
+                TextButton(onPressed: _pickDate, child: const Text('Pick Date')),
+              ],
             ),
             const SizedBox(height: 10),
-            ElevatedButton(onPressed: _addWord, child: const Text('Add Word')),
+            ElevatedButton(onPressed: _addEntry, child: const Text('Add Entry')),
             const SizedBox(height: 20),
-            const Text(
-              'Words in Database:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Text('Entries:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            // Expanded ListView shows all words in real-time
+            // DataTable
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore
-                    .collection('words')
-                    .orderBy('timestamp', descending: true)
-                    .snapshots(),
+                stream: _firestore.collection('adrika2').orderBy('date', descending: true).snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const CircularProgressIndicator();
-
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                   final docs = snapshot.data!.docs;
-                  if (docs.isEmpty) return const Text('No words yet.');
+                  if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
 
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      final word = docs[index]['word'] ?? '';
-                      return ListTile(
-                        title: Text(word),
-                      );
-                    },
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Name')),
+                        DataColumn(label: Text('Place')),
+                        DataColumn(label: Text('Hours')),
+                        DataColumn(label: Text('Date')),
+                      ],
+                      rows: docs.map((doc) {
+                        final data = doc.data()! as Map<String, dynamic>;
+                        final timestamp = data['date'] as Timestamp?;
+                        final dateStr = timestamp != null ? timestamp.toDate().toLocal().toString().split(' ')[0] : '';
+                        return DataRow(cells: [
+                          DataCell(Text(data['name'] ?? '')),
+                          DataCell(Text(data['place'] ?? '')),
+                          DataCell(Text(data['hours']?.toString() ?? '')),
+                          DataCell(Text(dateStr)),
+                        ]);
+                      }).toList(),
+                    ),
                   );
                 },
               ),
