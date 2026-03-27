@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Firestore Volunteer App',
       theme: ThemeData(primarySwatch: Colors.deepOrange),
-      home: const FirstPage(title: 'FirstPage'),
+      home: const HomePage(title: 'HomePage'),
     );
   }
 }
@@ -31,8 +31,8 @@ class VolunteerFormPage extends StatefulWidget {
   State<VolunteerFormPage> createState() => _VolunteerFormPageState();
 }
 
-class FirstPage extends StatelessWidget {
-  const FirstPage({Key? key, required this.title}) : super(key: key);
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key, required this.title}) : super(key: key);
   final String title;
   @override
   Widget build(BuildContext context) {
