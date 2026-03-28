@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Firestore Volunteer App',
       theme: ThemeData(primarySwatch: Colors.deepOrange),
-      home: const HomePage(title: 'HomePage'),
+      home: HomePage(title: 'HomePage'),
     );
   }
 }
@@ -32,8 +32,9 @@ class VolunteerFormPage extends StatefulWidget {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
+  HomePage({Key? key, required this.title}) : super(key: key);
   final String title;
+  final _firestore = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +42,9 @@ class HomePage extends StatelessWidget {
         title: Text(title),
       ),
       body: Center(
-        child: TextButton(
+        child: Column(
+        children:[
+        TextButton(
           onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return const VolunteerFormPage();
@@ -49,6 +52,44 @@ class HomePage extends StatelessWidget {
         },
           child: const Text('Next'),
         ),
+        Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore.collection('adrika2').orderBy('date', descending: true).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                  final docs = snapshot.data!.docs;
+                  if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
+
+                  return Scrollbar(
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Name')),
+                        DataColumn(label: Text('Place')),
+                        DataColumn(label: Text('Hours')),
+                        DataColumn(label: Text('Date')),
+                      ],
+                      rows: docs.map((doc) {
+                        final data = doc.data()! as Map<String, dynamic>;
+                        final timestamp = data['date'] as Timestamp?;
+                        final dateStr = timestamp != null ? timestamp.toDate().toLocal().toString().split(' ')[0] : '';
+                        return DataRow(cells: [
+                          DataCell(Text(data['name'] ?? '')),
+                          DataCell(Text(data['place'] ?? '')),
+                          DataCell(Text(data['hours']?.toString() ?? '')),
+                          DataCell(Text(dateStr)),
+                        ]);
+                      }).toList(),
+                    ),
+                  ),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
       ),
     );
   }
@@ -84,6 +125,11 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     setState(() {
       _selectedDate = null;
     });
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return HomePage(title: "HomePage");
+          }));
+
   }
 
   Future<void> _pickDate() async {
@@ -123,42 +169,9 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
             const SizedBox(height: 10),
             ElevatedButton(onPressed: _addEntry, child: const Text('Add Entry')),
             const SizedBox(height: 20),
-            const Text('Entries:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
+            
             // DataTable
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('adrika2').orderBy('date', descending: true).snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-                  final docs = snapshot.data!.docs;
-                  if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
-
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columns: const [
-                        DataColumn(label: Text('Name')),
-                        DataColumn(label: Text('Place')),
-                        DataColumn(label: Text('Hours')),
-                        DataColumn(label: Text('Date')),
-                      ],
-                      rows: docs.map((doc) {
-                        final data = doc.data()! as Map<String, dynamic>;
-                        final timestamp = data['date'] as Timestamp?;
-                        final dateStr = timestamp != null ? timestamp.toDate().toLocal().toString().split(' ')[0] : '';
-                        return DataRow(cells: [
-                          DataCell(Text(data['name'] ?? '')),
-                          DataCell(Text(data['place'] ?? '')),
-                          DataCell(Text(data['hours']?.toString() ?? '')),
-                          DataCell(Text(dateStr)),
-                        ]);
-                      }).toList(),
-                    ),
-                  );
-                },
-              ),
-            ),
+            
           ],
         ),
       ),
