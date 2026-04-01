@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'log_activities_page.dart';
 
@@ -30,20 +31,21 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+  String _selectedLogOption = 'Log Hours';
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+  Widget _getPage() {
+    if (_selectedIndex == 0) return HomePage();
+    return _getLogPage();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Widget _getLogPage() {
+    if (_selectedLogOption == 'Log Hours') {
+      return const VolunteerFormPage();
+    } else {
+      return const LogActivitiesPage();
+    }
   }
 
   @override
@@ -51,23 +53,39 @@ class _MainScreenState extends State<MainScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Servd'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.home), text: 'Home'),
-            Tab(icon: Icon(Icons.add), text: 'Log Hours'),
-            Tab(icon: Icon(Icons.add), text: 'Log Activity'),
-          ],
+        centerTitle: true,
+        backgroundColor: const Color(0xFF93a1fd),
+        leading: TextButton(
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+            // Optionally, navigate to login screen or show message
+          },
+          child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          HomePage(),
-          const VolunteerFormPage(),
-          const LogActivitiesPage(),
+        actions: [
+          TextButton(
+            onPressed: () => setState(() => _selectedIndex = 0),
+            child: const Text('Home', style: TextStyle(color: Colors.white)),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              setState(() {
+                _selectedIndex = 1;
+                _selectedLogOption = value;
+              });
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'Log Hours', child: Text('Log Hours')),
+              PopupMenuItem(value: 'Add Activity', child: Text('Add Activity')),
+            ],
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text('Log', style: TextStyle(color: Colors.white)),
+            ),
+          ),
         ],
       ),
+      body: _getPage(),
     );
   }
 }
@@ -79,26 +97,38 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('adrika2')
-                  .orderBy('date', descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData)
-                  return const Center(child: CircularProgressIndicator());
-                final docs = snapshot.data!.docs;
-                if (docs.isEmpty)
-                  return const Center(child: Text('No entries yet.'));
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 50.0, bottom: 20.0),
+          child: Text(
+            'Welcome',
+            style: TextStyle(
+              fontSize: 75,
+              color: const Color(0xFF27187e),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: _firestore
+                .collection('adrika2')
+                .orderBy('date', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData)
+                return const Center(child: CircularProgressIndicator());
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty)
+                return const Center(child: Text('No entries yet.'));
 
-                return Scrollbar(
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
+              return Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Container(
+                    width: double.infinity,
                     child: DataTable(
                       columns: const [
                         DataColumn(label: Text('Name')),
@@ -125,12 +155,12 @@ class HomePage extends StatelessWidget {
                       }).toList(),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
