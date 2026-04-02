@@ -107,11 +107,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const firstPage = null;
+    if (FirebaseAuth.instance.currentUser != null) {
+      return MaterialApp(
+        title: 'Firestore Volunteer App',
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+        home: HomePage(title: "HomePage"),
+      );
+    } else {
     return MaterialApp(
       title: 'Firestore Volunteer App',
       theme: ThemeData(primarySwatch: Colors.deepOrange),
       home: LoginPage(),
     );
+    }
   }
 }
 
