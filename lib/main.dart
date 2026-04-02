@@ -68,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
   String _selectedLogOption = 'Log Hours';
 
   Widget _getPage() {
-    if (_selectedIndex == 0) return HomePage();
+    if (_selectedIndex == 0) return HomePage(title: "Home",);
     return _getLogPage();
   }
 
@@ -76,7 +76,7 @@ class _MainScreenState extends State<MainScreen> {
     if (_selectedLogOption == 'Log Hours') {
       return const VolunteerFormPage();
     } else {
-      return const LogActivitiesPage();
+      return HomePage(title: "Home");
     }
   }
 
