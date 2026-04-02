@@ -3,12 +3,104 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
-import 'log_activities_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // Ideal time to initialize
+  // await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  //...
+  FirebaseAuth.instance
+  .authStateChanges()
+  .listen((User? user) {
+    if (user == null) {
+      print('User is currently signed out!');
+    } else {
+      print('User is signed in!');
+    }
+  });
+
+  FirebaseAuth.instance
+  .idTokenChanges()
+  .listen((User? user) {
+    if (user == null) {
+      print('User is currently signed out!');
+    } else {
+      print('User is signed in!');
+    }
+  });
+
+  FirebaseAuth.instance
+  .userChanges()
+  .listen((User? user) {
+    if (user == null) {
+      print('User is currently signed out!');
+    } else {
+      print('User is signed in!');
+    }
+  });
+
+  FirebaseAuth.instance
+  .authStateChanges()
+  .listen((User? user) {
+    if (user != null) {
+      print(user.uid);
+    }
+  });
+
+  
+
   runApp(const MyApp());
+}
+
+Future<User?> signUp(String email, String password) async {
+  print("Received sign up request for email: $email");
+  try {
+    final credential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    print("User signed up: ${credential.user?.uid}");
+
+    final user = credential.user;
+
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user!.uid)
+        .set({
+      'email': user.email,
+      'createdAt': Timestamp.now(),
+    });
+
+    return user;
+  } catch (e) {
+    print("Sign up error: $e");
+    return null;
+  }
+}
+
+Future<User?> signIn(String email, String password) async {
+  try {
+    final credential = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    return credential.user;
+  } catch (e) {
+    print("Login error: $e");
+    return null;
+  }
+}
+
+Future<void> signOut() async {
+  await FirebaseAuth.instance.signOut();
 }
 
 class MyApp extends StatelessWidget {
@@ -19,7 +111,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Servd',
       theme: ThemeData(primarySwatch: Colors.deepOrange),
-      home: const MainScreen(), // Updated to use MainScreen
+      home: LoginPage(),
     );
   }
 }
@@ -48,6 +140,11 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+class HomePage extends StatelessWidget {
+  HomePage({Key? key, required this.title}) : super(key: key);
+  final String title;
+  final _firestore = FirebaseFirestore.instance;
+  final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,24 +208,22 @@ class HomePage extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: _firestore
-                .collection('adrika2')
-                .orderBy('date', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData)
-                return const Center(child: CircularProgressIndicator());
-              final docs = snapshot.data!.docs;
-              if (docs.isEmpty)
-                return const Center(child: Text('No entries yet.'));
+              child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('Users')
+                  .doc(user!.uid)
+                  .collection('Hours')
+                  .orderBy('date', descending: true)
+                  .snapshots(),                
+                  builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                  final docs = snapshot.data!.docs;
+                  if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
 
-              return Scrollbar(
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Container(
-                    width: double.infinity,
+                  return Scrollbar(
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
                     child: DataTable(
                       columns: const [
                         DataColumn(label: Text('Name')),
@@ -210,13 +305,19 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     final name = _nameController.text.trim();
     final hours = double.tryParse(_hoursController.text.trim());
     final date = _selectedDate;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
     if (name.isEmpty || _selectedActivityId == null || hours == null || date == null) return;
 
     final selectedActivity = _activities.firstWhere((a) => a['id'] == _selectedActivityId);
     final place = selectedActivity['organization'];
 
-    await _firestore.collection('adrika2').add({
+    await _firestore
+        .collection('Users')
+        .doc(user.uid)
+        .collection('Hours')
+        .add({
       'name': name,
       'place': place,
       'hours': hours,
@@ -303,6 +404,107 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
           ElevatedButton(onPressed: _addEntry, child: const Text('Add Entry')),
           const SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Login')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
+            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
+            const SizedBox(height: 20),
+            ElevatedButton(
+            onPressed: () async {
+              final user = await signIn(
+                _emailController.text.trim(),
+                _passwordController.text.trim(),
+              );
+
+              if (user != null) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomePage(title: "HomePage"),
+                  ),
+                );
+              }
+            },
+            child: const Text('Login'),
+          ),
+            ElevatedButton(
+              onPressed: () async {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SignUpPage(),
+                    ),
+                  );
+                
+              },
+              child: const Text('Sign Up'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sign Up')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
+            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                print("Attempting to sign up with email: ${_emailController.text.trim()}");
+                final user = await signUp(_emailController.text.trim(), _passwordController.text.trim());
+                print("User signed up: ${user?.uid}");
+                if (user != null) {
+
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(title: "HomePage")));
+                }
+              },
+              child: const Text('Sign Up'),
+            ),
+          ],
+        ),
       ),
     );
   }
