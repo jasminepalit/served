@@ -76,7 +76,7 @@ class _MainScreenState extends State<MainScreen> {
     if (_selectedLogOption == 'Log Hours') {
       return const VolunteerFormPage();
     } else {
-      return HomePage(title: "Home");
+      return const ActivityFormPage();
     }
   }
 
@@ -174,7 +174,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const firstPage = null;
+  
     if (FirebaseAuth.instance.currentUser != null) {
       return MaterialApp(
         title: 'Firestore Volunteer App',
@@ -392,7 +392,7 @@ class _LoginPageState extends State<LoginPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => HomePage(title: "HomePage"),
+                    builder: (context) => const MainScreen(),
                   ),
                 );
               }
@@ -447,11 +447,109 @@ class _SignUpPageState extends State<SignUpPage> {
                 print("User signed up: ${user?.uid}");
                 if (user != null) {
 
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(title: "HomePage")));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
                 }
               },
               child: const Text('Sign Up'),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ActivityFormPage extends StatefulWidget {
+  const ActivityFormPage({super.key});
+
+  @override
+  State<ActivityFormPage> createState() => _ActivityFormPageState();
+}
+
+
+class _ActivityFormPageState extends State<ActivityFormPage> {
+  final _nameController = TextEditingController();
+  final _placeController = TextEditingController();
+  final _hoursController = TextEditingController();
+  DateTime? _selectedDate;
+
+  final _firestore = FirebaseFirestore.instance;
+
+  Future<void> _addEntry() async {
+    final name = _nameController.text.trim();
+    final place = _placeController.text.trim();
+    final hours = double.tryParse(_hoursController.text.trim());
+    final date = _selectedDate;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    if (name.isEmpty || place.isEmpty || hours == null || date == null) return;
+
+    await _firestore
+        .collection('Users')
+        .doc(user.uid)
+        .collection('Activities')
+        .add({
+      'name': name,
+      'place': place,
+      'hours': hours,
+      'date': Timestamp.fromDate(date),
+    });
+
+    // Clear form
+    _nameController.clear();
+    _placeController.clear();
+    _hoursController.clear();
+    setState(() {
+      _selectedDate = null;
+    });
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return HomePage(title: "HomePage");
+          }));
+
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) setState(() => _selectedDate = picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Activity Form')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Form Fields
+            TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Name')),
+            TextField(controller: _placeController, decoration: const InputDecoration(labelText: 'Place')),
+            TextField(controller: _hoursController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Hours')),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(_selectedDate == null
+                      ? 'No date selected'
+                      : 'Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}'),
+                ),
+                TextButton(onPressed: _pickDate, child: const Text('Pick Date')),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(onPressed: _addEntry, child: const Text('Add Entry')),
+            const SizedBox(height: 20),
+            
+            // DataTable
+            
           ],
         ),
       ),
