@@ -209,7 +209,7 @@ class VolunteerFormPage extends StatefulWidget {
 }
 
 class HomePage extends StatelessWidget {
-  HomePage({Key? key, required this.title}) : super(key: key);
+  HomePage({super.key, required this.title});
   final String title;
   final _firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
@@ -307,6 +307,8 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       'date': Timestamp.fromDate(date),
     });
 
+    if (!context.mounted) return;
+
     // Clear form
     _nameController.clear();
     _placeController.clear();
@@ -315,7 +317,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       _selectedDate = null;
     });
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) { // ignore: use_build_context_synchronously
             return HomePage(title: "HomePage");
           }));
 
@@ -398,6 +400,8 @@ class _LoginPageState extends State<LoginPage> {
                 _passwordController.text.trim(),
               );
 
+              if (!context.mounted) return;
+
               if (user != null) {
                 Navigator.pushReplacement(
                   context,
@@ -455,6 +459,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 print("Attempting to sign up with email: ${_emailController.text.trim()}");
                 final user = await signUp(_emailController.text.trim(), _passwordController.text.trim());
                 print("User signed up: ${user?.uid}");
+
+                if (!context.mounted) return;
+
                 if (user != null) {
 
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
@@ -478,43 +485,60 @@ class ActivityFormPage extends StatefulWidget {
 
 
 class _ActivityFormPageState extends State<ActivityFormPage> {
-  final _nameController = TextEditingController();
-  final _placeController = TextEditingController();
-  final _hoursController = TextEditingController();
+  final _organizationController = TextEditingController();
+  final _advisorNameController = TextEditingController();
+  final _advisorEmailController = TextEditingController();
+  final _advisorNumberController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _highNeedsDescriptionController = TextEditingController();
   DateTime? _selectedDate;
+  bool _isHighNeeds = false;
 
   final _firestore = FirebaseFirestore.instance;
 
   Future<void> _addEntry() async {
-    final name = _nameController.text.trim();
-    final place = _placeController.text.trim();
-    final hours = double.tryParse(_hoursController.text.trim());
     final date = _selectedDate;
+    final organization = _organizationController.text.trim();
+    final advisorName = _advisorNameController.text.trim();
+    final advisorEmail = _advisorEmailController.text.trim();
+    final advisorNumber = _advisorNumberController.text.trim();
+    final description = _descriptionController.text.trim();
+    final highNeedsDescription = _isHighNeeds ? _highNeedsDescriptionController.text.trim() : '';
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    if (name.isEmpty || place.isEmpty || hours == null || date == null) return;
+    if (date == null) return;
 
     await _firestore
         .collection('Users')
         .doc(user.uid)
         .collection('Activities')
         .add({
-      'name': name,
-      'place': place,
-      'hours': hours,
       'date': Timestamp.fromDate(date),
+      'organization': organization,
+      'advisorName': advisorName,
+      'advisorEmail': advisorEmail,
+      'advisorNumber': advisorNumber,
+      'description': description,
+      'isHighNeeds': _isHighNeeds,
+      'highNeedsDescription': highNeedsDescription,
     });
+
+    if (!context.mounted) return;
 
     // Clear form
-    _nameController.clear();
-    _placeController.clear();
-    _hoursController.clear();
+    _organizationController.clear();
+    _advisorNameController.clear();
+    _advisorEmailController.clear();
+    _advisorNumberController.clear();
+    _descriptionController.clear();
+    _highNeedsDescriptionController.clear();
     setState(() {
       _selectedDate = null;
+      _isHighNeeds = false;
     });
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) { // ignore: use_build_context_synchronously
             return HomePage(title: "HomePage");
           }));
 
@@ -537,30 +561,74 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       appBar: AppBar(title: const Text('Activity Form')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Form Fields
-            TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Name')),
-            TextField(controller: _placeController, decoration: const InputDecoration(labelText: 'Place')),
-            TextField(controller: _hoursController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Hours')),
-            const SizedBox(height: 10),
-            Row(
+        child: SingleChildScrollView(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: Text(_selectedDate == null
-                      ? 'No date selected'
-                      : 'Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}'),
+                const Text('Add Activity', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Activity Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 8),
+                          TextField(controller: _organizationController, decoration: const InputDecoration(labelText: 'Organization Name', border: OutlineInputBorder())),
+                          const SizedBox(height: 8),
+                          TextField(controller: _descriptionController, maxLines: 3, decoration: const InputDecoration(labelText: 'Activity Description', border: OutlineInputBorder())),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(child: Text(_selectedDate == null ? 'No date selected' : 'Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}')),
+                              TextButton(onPressed: _pickDate, child: const Text('Pick Date')),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Advisor Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 8),
+                          TextField(controller: _advisorNameController, decoration: const InputDecoration(labelText: 'Advisor Name', border: OutlineInputBorder())),
+                          const SizedBox(height: 8),
+                          TextField(controller: _advisorEmailController, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Advisor Email', border: OutlineInputBorder())),
+                          const SizedBox(height: 8),
+                          TextField(controller: _advisorNumberController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Advisor Phone Number', border: OutlineInputBorder())),
+                          const SizedBox(height: 8),
+                          CheckboxListTile(
+                            title: const Text('High Needs Activity'),
+                            value: _isHighNeeds,
+                            onChanged: (value) => setState(() => _isHighNeeds = value ?? false),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          if (_isHighNeeds)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: TextField(controller: _highNeedsDescriptionController, maxLines: 3, decoration: const InputDecoration(labelText: 'Why is it high needs?', border: OutlineInputBorder())),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                TextButton(onPressed: _pickDate, child: const Text('Pick Date')),
+                const SizedBox(height: 16),
+                SizedBox(width: double.infinity, child: ElevatedButton(onPressed: _addEntry, child: const Text('Add Entry'))),
               ],
             ),
-            const SizedBox(height: 10),
-            ElevatedButton(onPressed: _addEntry, child: const Text('Add Entry')),
-            const SizedBox(height: 20),
-            
-            // DataTable
-            
-          ],
+          ),
         ),
       ),
     );
