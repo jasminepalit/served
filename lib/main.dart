@@ -90,7 +90,8 @@ class _MainScreenState extends State<MainScreen> {
         leading: TextButton(
           onPressed: () async {
             await FirebaseAuth.instance.signOut();
-            // Optionally, navigate to login screen or show message
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) {
+              return LoginPage();}), (route) => false,);
           },
           child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
@@ -167,6 +168,7 @@ Future<User?> signIn(String email, String password) async {
 
 Future<void> signOut() async {
   await FirebaseAuth.instance.signOut();
+  
 }
 
 class MyApp extends StatelessWidget {
@@ -175,20 +177,28 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
   
-    if (FirebaseAuth.instance.currentUser != null) {
-      return MaterialApp(
-        title: 'Firestore Volunteer App',
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-        home: HomePage(title: "HomePage"),
-      );
-    } else {
-    return MaterialApp(
-      title: 'Firestore Volunteer App',
-      theme: ThemeData(primarySwatch: Colors.deepOrange),
-      home: LoginPage(),
-    );
-    }
-  }
+    
+  return MaterialApp(
+    title: 'Firestore Volunteer App',
+    theme: ThemeData(primarySwatch: Colors.deepOrange),
+    home: StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasData) {
+          return const MainScreen(); // logged in
+        } else {
+          return const LoginPage(); // logged out
+        }
+      },
+    ),
+  );
+}
 }
 
 class VolunteerFormPage extends StatefulWidget {
