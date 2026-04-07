@@ -51,6 +51,8 @@ void main() async {
     }
   });
 
+
+
   
 
   runApp(const MyApp());
@@ -80,11 +82,16 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  final user = FirebaseAuth.instance.currentUser;
+
+  String userType = loadUserType();
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Servd'),
+        title: const Text('Servd '),
         centerTitle: true,
         backgroundColor: const Color(0xFF93a1fd),
         leading: TextButton(
@@ -124,6 +131,24 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 
+String loadUserType() {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return 'user';
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
+  docRef.get().then((doc) {
+    if (doc.exists) {
+      print(doc['type']);
+      return doc['type'];
+    } else {
+      return 'user';
+    }
+  }).catchError((e) {
+    print("Error fetching user type: $e");
+    return 'user';
+  });
+  return 'user'; // default while loading
+}
+
 Future<User?> signUp(String email, String password) async {
   print("Received sign up request for email: $email");
   try {
@@ -143,6 +168,8 @@ Future<User?> signUp(String email, String password) async {
         .set({
       'email': user.email,
       'createdAt': Timestamp.now(),
+      'uid': user.uid,
+      'type': 'user',
     });
 
     return user;
@@ -159,6 +186,19 @@ Future<User?> signIn(String email, String password) async {
       email: email,
       password: password,
     );
+
+    /*
+    final user = credential.user;
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user!.uid)
+        .set({
+      'type': 'user',
+      
+    });*/
+
+    loadUserType();
+
     return credential.user;
   } catch (e) {
     print("Login error: $e");
