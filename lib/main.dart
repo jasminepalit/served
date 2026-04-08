@@ -80,7 +80,8 @@ String loadUserType() {
   return 'user'; // default while loading
 }
 
-Future<User?> signUp(String email, String password) async {
+
+Future<User?> signUp(String email, String password, String firstName, String lastName) async {
   print("Received sign up request for email: $email");
   try {
     final credential = await FirebaseAuth.instance
@@ -101,6 +102,8 @@ Future<User?> signUp(String email, String password) async {
       'createdAt': Timestamp.now(),
       'uid': user.uid,
       'type': 'user',
+      'firstName': firstName,
+      'lastName': lastName,
     });
 
     return user;
