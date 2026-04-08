@@ -80,6 +80,42 @@ String loadUserType() {
   return 'user'; // default while loading
 }
 
+String loadFirstName() {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return 'user';
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
+  docRef.get().then((doc) {
+    if (doc.exists) {
+      print(doc['firstName']);
+      return doc['firstName'];
+    } else {
+      return 'Jane';
+    }
+  }).catchError((e) {
+    print("Error fetching user first name: $e");
+    return 'Jane';
+  });
+  return 'Jane'; // default while loading
+}
+
+String loadLastName() {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return 'user';
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
+  docRef.get().then((doc) {
+    if (doc.exists) {
+      print(doc['lastName']);
+      return doc['lastName'];
+    } else {
+      return 'Doe';
+    }
+  }).catchError((e) {
+    print("Error fetching user last name: $e");
+    return 'Doe';
+  });
+  return 'Doe'; // default while loading
+}
+
 
 Future<User?> signUp(String email, String password, String firstName, String lastName) async {
   print("Received sign up request for email: $email");
