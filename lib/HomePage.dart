@@ -5,17 +5,19 @@ import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'MainScreen.dart';
 import 'VolunteerFormPage.dart';
+import 'main.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key, required this.title});
   final String title;
   final _firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
+  final String firstName = loadFirstName();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(firstName),
       ),
       body: Center(
         child: Column(

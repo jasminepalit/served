@@ -80,22 +80,24 @@ String loadUserType() {
   return 'user'; // default while loading
 }
 
+//issue
 String loadFirstName() {
   final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return 'user';
+  if (user == null) return 'No One';
+  print(user.uid);
   final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
   docRef.get().then((doc) {
     if (doc.exists) {
       print(doc['firstName']);
       return doc['firstName'];
     } else {
-      return 'Jane';
+      return 'nothing here';
     }
   }).catchError((e) {
     print("Error fetching user first name: $e");
-    return 'Jane';
+    return 'Uh oh';
   });
-  return 'Jane'; // default while loading
+  return 'Bye'; // default while loading
 }
 
 String loadLastName() {

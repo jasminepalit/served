@@ -38,12 +38,15 @@ class _MainScreenState extends State<MainScreen> {
 
   String userType = loadUserType();
 
+  String firstName = loadFirstName();
+
+  String lastName = loadLastName();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Servd '),
+        title: Text(firstName),
         centerTitle: true,
         backgroundColor: const Color(0xFF93a1fd),
         leading: TextButton(
