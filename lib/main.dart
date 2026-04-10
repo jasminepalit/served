@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_helpers.dart';
 import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
@@ -62,126 +63,6 @@ void main() async {
 }
 
 
-String loadUserType() {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return 'user';
-  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
-  docRef.get().then((doc) {
-    if (doc.exists) {
-      print(doc['type']);
-      return doc['type'];
-    } else {
-      return 'user';
-    }
-  }).catchError((e) {
-    print("Error fetching user type: $e");
-    return 'user';
-  });
-  return 'user'; // default while loading
-}
-
-//issue
-String loadFirstName() {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return 'No One';
-  print(user.uid);
-  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
-  docRef.get().then((doc) {
-    if (doc.exists) {
-      print(doc['firstName']);
-      return doc['firstName'];
-    } else {
-      return 'nothing here';
-    }
-  }).catchError((e) {
-    print("Error fetching user first name: $e");
-    return 'Uh oh';
-  });
-  return 'Bye'; // default while loading
-}
-
-String loadLastName() {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return 'user';
-  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
-  docRef.get().then((doc) {
-    if (doc.exists) {
-      print(doc['lastName']);
-      return doc['lastName'];
-    } else {
-      return 'Doe';
-    }
-  }).catchError((e) {
-    print("Error fetching user last name: $e");
-    return 'Doe';
-  });
-  return 'Doe'; // default while loading
-}
-
-
-Future<User?> signUp(String email, String password, String firstName, String lastName) async {
-  print("Received sign up request for email: $email");
-  try {
-    final credential = await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    print("User signed up: ${credential.user?.uid}");
-
-    final user = credential.user;
-
-    await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(user!.uid)
-        .set({
-      'email': user.email,
-      'createdAt': Timestamp.now(),
-      'uid': user.uid,
-      'type': 'user',
-      'firstName': firstName,
-      'lastName': lastName,
-    });
-
-    return user;
-  } catch (e) {
-    print("Sign up error: $e");
-    return null;
-  }
-}
-
-Future<User?> signIn(String email, String password) async {
-  try {
-    final credential = await FirebaseAuth.instance
-        .signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    /*
-    final user = credential.user;
-    await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(user!.uid)
-        .set({
-      'type': 'user',
-      
-    });*/
-
-    loadUserType();
-
-    return credential.user;
-  } catch (e) {
-    print("Login error: $e");
-    return null;
-  }
-}
-
-Future<void> signOut() async {
-  await FirebaseAuth.instance.signOut();
-  
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
