@@ -1,9 +1,148 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'LoginPage.dart';
+import 'HomePage.dart';
+import 'VolunteerFormPage.dart';
+import 'ActivityFormPage.dart';
+import 'SignUpPage.dart';
+import 'MainScreen.dart';
 
-void main() {
-  runApp(MyApp());
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // Ideal time to initialize
+  // await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  //...
+  FirebaseAuth.instance
+  .authStateChanges()
+  .listen((User? user) {
+    if (user == null) {
+      print('User is currently signed out!');
+    } else {
+      print('User is signed in!');
+    }
+  });
+
+  FirebaseAuth.instance
+  .idTokenChanges()
+  .listen((User? user) {
+    if (user == null) {
+      print('User is currently signed out!');
+    } else {
+      print('User is signed in!');
+    }
+  });
+
+  FirebaseAuth.instance
+  .userChanges()
+  .listen((User? user) {
+    if (user == null) {
+      print('User is currently signed out!');
+    } else {
+      print('User is signed in!');
+    }
+  });
+
+  FirebaseAuth.instance
+  .authStateChanges()
+  .listen((User? user) {
+    if (user != null) {
+      print(user.uid);
+    }
+  });
+
+  runApp(const MyApp());
+}
+
+
+String loadUserType() {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return 'user';
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
+  docRef.get().then((doc) {
+    if (doc.exists) {
+      print(doc['type']);
+      return doc['type'];
+    } else {
+      return 'user';
+    }
+  }).catchError((e) {
+    print("Error fetching user type: $e");
+    return 'user';
+  });
+  return 'user'; // default while loading
+}
+
+
+Future<User?> signUp(String email, String password, String firstName, String lastName) async {
+  print("Received sign up request for email: $email");
+  try {
+    final credential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    print("User signed up: ${credential.user?.uid}");
+
+    final user = credential.user;
+
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user!.uid)
+        .set({
+      'email': user.email,
+      'createdAt': Timestamp.now(),
+      'uid': user.uid,
+      'type': 'user',
+      'firstName': firstName,
+      'lastName': lastName,
+    });
+
+    return user;
+  } catch (e) {
+    print("Sign up error: $e");
+    return null;
+  }
+}
+
+Future<User?> signIn(String email, String password) async {
+  try {
+    final credential = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    /*
+    final user = credential.user;
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user!.uid)
+        .set({
+      'type': 'user',
+      
+    });*/
+
+    loadUserType();
+
+    return credential.user;
+  } catch (e) {
+    print("Login error: $e");
+    return null;
+  }
+}
+
+Future<void> signOut() async {
+  await FirebaseAuth.instance.signOut();
+  
 }
 
 class MyApp extends StatelessWidget {
@@ -11,44 +150,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'servd',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
-        home: MyHomePage(),
-      ),
-    );
-  }
+  
+    
+  return MaterialApp(
+    title: 'Firestore Volunteer App',
+    theme: ThemeData(primarySwatch: Colors.deepOrange),
+    home: StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-
+        if (snapshot.hasData) {
+          return const MainScreen(); // logged in
+        } else {
+          return const LoginPage(); // logged out
+        }
+      },
+    ),
+  );
+}
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-}  
-
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    return Scaffold(
-      body: Column(
-        children: [Text('A random idea:'), 
-        Text(appState.current.asLowerCase),     
-        ElevatedButton(onPressed: () {
-          appState.getNext();  
-        },
-      child: Text('Next'),       ),],
-      ),
-    );
-  }
-}
