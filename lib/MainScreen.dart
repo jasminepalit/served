@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
-import 'SignUpPage.dart';
-import 'main.dart';
+import 'auth_helpers.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -34,16 +30,41 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  final user = FirebaseAuth.instance.currentUser;
+  String userType = 'user';
+  String firstName = 'Loading...';
+  String lastName = 'Loading...';
 
-  String userType = loadUserType();
-
+  @override
+  void initState() {
+    super.initState();
+    loadFirstName().then((value) {
+      if (!mounted) return;
+      setState(() {
+        firstName = value;
+        print(value);
+      });
+    });
+    loadLastName().then((value) {
+      if (!mounted) return;
+      setState(() {
+        lastName = value;
+        print(value);
+      });
+    });
+    loadUserType().then((value) {
+      if (!mounted) return;
+      setState(() {
+        userType = value;
+        print(value);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Servd '),
+        title: Text(firstName),
         centerTitle: true,
         backgroundColor: const Color(0xFF93a1fd),
         leading: TextButton(
