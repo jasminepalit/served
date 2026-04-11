@@ -9,6 +9,7 @@ import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
 import 'main.dart';
 import 'MainScreen.dart';
+import 'AdminHomePage.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -41,8 +42,13 @@ class _SignUpPageState extends State<SignUpPage> {
                 if (!context.mounted) return;
 
                 if (user != null) {
-
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                  // Check user role in Firestore
+                  DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+                  if (userDoc.exists && userDoc['type'] == 'admin') {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Adminhomepage()));
+                  } else {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                  }
                 }
               },
               child: const Text('Sign Up'),

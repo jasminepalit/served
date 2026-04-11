@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:served/AdminHomePage.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'HomePage.dart';
@@ -45,12 +46,24 @@ class _LoginPageState extends State<LoginPage> {
               if (!context.mounted) return;
 
               if (user != null) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MainScreen(),
-                  ),
-                );
+                      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                .collection('Users')
+                .doc(user.uid)
+                .get();
+
+            if (!context.mounted) return;
+
+            if (userDoc.exists && userDoc['type'] == 'admin') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Adminhomepage()),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const MainScreen()),
+              );
+              }
               }
             },
             child: const Text('Login'),
