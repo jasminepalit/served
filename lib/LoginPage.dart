@@ -28,9 +28,15 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
+      appBar: AppBar(title: const Text('Login')
+    
+      ),
+      body: Center(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
@@ -68,7 +74,8 @@ class _LoginPageState extends State<LoginPage> {
             },
             child: const Text('Login'),
           ),
-            ElevatedButton(
+          const SizedBox(height: 12),
+            OutlinedButton(
               onPressed: () async {
                   Navigator.pushReplacement(
                     context,
@@ -82,6 +89,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
+        ),
+        ),
+      ),
       ),
     );
   }
