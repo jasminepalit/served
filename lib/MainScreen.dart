@@ -7,7 +7,6 @@ import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
-import 'SignUpPage.dart';
 import 'main.dart';
 
 class MainScreen extends StatefulWidget {
