@@ -7,6 +7,11 @@ import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 
+const Color kPrimaryColor = Color(0xFF5128B5);
+const Color kSecondaryColor = Color(0xFF758BFD);
+const Color kAccentColor = Color(0xFFAEB8FE);
+const Color kBackgroundColor = Color(0xFFF2F1F6);
+const Color kAccentOrange = Color(0xFFFF8600);
 
 class ActivityFormPage extends StatefulWidget {
   const ActivityFormPage({super.key});
@@ -14,6 +19,7 @@ class ActivityFormPage extends StatefulWidget {
   @override
   State<ActivityFormPage> createState() => _ActivityFormPageState();
 }
+
 
 
 class _ActivityFormPageState extends State<ActivityFormPage> {
@@ -166,3 +172,5 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     );
   }
 }
+
+

@@ -12,6 +12,11 @@ import 'main.dart';
 import 'MainScreen.dart';
 import 'SignUpPage.dart';
 
+const Color kPrimaryColor = Color(0xFF5128B5);
+const Color kSecondaryColor = Color(0xFF758BFD);
+const Color kAccentColor = Color(0xFFAEB8FE);
+const Color kBackgroundColor = Color(0xFFF2F1F6);
+const Color kAccentOrange = Color(0xFFFF8600);
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

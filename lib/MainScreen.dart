@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
 import 'main.dart';
+
+const Color kPrimaryColor = Color(0xFF5128B5);
+const Color kSecondaryColor = Color(0xFF758BFD);
+const Color kAccentColor = Color(0xFFAEB8FE);
+const Color kBackgroundColor = Color(0xFFF2F1F6);
+const Color kAccentOrange = Color(0xFFFF8600);
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -37,21 +40,20 @@ class _MainScreenState extends State<MainScreen> {
 
   String userType = loadUserType();
 
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Servd '),
+        title: const Text('Servd'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF93a1fd),
-        leading: TextButton(
+        backgroundColor: kPrimaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.logout, color: Colors.white),
           onPressed: () async {
             await FirebaseAuth.instance.signOut();
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) {
               return LoginPage();}), (route) => false,);
           },
-          child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
         actions: [
           TextButton(
@@ -80,3 +82,5 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
+
