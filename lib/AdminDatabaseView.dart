@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'VolunteerFormPage.dart';
 import 'auth_helpers.dart';
+import 'AdminUserDataView.dart';
 
 class AdminDatabaseView extends StatefulWidget {
   const AdminDatabaseView({super.key});
@@ -36,14 +37,6 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          TextButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const VolunteerFormPage();
-              }));
-            },
-            child: const Text('Next'),
-          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('Users').snapshots(),
@@ -62,6 +55,7 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                         DataColumn(label: Text('Last Name')),
                         DataColumn(label: Text('Email')),
                         DataColumn(label: Text('Type')),
+                        DataColumn(label: Text('View'))
                       ],
                       rows: docs.map((doc) {
                         final data = doc.data()! as Map<String, dynamic>;
@@ -70,6 +64,16 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                           DataCell(Text(data['lastName'] ?? '')),
                           DataCell(Text(data['email'] ?? '')),
                           DataCell(Text(data['type'] ?? '')),
+                          DataCell(
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                  return AdminUserDataView(uid: doc.id);
+                                }));
+                              },
+                              child: const Text('Edit'),
+                            ),
+                          ),
                         ]);
                       }).toList(),
                     ),

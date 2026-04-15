@@ -48,6 +48,48 @@ Future<String> loadLastName() async {
   return 'Doe';
 }
 
+Future<String> loadFirstNameSpecific(uid) async {
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
+  try {
+    final doc = await docRef.get();
+    if (doc.exists) {
+      return doc['firstName'] as String? ?? 'Jane';
+    }
+  } catch (e) {
+    print("Error fetching user first name: $e");
+  }
+  return 'Jane';
+}
+
+Future<String> loadLastNameSpecific(uid) async {
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
+  try {
+    final doc = await docRef.get();
+    if (doc.exists) {
+      return doc['lastName'] as String? ?? 'Doe';
+    }
+  } catch (e) {
+    print("Error fetching user last name: $e");
+  }
+  return 'Doe';
+}
+
+Future<String> loadNameSpecific(uid) async {
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
+  try {
+    final doc = await docRef.get();
+    if (doc.exists) {
+      String f = doc['firstName'] as String? ?? 'Jane';
+      String l = doc['lastName'] as String? ?? 'Doe';
+      return '$f $l';
+ 
+    }
+  } catch (e) {
+    print("Error fetching user last name: $e");
+  }
+  return 'Doe';
+}
+
 Future<User?> signUp(String email, String password, String firstName, String lastName) async {
   print("Received sign up request for email: $email");
   try {
