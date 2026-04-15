@@ -60,6 +60,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       'description': description,
       'isHighNeeds': _isHighNeeds,
       'highNeedsDescription': highNeedsDescription,
+      'status': 'pending',
     });
 
     if (!context.mounted) return;

@@ -4,10 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
-import 'HomePage.dart';
-import 'VolunteerFormPage.dart';
-import 'ActivityFormPage.dart';
-import 'SignUpPage.dart';
 import 'MainScreen.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
