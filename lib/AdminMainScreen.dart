@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:served/AdminDatabaseView.dart';
 import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
 import 'auth_helpers.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class AdminMainScreen extends StatefulWidget {
+  const AdminMainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<AdminMainScreen> createState() => _AdminMainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _AdminMainScreenState extends State<AdminMainScreen> {
   int _selectedIndex = 0;
-  String _selectedLogOption = 'Log Hours';
+  String _selectedLogOption = 'Home';
 
   Widget _getPage() {
-    if (_selectedIndex == 0) return HomePage(title: "Home",);
+    if (_selectedIndex == 0) return AdminDatabaseView();
     return _getLogPage();
   }
 
@@ -78,29 +79,45 @@ class _MainScreenState extends State<MainScreen> {
           child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
         actions: [
-          TextButton(
-            onPressed: () => setState(() => _selectedIndex = 0),
-            child: const Text('Home', style: TextStyle(color: Colors.white)),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                _selectedIndex = 1;
-                _selectedLogOption = value;
-              });
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'Log Hours', child: Text('Log Hours')),
-              PopupMenuItem(value: 'Add Activity', child: Text('Add Activity')),
-            ],
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text('Log', style: TextStyle(color: Colors.white)),
+          if (_selectedIndex == 1) ...[
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                setState(() {
+                  _selectedLogOption = value;
+                });
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(value: 'Log Hours', child: Text('Log Hours')),
+                PopupMenuItem(value: 'Add Activity', child: Text('Add Activity')),
+              ],
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text('Log', style: TextStyle(color: Colors.white)),
+              ),
             ),
-          ),
+          ],
         ],
       ),
       body: _getPage(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() {
+          _selectedIndex = index;
+          if (index == 0) {
+            _selectedLogOption = 'Home';
+          }
+        }),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Users',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.edit),
+            label: 'Log',
+          ),
+        ],
+      ),
     );
   }
 }

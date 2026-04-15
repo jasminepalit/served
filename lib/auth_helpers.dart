@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-Future<String> loadUserType() async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return 'user';
-  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
+Future<String> loadUserType({String? uid}) async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  final targetUid = uid ?? currentUser?.uid;
+  print("in loadUserType for uid=$targetUid");
+  if (targetUid == null) return 'user';
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(targetUid);
   try {
     final doc = await docRef.get();
     if (doc.exists) {
-      return doc['type'] as String? ?? 'user';
+      return (doc['type'] as String?)?.trim().toLowerCase() ?? 'user';
     }
   } catch (e) {
     print("Error fetching user type: $e");
