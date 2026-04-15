@@ -40,3 +40,8 @@ samples, guidance on mobile development, and a full API reference.
     flutter pub add cloud_firestore
   To run the app type a. In the bash terminal
     Flutter run
+
+**Citations**
+This app was made with the help of CoPilot
+This app was made with the help of Claude.ai
+Firebase and related tools were made with the help of https://firebase.google.com/docs/ 
