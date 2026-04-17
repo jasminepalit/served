@@ -29,20 +29,37 @@ class AdminActivityApprovalPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collectionGroup('Activities').where('status', isEqualTo: 'pending').snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+  if (snapshot.hasError) {
+    return Center(child: Text('Error: ${snapshot.error}'));
+  }
+  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final activities = snapshot.data!.docs;
           if (activities.isEmpty) {
             return const Center(child: Text('No pending activities for approval.'));
           }
+          
           return ListView.builder(
             itemCount: activities.length,
             itemBuilder: (context, index) {
               final activityDoc = activities[index];
               final activityData = activityDoc.data() as Map<String, dynamic>;
               final studentId = activityDoc.reference.parent.parent!.id; // Get user ID from path
+              final isHighNeeds = activityData['isHighNeeds'] ?? false;
+              final dateText = activityData['date']?.toDate()?.toString().split(' ')[0] ?? 'No date';
               return ListTile(
                 title: Text(activityData['organization'] ?? 'Unknown Organization'),
-                subtitle: Text('Date: ${activityData['date']?.toDate()?.toString().split(' ')[0] ?? 'No date'}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Date: $dateText'),
+                    if (isHighNeeds)
+                      const Text(
+                        'High Needs: Yes',
+                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                  ],
+                ),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -212,6 +229,8 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
           final advisorName = widget.activityData['advisorName'] ?? 'N/A';
           final advisorEmail = widget.activityData['advisorEmail'] ?? 'N/A';
           final advisorPhone = widget.activityData['advisorNumber'] ?? 'N/A';
+          final isHighNeeds = widget.activityData['isHighNeeds'] ?? false;
+          final highNeedsDescription = widget.activityData['highNeedsDescription'] ?? '';
 
           final formattedDate = activityDate != null
               ? DateTime.fromMillisecondsSinceEpoch(
@@ -318,6 +337,49 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                           ),
                         ),
                       ),
+                      if (isHighNeeds) ...[
+                        const SizedBox(height: 16),
+                        const Text(
+                          'High Needs Activity',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.redAccent),
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Student marked this activity as high needs.',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                highNeedsDescription.isNotEmpty
+                                    ? highNeedsDescription
+                                    : 'No additional high needs description provided.',
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
