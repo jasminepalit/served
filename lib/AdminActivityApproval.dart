@@ -1,14 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'LoginPage.dart';
-import 'HomePage.dart';
-import 'VolunteerFormPage.dart';
-import 'ActivityFormPage.dart';
-import 'SignUpPage.dart';
-import 'MainScreen.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -171,11 +162,14 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
   }
 
   void _requestMoreInfo() {
+    final messageController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Request More Information'),
         content: TextField(
+          controller: messageController,
           maxLines: 4,
           decoration: const InputDecoration(
             hintText: 'Explain what additional information you need...',
@@ -188,13 +182,47 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              final requestMessage = messageController.text.trim();
+              if (requestMessage.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a message before sending.'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                return;
+              }
+
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('More information request sent to student.'),
-                ),
-              );
+              setState(() => isLoading = true);
+              try {
+                await FirebaseFirestore.instance
+                    .collection('Users')
+                    .doc(widget.studentId)
+                    .collection('Activities')
+                    .doc(widget.activityId)
+                    .update({
+                  'status': 'more_info',
+                  'requestMessage': requestMessage,
+                  'moreInfoRequestedAt': Timestamp.now(),
+                });
+
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('More information request sent to student.'),
+                    backgroundColor: kAccentOrange,
+                  ),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                );
+              } finally {
+                if (mounted) setState(() => isLoading = false);
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: kAccentOrange),
             child: const Text('Send'),

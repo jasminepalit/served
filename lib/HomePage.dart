@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
+import 'StudentActivityPage.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -53,6 +54,15 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const StudentActivityPage();
+                }));
+              },
+              child: const Text('View Submitted Activities'),
             ),
             const SizedBox(height: 18),
             Expanded(

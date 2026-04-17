@@ -4,6 +4,7 @@ import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
+import 'StudentActivityPage.dart';
 import 'main.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
@@ -25,6 +26,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _getPage() {
     if (_selectedIndex == 0) return HomePage(title: "Home",);
+    if (_selectedIndex == 2) return const StudentActivityPage();
     return _getLogPage();
   }
 
@@ -59,6 +61,10 @@ class _MainScreenState extends State<MainScreen> {
           TextButton(
             onPressed: () => setState(() => _selectedIndex = 0),
             child: const Text('Home', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => setState(() => _selectedIndex = 2),
+            child: const Text('Activities', style: TextStyle(color: Colors.white)),
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
