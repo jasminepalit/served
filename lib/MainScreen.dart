@@ -32,7 +32,9 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _getLogPage() {
     if (_selectedLogOption == 'Log Hours') {
-      return const VolunteerFormPage();
+      return VolunteerFormPage(
+        onSuccess: () => setState(() => _selectedIndex = 0),
+      );
     } else {
       return const ActivityFormPage();
     }

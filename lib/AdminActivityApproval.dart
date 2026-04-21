@@ -270,7 +270,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header Card
                 Container(
@@ -291,7 +291,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                   ),
                   padding: const EdgeInsets.all(20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text(
                         'Student Information',
@@ -326,7 +326,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                   ),
                   padding: const EdgeInsets.all(20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text(
                         'Activity Details',
@@ -384,7 +384,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                           ),
                           padding: const EdgeInsets.all(12),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const Text(
                                 'Student marked this activity as high needs.',
@@ -429,7 +429,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                   ),
                   padding: const EdgeInsets.all(20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text(
                         'Advisor Information',

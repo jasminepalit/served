@@ -9,7 +9,8 @@ const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
 class VolunteerFormPage extends StatefulWidget {
-  const VolunteerFormPage({super.key});
+  final VoidCallback? onSuccess;
+  const VolunteerFormPage({super.key, this.onSuccess});
 
   @override
   State<VolunteerFormPage> createState() => _VolunteerFormPageState();
@@ -55,9 +56,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       _selectedDate = null;
     });
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) { // ignore: use_build_context_synchronously
-            return HomePage(title: "HomePage");
-          }));
+    widget.onSuccess?.call();
 
   }
 
@@ -92,10 +91,11 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                     const SizedBox(height: 2),
                     StreamBuilder<QuerySnapshot>(
                       stream: _firestore
-                          .collection('Users')
-                          .doc(FirebaseAuth.instance.currentUser!.uid)
-                          .collection('Activities')
-                          .snapshots(),
+                        .collection('Users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .collection('Activities')
+                        .where('status', isEqualTo: 'approved')  
+                        .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(child: CircularProgressIndicator());
