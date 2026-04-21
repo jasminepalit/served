@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'VolunteerFormPage.dart';
 import 'auth_helpers.dart';
 import 'AdminUserDataView.dart';
+import 'main.dart';
 
 class AdminDatabaseView extends StatefulWidget {
   const AdminDatabaseView({super.key});
@@ -55,6 +56,7 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                         DataColumn(label: Text('Last Name')),
                         DataColumn(label: Text('Email')),
                         DataColumn(label: Text('Type')),
+                        DataColumn(label: Text('Hours')),
                         DataColumn(label: Text('View'))
                       ],
                       rows: docs.map((doc) {
@@ -65,13 +67,27 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                           DataCell(Text(data['email'] ?? '')),
                           DataCell(Text(data['type'] ?? '')),
                           DataCell(
+                            FutureBuilder<double>(
+                              future: fetchSpecificStudentHours(doc.id),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const Text('Loading...');
+                                } else if (snapshot.hasError) {
+                                  return const Text('Error');
+                                } else {
+                                  return Text(snapshot.data?.toString() ?? '0');
+                                }
+                              },
+                            ),
+                          ),
+                          DataCell(
                             TextButton(
                               onPressed: () {
                                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                                   return AdminUserDataView(uid: doc.id);
                                 }));
                               },
-                              child: const Text('Edit'),
+                              child: const Text('View'),
                             ),
                           ),
                         ]);
@@ -87,3 +103,5 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
     );
   }
 }
+
+

@@ -117,3 +117,28 @@ class AuthenticatedHome extends StatelessWidget {
     );
   }
 }
+
+Future<double> _fetchStudentHours() async {
+    double total = 0;
+    final firestore = FirebaseFirestore.instance;
+    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    for (final student in students.docs) {
+      final hoursSnapshot = await firestore
+          .collection('Users')
+          .doc(student.id)
+          .collection('Hours')
+          .get();
+      for (final hoursDoc in hoursSnapshot.docs) {
+        final data = hoursDoc.data();
+        final hoursValue = data['hours'];
+        if (hoursValue is num) {
+          total += hoursValue.toDouble();
+        } else if (hoursValue is String) {
+          total += double.tryParse(hoursValue) ?? 0;
+        }
+      }
+    }
+    return total;
+  }
+
+  

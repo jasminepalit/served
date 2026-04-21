@@ -134,3 +134,25 @@ Future<User?> signIn(String email, String password) async {
 Future<void> signOut() async {
   await FirebaseAuth.instance.signOut();
 }
+
+Future<double> fetchSpecificStudentHours(uid) async {
+    double total = 0;
+    final firestore = FirebaseFirestore.instance;
+    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+
+    final hoursSnapshot = await firestore
+      .collection('Users')
+      .doc(uid)
+      .collection('Hours')
+      .get();
+    for (final hoursDoc in hoursSnapshot.docs) {
+        final data = hoursDoc.data();
+        final hoursValue = data['hours'];
+        if (hoursValue is num) {
+          total += hoursValue.toDouble();
+        } else if (hoursValue is String) {
+          total += double.tryParse(hoursValue) ?? 0;
+        }
+      }
+    return total;
+  }
