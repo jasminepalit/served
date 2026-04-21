@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_helpers.dart';
 import 'LoginPage.dart';
+import 'AdminMainScreen.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
@@ -84,9 +85,9 @@ class MyApp extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          return const MainScreen(); // logged in
+          return const AuthenticatedHome();
         } else {
-          return const LoginPage(); // logged out
+          return const LoginPage();
         }
       },
     ),
@@ -94,3 +95,50 @@ class MyApp extends StatelessWidget {
 }
 }
 
+class AuthenticatedHome extends StatelessWidget {
+  const AuthenticatedHome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: loadUserType(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final type = snapshot.data ?? 'user';
+        if (type == 'admin') {
+          return const AdminMainScreen();
+        }
+        return const MainScreen();
+      },
+    );
+  }
+}
+
+Future<double> _fetchStudentHours() async {
+    double total = 0;
+    final firestore = FirebaseFirestore.instance;
+    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    for (final student in students.docs) {
+      final hoursSnapshot = await firestore
+          .collection('Users')
+          .doc(student.id)
+          .collection('Hours')
+          .get();
+      for (final hoursDoc in hoursSnapshot.docs) {
+        final data = hoursDoc.data();
+        final hoursValue = data['hours'];
+        if (hoursValue is num) {
+          total += hoursValue.toDouble();
+        } else if (hoursValue is String) {
+          total += double.tryParse(hoursValue) ?? 0;
+        }
+      }
+    }
+    return total;
+  }
+
+  

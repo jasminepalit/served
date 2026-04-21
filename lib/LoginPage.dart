@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'MainScreen.dart';
 import 'SignUpPage.dart';
 import 'auth_helpers.dart';
+import 'AdminDatabaseView.dart';
+import 'AdminMainScreen.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -16,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,10 +35,21 @@ class _LoginPageState extends State<LoginPage> {
                 _emailController.text.trim(),
                 _passwordController.text.trim(),
               );
-
               if (!context.mounted) return;
 
               if (user != null) {
+                final userType = await loadUserType(uid: user.uid);
+                print("Logged in as $userType for uid=${user.uid}");
+                if (userType == 'admin') {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminMainScreen(),
+                    ),
+                  );
+                  return;
+                }
+
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(

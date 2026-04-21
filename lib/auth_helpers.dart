@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-Future<String> loadUserType() async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return 'user';
-  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
+Future<String> loadUserType({String? uid}) async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  final targetUid = uid ?? currentUser?.uid;
+  print("in loadUserType for uid=$targetUid");
+  if (targetUid == null) return 'user';
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(targetUid);
   try {
     final doc = await docRef.get();
     if (doc.exists) {
-      return doc['type'] as String? ?? 'user';
+      return (doc['type'] as String?)?.trim().toLowerCase() ?? 'user';
     }
   } catch (e) {
     print("Error fetching user type: $e");
@@ -39,6 +41,48 @@ Future<String> loadLastName() async {
     final doc = await docRef.get();
     if (doc.exists) {
       return doc['lastName'] as String? ?? 'Doe';
+    }
+  } catch (e) {
+    print("Error fetching user last name: $e");
+  }
+  return 'Doe';
+}
+
+Future<String> loadFirstNameSpecific(uid) async {
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
+  try {
+    final doc = await docRef.get();
+    if (doc.exists) {
+      return doc['firstName'] as String? ?? 'Jane';
+    }
+  } catch (e) {
+    print("Error fetching user first name: $e");
+  }
+  return 'Jane';
+}
+
+Future<String> loadLastNameSpecific(uid) async {
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
+  try {
+    final doc = await docRef.get();
+    if (doc.exists) {
+      return doc['lastName'] as String? ?? 'Doe';
+    }
+  } catch (e) {
+    print("Error fetching user last name: $e");
+  }
+  return 'Doe';
+}
+
+Future<String> loadNameSpecific(uid) async {
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
+  try {
+    final doc = await docRef.get();
+    if (doc.exists) {
+      String f = doc['firstName'] as String? ?? 'Jane';
+      String l = doc['lastName'] as String? ?? 'Doe';
+      return '$f $l';
+ 
     }
   } catch (e) {
     print("Error fetching user last name: $e");
@@ -90,3 +134,25 @@ Future<User?> signIn(String email, String password) async {
 Future<void> signOut() async {
   await FirebaseAuth.instance.signOut();
 }
+
+Future<double> fetchSpecificStudentHours(uid) async {
+    double total = 0;
+    final firestore = FirebaseFirestore.instance;
+    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+
+    final hoursSnapshot = await firestore
+      .collection('Users')
+      .doc(uid)
+      .collection('Hours')
+      .get();
+    for (final hoursDoc in hoursSnapshot.docs) {
+        final data = hoursDoc.data();
+        final hoursValue = data['hours'];
+        if (hoursValue is num) {
+          total += hoursValue.toDouble();
+        } else if (hoursValue is String) {
+          total += double.tryParse(hoursValue) ?? 0;
+        }
+      }
+    return total;
+  }
