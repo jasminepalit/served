@@ -4,13 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:served/AdminHomePage.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'HomePage.dart';
-import 'VolunteerFormPage.dart';
-import 'ActivityFormPage.dart';
-import 'MainScreen.dart';
-import 'main.dart';
 import 'MainScreen.dart';
 import 'SignUpPage.dart';
+import 'auth_helpers.dart';
+import 'AdminDatabaseView.dart';
+import 'AdminMainScreen.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -29,7 +27,6 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
                 _emailController.text.trim(),
                 _passwordController.text.trim(),
               );
-
               if (!context.mounted) return;
 
               if (user != null) {

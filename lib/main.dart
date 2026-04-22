@@ -3,7 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_helpers.dart';
 import 'LoginPage.dart';
+import 'AdminMainScreen.dart';
+import 'HomePage.dart';
+import 'VolunteerFormPage.dart';
+import 'ActivityFormPage.dart';
+import 'SignUpPage.dart';
 import 'MainScreen.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
@@ -63,85 +69,6 @@ void main() async {
 }
 
 
-String loadUserType() {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return 'user';
-  final docRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
-  docRef.get().then((doc) {
-    if (doc.exists) {
-      print(doc['type']);
-      return doc['type'];
-    } else {
-      return 'user';
-    }
-  }).catchError((e) {
-    print("Error fetching user type: $e");
-    return 'user';
-  });
-  return 'user'; // default while loading
-}
-
-Future<User?> signUp(String email, String password) async {
-  print("Received sign up request for email: $email");
-  try {
-    final credential = await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    print("User signed up: ${credential.user?.uid}");
-
-    final user = credential.user;
-
-    await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(user!.uid)
-        .set({
-      'email': user.email,
-      'createdAt': Timestamp.now(),
-      'uid': user.uid,
-      'type': 'user',
-    });
-
-    return user;
-  } catch (e) {
-    print("Sign up error: $e");
-    return null;
-  }
-}
-
-Future<User?> signIn(String email, String password) async {
-  try {
-    final credential = await FirebaseAuth.instance
-        .signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    /*
-    final user = credential.user;
-    await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(user!.uid)
-        .set({
-      'type': 'user',
-      
-    });*/
-
-    loadUserType();
-
-    return credential.user;
-  } catch (e) {
-    print("Login error: $e");
-    return null;
-  }
-}
-
-Future<void> signOut() async {
-  await FirebaseAuth.instance.signOut();
-  
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -163,9 +90,9 @@ class MyApp extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          return const MainScreen(); // logged in
+          return const AuthenticatedHome();
         } else {
-          return const LoginPage(); // logged out
+          return const LoginPage();
         }
       },
     ),
@@ -173,3 +100,50 @@ class MyApp extends StatelessWidget {
 }
 }
 
+class AuthenticatedHome extends StatelessWidget {
+  const AuthenticatedHome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: loadUserType(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final type = snapshot.data ?? 'user';
+        if (type == 'admin') {
+          return const AdminMainScreen();
+        }
+        return const MainScreen();
+      },
+    );
+  }
+}
+
+Future<double> _fetchStudentHours() async {
+    double total = 0;
+    final firestore = FirebaseFirestore.instance;
+    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    for (final student in students.docs) {
+      final hoursSnapshot = await firestore
+          .collection('Users')
+          .doc(student.id)
+          .collection('Hours')
+          .get();
+      for (final hoursDoc in hoursSnapshot.docs) {
+        final data = hoursDoc.data();
+        final hoursValue = data['hours'];
+        if (hoursValue is num) {
+          total += hoursValue.toDouble();
+        } else if (hoursValue is String) {
+          total += double.tryParse(hoursValue) ?? 0;
+        }
+      }
+    }
+    return total;
+  }
+
+  

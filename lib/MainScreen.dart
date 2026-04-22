@@ -6,6 +6,7 @@ import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
 import 'StudentActivityPage.dart';
 import 'main.dart';
+import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -40,9 +41,14 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  final user = FirebaseAuth.instance.currentUser;
-
-  String userType = loadUserType();
+  String userType = 'user';
+  String firstName = 'Loading...';
+  String lastName = 'Loading...';
+  
+  @override
+  void initState() {
+    super.initState();
+    print("Mainscreen");
 
  @override
   Widget build(BuildContext context) {

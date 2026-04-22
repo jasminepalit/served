@@ -10,18 +10,48 @@ const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
+import 'auth_helpers.dart';
 
-class HomePage extends StatelessWidget {
-  HomePage({super.key, required this.title});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, required this.title});
   final String title;
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final _firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
+  late final Future<String> firstNameFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    firstNameFuture = loadFirstName();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: Text('No authenticated user.')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: FutureBuilder<String>(
+          future: firstNameFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            }
+            return Text(snapshot.data ?? 'No One');
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
