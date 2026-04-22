@@ -40,19 +40,75 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('Users').snapshots(),
+              stream: _firestore.collection('Users').where('type', isEqualTo: 'user').where('status', isEqualTo: 'Active').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('No users found.'));
 
-                return Scrollbar(
+                return 
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: 800,
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text('First Name'),),
+                            DataColumn(label: Text('Last Name')),
+                            DataColumn(label: Text('Email')),
+                            DataColumn(label: Text('Type')),
+                            DataColumn(label: Text('Hours')),
+                            DataColumn(label: Text('View'))
+                          ],
+                          rows: docs.map((doc) {
+                            final data = doc.data()! as Map<String, dynamic>;
+                            return DataRow(cells: [
+                              DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
+                              DataCell(Text(data['lastName'] ?? '', textAlign: TextAlign.center)),
+                              DataCell(Text(data['email'] ?? '', textAlign: TextAlign.center)),
+                              DataCell(Text(data['type'] ?? '', textAlign: TextAlign.center)),
+                              DataCell(
+                                FutureBuilder<double>(
+                                  future: fetchSpecificStudentHours(doc.id),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Text('Loading...');
+                                    } else if (snapshot.hasError) {
+                                      return const Text('Error');
+                                    } else {
+                                      return Text(snapshot.data?.toString() ?? '0');
+                                    }
+                                  },
+                                ),
+                              ),
+                              DataCell(
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                      return AdminUserDataView(uid: doc.id);
+                                    }));
+                                  },
+                                  child: const Text('View'),
+                                ),
+                              ),
+                            ]);
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+                Scrollbar(
                   thumbVisibility: true,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: DataTable(
                       columns: const [
-                        DataColumn(label: Text('First Name')),
+                        DataColumn(label: Text('First Name'),),
                         DataColumn(label: Text('Last Name')),
                         DataColumn(label: Text('Email')),
                         DataColumn(label: Text('Type')),
