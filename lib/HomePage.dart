@@ -87,8 +87,8 @@ class HomePage extends StatelessWidget {
                         child: SingleChildScrollView(
                           scrollDirection: Axis.vertical,
                           child: DataTable(
-                            headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
-                            dataRowColor: MaterialStateProperty.all(Colors.white),
+                            headingRowColor: WidgetStateProperty.all(kSecondaryColor.withValues(alpha: 0.18)),
+                            dataRowColor: WidgetStateProperty.all(Colors.white),
                             dividerThickness: 1,
                             headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
                             dataTextStyle: const TextStyle(color: Colors.black87),

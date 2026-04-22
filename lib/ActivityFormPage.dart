@@ -44,6 +44,16 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
+    // Validation: Check that all required fields are filled
+    if (organization.isEmpty || advisorName.isEmpty || advisorEmail.isEmpty || 
+        advisorNumber.isEmpty || description.isEmpty || 
+        (_isHighNeeds && highNeedsDescription.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all required fields.')),
+      );
+      return;
+    }
+
     
 
     await _firestore
@@ -76,12 +86,9 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       _isHighNeeds = false;
     });
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) { // ignore: use_build_context_synchronously
-            return HomePage(title: "HomePage");
-          }));
+    Navigator.pop(context);
 
   }
-
 
 
   @override

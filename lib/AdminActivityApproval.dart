@@ -275,11 +275,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                 // Header Card
                 Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [kPrimaryColor, kSecondaryColor],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: kPrimaryColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(

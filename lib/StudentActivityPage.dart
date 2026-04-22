@@ -257,6 +257,11 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
       appBar: AppBar(
         title: const Text('Edit Activity'),
         backgroundColor: kPrimaryColor,
+        automaticallyImplyLeading: false, // removes the back arrow
+        leading: IconButton(                          // ADD THIS
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () => Navigator.pop(context),
+  ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
