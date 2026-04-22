@@ -109,6 +109,7 @@ Future<User?> signUp(String email, String password, String firstName, String las
       'type': 'user',
       'firstName': firstName,
       'lastName': lastName,
+      'status': 'Active',
     });
 
     return user;

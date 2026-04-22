@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:served/AdminDatabaseView.dart';
+import 'package:served/AdminDeleteAccounts.dart';
 import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
 import 'auth_helpers.dart';
+import 'AdminDeleteAccounts.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -17,6 +19,7 @@ class AdminMainScreen extends StatefulWidget {
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _selectedIndex = 0;
   String _selectedLogOption = 'Home';
+  String currentView = 'database';  // 'database' or 'delete'
 
   Widget _getPage() {
     if (_selectedIndex == 0) return AdminDatabaseView();
@@ -79,6 +82,14 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
         actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return AdminDeleteAccounts();
+              }));
+            },
+            child: const Text('Remove Users', style: TextStyle(color: Colors.white)),
+          ),
           if (_selectedIndex == 1) ...[
             PopupMenuButton<String>(
               onSelected: (value) {
