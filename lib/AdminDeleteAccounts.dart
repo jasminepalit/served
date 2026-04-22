@@ -70,25 +70,8 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                             TextButton(
                               onPressed: () async {
                                 // Show confirmation dialog
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Deactivate User'),
-                                    content: const Text('Are you sure you want to deactivate this user?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context, false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context, true),
-                                        child: const Text('Deactivate'),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                              
 
-                                if (confirm == true) {
                                     // Delete all Hours sub-documents first
                                     final docs = await _firestore
                                         .collection('Users')
@@ -100,7 +83,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
 
                                     // Delete the main user document
 
-                                  }
+                                  
                                 }
                               },
                               child: const Text('Deactivate'),
