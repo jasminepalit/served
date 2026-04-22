@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:served/AdminHomePage.dart';
+import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'MainScreen.dart';
 import 'SignUpPage.dart';
@@ -6,6 +10,11 @@ import 'auth_helpers.dart';
 import 'AdminDatabaseView.dart';
 import 'AdminMainScreen.dart';
 
+const Color kPrimaryColor = Color(0xFF5128B5);
+const Color kSecondaryColor = Color(0xFF758BFD);
+const Color kAccentColor = Color(0xFFAEB8FE);
+const Color kBackgroundColor = Color(0xFFF2F1F6);
+const Color kAccentOrange = Color(0xFFFF8600);
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,9 +30,15 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
+      appBar: AppBar(title: const Text('Login')
+    
+      ),
+      body: Center(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
@@ -38,29 +53,30 @@ class _LoginPageState extends State<LoginPage> {
               if (!context.mounted) return;
 
               if (user != null) {
-                final userType = await loadUserType(uid: user.uid);
-                print("Logged in as $userType for uid=${user.uid}");
-                if (userType == 'admin') {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AdminMainScreen(),
-                    ),
-                  );
-                  return;
-                }
+                      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                .collection('Users')
+                .doc(user.uid)
+                .get();
 
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MainScreen(),
-                  ),
-                );
+            if (!context.mounted) return;
+
+            if (userDoc.exists && userDoc['type'] == 'admin') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Adminhomepage()),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const MainScreen()),
+              );
+              }
               }
             },
             child: const Text('Login'),
           ),
-            ElevatedButton(
+          const SizedBox(height: 12),
+            OutlinedButton(
               onPressed: () async {
                   Navigator.pushReplacement(
                     context,
@@ -74,6 +90,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
+        ),
+        ),
+      ),
       ),
     );
   }

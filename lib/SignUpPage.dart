@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
 import 'MainScreen.dart';
+import 'AdminHomePage.dart';
+
+const Color kPrimaryColor = Color(0xFF5128B5);
+const Color kSecondaryColor = Color(0xFF758BFD);
+const Color kAccentColor = Color(0xFFAEB8FE);
+const Color kBackgroundColor = Color(0xFFF2F1F6);
+const Color kAccentOrange = Color(0xFFFF8600);
 import 'auth_helpers.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -39,8 +46,13 @@ class _SignUpPageState extends State<SignUpPage> {
                 if (!context.mounted) return;
 
                 if (user != null) {
-
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                  // Check user role in Firestore
+                  DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+                  if (userDoc.exists && userDoc['type'] == 'admin') {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Adminhomepage()));
+                  } else {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                  }
                 }
               },
               child: const Text('Sign Up'),
