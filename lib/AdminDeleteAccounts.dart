@@ -40,7 +40,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('Users').where('type', isEqualTo: 'user').snapshots(),
+              stream: _firestore.collection('Users').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
@@ -55,9 +55,10 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                         DataColumn(label: Text('First Name')),
                         DataColumn(label: Text('Last Name')),
                         DataColumn(label: Text('Email')),
-                        DataColumn(label: Text('Type')),
-                        DataColumn(label: Text('Deactivate')),
-                        DataColumn(label: Text('Activate')),
+                        DataColumn(label: Text('Role')),
+                        DataColumn(label: Text('Change Role')),
+                        DataColumn(label: Text('Status')),
+                        DataColumn(label: Text('Change Status')),
                       ],
                       rows: docs.map((doc) {
                         final data = doc.data()! as Map<String, dynamic>;
@@ -65,12 +66,41 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                           DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
                           DataCell(Text(data['lastName'] ?? '', textAlign: TextAlign.center)),
                           DataCell(Text(data['email'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(Text(data['type'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(
+                            TextButton(
+                              onPressed: () async {
+                                // Show confirmation dialog
+                            
+                                    // Delete all Hours sub-documents first
+                                if (data['type'] == 'user') {
+                                final docs = await _firestore
+                                        .collection('Users')
+                                        .doc(doc.id)
+                                        .get();
+                                    if (docs.exists) {
+                                      
+                                      await _firestore.collection('Users').doc(doc.id).update({'type': 'admin'});
+                                    }
+                                } else {
+
+                                    
+                                      
+                                      await _firestore.collection('Users').doc(doc.id).update({'type': 'user'});
+                                    
+
+                                  }
+                                }
+                              ,
+                              child: Text(data['type'] == 'admin' ? 'Make User' : 'Make Admin'),
+                            ),
+                          ),
                           DataCell(Text(data['status'] ?? '', textAlign: TextAlign.center)),
                           DataCell(
                             TextButton(
                               onPressed: () async {
                                 // Show confirmation dialog
-                              
+                                if (data['status'] == 'Active') {
 
                                     // Delete all Hours sub-documents first
                                     final docs = await _firestore
@@ -82,35 +112,16 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                                       await _firestore.collection('Users').doc(doc.id).update({'status': 'Inactive'});
 
                                     // Delete the main user document
-
+                                    }
+                                } else {
+                                  await _firestore.collection('Users').doc(doc.id).update({'status': 'Active'});
                                   
                                 }
                               },
-                              child: const Text('Deactivate'),
+                              child:  Text(data['status'] == 'Active' ? 'Deactivate' : 'Activate'),
                             ),
                           ),
-                          DataCell(
-                            TextButton(
-                              onPressed: () async {
-                                // Show confirmation dialog
-                               
-                                    // Delete all Hours sub-documents first
-                                final docs = await _firestore
-                                        .collection('Users')
-                                        .doc(doc.id)
-                                        .get();
-                                    if (docs.exists) {
-                                      
-                                      await _firestore.collection('Users').doc(doc.id).update({'status': 'Active'});
 
-                                    // Delete the main user document
-
-                                  }
-                                }
-                              ,
-                              child: const Text('Activate'),
-                            ),
-                          ),
 
 
                         ]);

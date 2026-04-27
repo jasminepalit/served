@@ -103,17 +103,35 @@ class MyApp extends StatelessWidget {
 class AuthenticatedHome extends StatelessWidget {
   const AuthenticatedHome({super.key});
 
+  Future<Map<String, String>> _loadUserData() async {
+    final type = await loadUserType();
+    final status = await loadUserStatus();
+    return {'type': type, 'status': status};
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: loadUserType(),
+    return FutureBuilder<Map<String, String>>(
+      future: _loadUserData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        final type = snapshot.data ?? 'user';
+        final data = snapshot.data ?? {'type': 'user', 'status': 'active'};
+        final type = data['type']!;
+        final status = data['status']!;
+
+        if (status == 'inactive') {
+          // Sign out the user
+          FirebaseAuth.instance.signOut();
+          // Return a loading screen or message while signing out
+          return const Scaffold(
+            body: Center(child: Text('Signing out...')),
+          );
+        }
+
         if (type == 'admin') {
           return const AdminMainScreen();
         }
