@@ -49,8 +49,9 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     print("Mainscreen");
+  }
 
- @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -97,10 +98,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
-}
+  
+
 
