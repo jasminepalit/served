@@ -5,6 +5,7 @@ import 'SignUpPage.dart';
 import 'main.dart';
 import 'LoginPage.dart';
 import 'AdminActivityApproval.dart';
+import 'AdminDeleteAccounts.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -101,6 +102,13 @@ class _AdminhomepageState extends State<Adminhomepage> {
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminActivityApprovalPage())),
               child: const Text('Approve Activities', style: TextStyle(color: Colors.white)),
             ),
+            TextButton(
+    onPressed: () => Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AdminDeleteAccounts()),
+    ),
+    child: const Text('Admin Panel', style: TextStyle(color: Colors.white)),
+  ),
           ],
       ),
       body: Center(

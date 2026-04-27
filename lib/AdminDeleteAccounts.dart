@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'VolunteerFormPage.dart';
 import 'auth_helpers.dart';
-import 'AdminUserDataView.dart';
-import 'main.dart';
+import 'AdminDatabaseView.dart';
+import 'LoginPage.dart';
 
 class AdminDeleteAccounts extends StatefulWidget {
   const AdminDeleteAccounts({super.key});
@@ -34,9 +33,34 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
       return const Center(child: Text('No authenticated user.'));
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Admin Delete Accounts'),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF93a1fd),
+        leading: TextButton(
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) {
+              return LoginPage();
+            }), (route) => false);
+          },
+          child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const AdminDatabaseView();
+              }));
+            },
+            child: const Text('Users', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(

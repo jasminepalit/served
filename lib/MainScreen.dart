@@ -7,6 +7,7 @@ import 'ActivityFormPage.dart';
 import 'StudentActivityPage.dart';
 import 'main.dart';
 import 'auth_helpers.dart';
+import 'AdminDeleteAccounts.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -75,6 +76,7 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () => setState(() => _selectedIndex = 2),
             child: const Text('Activities', style: TextStyle(color: Colors.white)),
           ),
+            
           PopupMenuButton<String>(
             onSelected: (value) {
               setState(() {
