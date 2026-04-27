@@ -60,6 +60,14 @@ class _LoginPageState extends State<LoginPage> {
 
             if (!context.mounted) return;
 
+            if (userDoc.exists && userDoc['status'] == 'Inactive') {
+              signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            }
+
             if (userDoc.exists && userDoc['type'] == 'admin') {
               Navigator.pushReplacement(
                 context,

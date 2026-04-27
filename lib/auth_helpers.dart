@@ -18,6 +18,23 @@ Future<String> loadUserType({String? uid}) async {
   return 'user';
 }
 
+Future<String> loadUserStatus({String? uid}) async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  final targetUid = uid ?? currentUser?.uid;
+  print("in loadUserStatus for uid=$targetUid");
+  if (targetUid == null) return 'active';
+  final docRef = FirebaseFirestore.instance.collection('Users').doc(targetUid);
+  try {
+    final doc = await docRef.get();
+    if (doc.exists) {
+      return (doc['status'] as String?)?.trim().toLowerCase() ?? 'active';
+    }
+  } catch (e) {
+    print("Error fetching user status: $e");
+  }
+  return 'active';
+}
+
 Future<String> loadFirstName() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return 'Jane';
