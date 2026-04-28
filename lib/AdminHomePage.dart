@@ -156,19 +156,71 @@ class _AdminhomepageState extends State<Adminhomepage> {
             ),
             const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                4,
-                (index) => Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF93a1fd),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: const Color(0xFF93a1fd),
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: const Color(0xFF93a1fd),
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collectionGroup('Activities')
+          .where('status', isEqualTo: 'approved')
+          .snapshots(),
+      builder: (context, snapshot) {
+        final count = snapshot.data?.docs.length ?? 0;
+        return Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            color: const Color(0xFF93a1fd),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '$count',
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-            ),
+              const Text(
+                'Activities Approved',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+    Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: const Color(0xFF93a1fd),
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+  ],
+),
           ],
         ),
       ),
