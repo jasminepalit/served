@@ -158,7 +158,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
