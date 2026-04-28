@@ -8,7 +8,7 @@ import 'auth_helpers.dart';
 
 
 const Color kPrimaryColor = Color(0xFF5128B5);
-const Color kSecondaryColor = Color(0xFF758BFD);
+const Color kSecondaryColor = Color(0xFF758BFD);   
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
@@ -53,7 +53,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   // Check user role in Firestore
                   DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
                   if (userDoc.exists && userDoc['type'] == 'admin') {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Adminhomepage()));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AdminHomePage()));
                   } else {
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
                   }

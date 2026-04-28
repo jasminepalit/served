@@ -12,46 +12,15 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-class Adminhomepage extends StatefulWidget {
-  const Adminhomepage({super.key});
+class AdminHomePage extends StatefulWidget {
+  const AdminHomePage({super.key});
 
 
   @override
-  State<Adminhomepage> createState() => _AdminhomepageState();
+  State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
-class AdminPage extends StatelessWidget {
-  const AdminPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Panel'),
-        backgroundColor: const Color(0xFF93a1fd),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('Users').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          final users = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              final userData = users[index].data() as Map<String, dynamic>;
-              return ListTile(
-                title: Text(userData['email'] ?? 'No email'),
-                subtitle: Text('Role: ${userData['type'] ?? 'user'}'),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _AdminhomepageState extends State<Adminhomepage> {
+class _AdminHomePageState extends State<AdminHomePage> {
  
 
   Future<double> _fetchStudentHours() async {
@@ -80,29 +49,7 @@ class _AdminhomepageState extends State<Adminhomepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Servd Admin'),
-         centerTitle: true,
-        backgroundColor: const Color(0xFF93a1fd),
-        leading: TextButton(
-          onPressed: () async {
-            await FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) {
-              return LoginPage();}), (route) => false,);
-          },
-          child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
-        ),
-        actions: [
-            TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminPage())),
-              child: const Text('View Users', style: TextStyle(color: Colors.white)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminActivityApprovalPage())),
-              child: const Text('Approve Activities', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-      ),
+      
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

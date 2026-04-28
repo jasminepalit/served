@@ -3,11 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:served/AdminDatabaseView.dart';
 import 'package:served/AdminDeleteAccounts.dart';
 import 'LoginPage.dart';
-import 'HomePage.dart';
-import 'VolunteerFormPage.dart';
-import 'ActivityFormPage.dart';
+import 'AdminHomePage.dart';
 import 'auth_helpers.dart';
-import 'AdminDeleteAccounts.dart';
+import 'AdminActivityApproval.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -18,19 +16,21 @@ class AdminMainScreen extends StatefulWidget {
 
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _selectedIndex = 0;
-  String _selectedLogOption = 'Home';
-  String currentView = 'database';  // 'database' or 'delete'
 
   Widget _getPage() {
-    if (_selectedIndex == 0) return AdminDatabaseView();
-    return _getLogPage();
-  }
-
-  Widget _getLogPage() {
-    if (_selectedLogOption == 'Log Hours') {
-      return const VolunteerFormPage();
-    } else {
-      return const ActivityFormPage();
+    if (_selectedIndex == 0) {
+      return const AdminHomePage();
+    } else if (_selectedIndex == 1) {
+      return const AdminDatabaseView();
+    }
+    else if (_selectedIndex == 2) {
+       return const AdminDeleteAccounts();
+    }
+    else if (_selectedIndex == 3) {
+      return const AdminActivityApproval();
+    }
+    else{
+    return const AdminHomePage();
     }
   }
 
@@ -72,7 +72,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       appBar: AppBar(
         title: Text(firstName),
         centerTitle: true,
-        backgroundColor: const Color(0xFF93a1fd),
+        backgroundColor: const Color(0xFF5128B5),
         leading: TextButton(
           onPressed: () async {
             await FirebaseAuth.instance.signOut();
@@ -84,51 +84,60 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return AdminDeleteAccounts();
-              }));
+              setState(() {
+                _selectedIndex = 0;
+              });
             },
-            child: const Text('Remove Users', style: TextStyle(color: Colors.white)),
-          ),
-          if (_selectedIndex == 1) ...[
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                setState(() {
-                  _selectedLogOption = value;
-                });
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: 'Log Hours', child: Text('Log Hours')),
-                PopupMenuItem(value: 'Add Activity', child: Text('Add Activity')),
-              ],
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text('Log', style: TextStyle(color: Colors.white)),
+            child: Text(
+              'Admin Home',
+              style: TextStyle(
+                color: _selectedIndex == 0 ? Color(0xFFFF8600) : Colors.white,
               ),
             ),
-          ],
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _selectedIndex = 1;
+              });
+            },
+            child: Text(
+              'View User Data',
+              style: TextStyle(
+                color: _selectedIndex == 1 ? Color(0xFFFF8600) : Colors.white,
+              ),
+            ),
+          ),
+
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _selectedIndex = 2;
+              });
+            },
+            child: Text(
+              'Edit User Status',
+              style: TextStyle(
+                color: _selectedIndex == 2 ? Color(0xFFFF8600) : Colors.white,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _selectedIndex = 3;
+              });
+            },
+            child: Text(
+              'Approve Activities',
+              style: TextStyle(
+                color: _selectedIndex == 3 ? Color(0xFFFF8600) : Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
       body: _getPage(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() {
-          _selectedIndex = index;
-          if (index == 0) {
-            _selectedLogOption = 'Home';
-          }
-        }),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Users',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.edit),
-            label: 'Log',
-          ),
-        ],
-      ),
     );
   }
 }

@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
             if (userDoc.exists && userDoc['type'] == 'admin') {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const Adminhomepage()),
+                MaterialPageRoute(builder: (context) => const AdminMainScreen()),
               );
             } else {
               Navigator.pushReplacement(
