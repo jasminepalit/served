@@ -7,8 +7,8 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-class AdminActivityApprovalPage extends StatelessWidget {
-  const AdminActivityApprovalPage({super.key});
+class AdminActivityApproval extends StatelessWidget {
+  const AdminActivityApproval({super.key});
 
   @override
   Widget build(BuildContext context) {
