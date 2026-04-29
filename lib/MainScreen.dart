@@ -37,7 +37,9 @@ class _MainScreenState extends State<MainScreen> {
         onSuccess: () => setState(() => _selectedIndex = 0),
       );
     } else {
-      return const ActivityFormPage();
+      return ActivityFormPage(
+        onSuccess: () => setState(() => _selectedIndex = 0),
+      );
     }
   }
 

@@ -21,7 +21,7 @@ class StudentActivityPage extends StatelessWidget {
         return 'More Info Requested';
       case 'pending':
       default:
-        return 'Pending';
+        return 'pending';
     }
   }
 
