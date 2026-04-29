@@ -20,8 +20,6 @@ class ActivityFormPage extends StatefulWidget {
   State<ActivityFormPage> createState() => _ActivityFormPageState();
 }
 
-
-
 class _ActivityFormPageState extends State<ActivityFormPage> {
   final _organizationController = TextEditingController();
   final _advisorNameController = TextEditingController();

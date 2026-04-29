@@ -174,3 +174,45 @@ Future<double> fetchSpecificStudentHours(uid) async {
       }
     return total;
   }
+
+Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
+  double total = 0;
+  final firestore = FirebaseFirestore.instance;
+
+  // Get all approved high needs activities for the user
+  final activitiesSnapshot = await firestore
+      .collection('Users')
+      .doc(uid)
+      .collection('Activities')
+      .where('status', isEqualTo: 'approved')
+      .where('isHighNeeds', isEqualTo: true)
+      .get();
+
+  // Collect unique organizations
+  final highNeedsOrganizations = activitiesSnapshot.docs
+      .map((doc) => doc.data()['organization'] as String?)
+      .where((org) => org != null)
+      .toSet();
+
+  // Get all hours for the user
+  final hoursSnapshot = await firestore
+      .collection('Users')
+      .doc(uid)
+      .collection('Hours')
+      .get();
+
+  // Sum hours where place is in high needs organizations
+  for (final hoursDoc in hoursSnapshot.docs) {
+    final data = hoursDoc.data();
+    final place = data['place'] as String?;
+    final hoursValue = data['hours'];
+    if (place != null && highNeedsOrganizations.contains(place)) {
+      if (hoursValue is num) {
+        total += hoursValue.toDouble();
+      } else if (hoursValue is String) {
+        total += double.tryParse(hoursValue) ?? 0;
+      }
+    }
+  }
+  return total;
+}
