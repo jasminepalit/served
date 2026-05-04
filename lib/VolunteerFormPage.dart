@@ -45,6 +45,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       'place': place,
       'hours': hours,
       'date': Timestamp.fromDate(date),
+      'status': 'pending',
     });
 
     if (!context.mounted) return;
