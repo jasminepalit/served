@@ -1,6 +1,8 @@
+// Import necessary packages for Firebase
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// Load user type from Firestore, defaulting to 'user'
 Future<String> loadUserType({String? uid}) async {
   final currentUser = FirebaseAuth.instance.currentUser;
   final targetUid = uid ?? currentUser?.uid;
@@ -18,6 +20,7 @@ Future<String> loadUserType({String? uid}) async {
   return 'user';
 }
 
+// Load user status from Firestore, defaulting to 'active'
 Future<String> loadUserStatus({String? uid}) async {
   final currentUser = FirebaseAuth.instance.currentUser;
   final targetUid = uid ?? currentUser?.uid;
@@ -35,6 +38,7 @@ Future<String> loadUserStatus({String? uid}) async {
   return 'active';
 }
 
+// Load current user's first name from Firestore
 Future<String> loadFirstName() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return 'Jane';
@@ -50,6 +54,7 @@ Future<String> loadFirstName() async {
   return 'Jane';
 }
 
+// Load current user's last name from Firestore
 Future<String> loadLastName() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return 'Doe';
@@ -65,6 +70,7 @@ Future<String> loadLastName() async {
   return 'Doe';
 }
 
+// Load specific user's first name by UID
 Future<String> loadFirstNameSpecific(uid) async {
   final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
   try {
@@ -78,6 +84,7 @@ Future<String> loadFirstNameSpecific(uid) async {
   return 'Jane';
 }
 
+// Load specific user's last name by UID
 Future<String> loadLastNameSpecific(uid) async {
   final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
   try {
@@ -91,6 +98,7 @@ Future<String> loadLastNameSpecific(uid) async {
   return 'Doe';
 }
 
+// Load specific user's full name by UID
 Future<String> loadNameSpecific(uid) async {
   final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
   try {
@@ -99,7 +107,6 @@ Future<String> loadNameSpecific(uid) async {
       String f = doc['firstName'] as String? ?? 'Jane';
       String l = doc['lastName'] as String? ?? 'Doe';
       return '$f $l';
- 
     }
   } catch (e) {
     print("Error fetching user last name: $e");
@@ -107,6 +114,7 @@ Future<String> loadNameSpecific(uid) async {
   return 'Doe';
 }
 
+// Sign up a new user with email, password, and name
 Future<User?> signUp(String email, String password, String firstName, String lastName) async {
   print("Received sign up request for email: $email");
   try {
@@ -119,6 +127,7 @@ Future<User?> signUp(String email, String password, String firstName, String las
 
     final user = credential.user;
 
+    // Create user document in Firestore
     await FirebaseFirestore.instance.collection('Users').doc(user!.uid).set({
       'email': user.email,
       'createdAt': Timestamp.now(),
@@ -136,6 +145,7 @@ Future<User?> signUp(String email, String password, String firstName, String las
   }
 }
 
+// Sign in existing user
 Future<User?> signIn(String email, String password) async {
   try {
     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -149,28 +159,31 @@ Future<User?> signIn(String email, String password) async {
   }
 }
 
+// Sign out current user
 Future<void> signOut() async {
   await FirebaseAuth.instance.signOut();
 }
 
+// Fetch total hours for a specific student
 Future<double> fetchSpecificStudentHours(uid) async {
-    double total = 0;
-    final firestore = FirebaseFirestore.instance;
-    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+  double total = 0;
+  final firestore = FirebaseFirestore.instance;
+  final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
 
-    final hoursSnapshot = await firestore
-      .collection('Users')
-      .doc(uid)
-      .collection('Hours')
-      .get();
-    for (final hoursDoc in hoursSnapshot.docs) {
-        final data = hoursDoc.data();
-        final hoursValue = data['hours'];
-        if (hoursValue is num) {
-          total += hoursValue.toDouble();
-        } else if (hoursValue is String) {
-          total += double.tryParse(hoursValue) ?? 0;
-        }
-      }
-    return total;
+  // Get all hours documents for the user
+  final hoursSnapshot = await firestore
+    .collection('Users')
+    .doc(uid)
+    .collection('Hours')
+    .get();
+  for (final hoursDoc in hoursSnapshot.docs) {
+    final data = hoursDoc.data();
+    final hoursValue = data['hours'];
+    if (hoursValue is num) {
+      total += hoursValue.toDouble();
+    } else if (hoursValue is String) {
+      total += double.tryParse(hoursValue) ?? 0;
+    }
   }
+  return total;
+}

@@ -1,16 +1,20 @@
+// Import necessary packages for Flutter, Firebase, and local files
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// Define color constants for the app's theme
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
+// Student activity page widget to view and manage submitted activities
 class StudentActivityPage extends StatelessWidget {
   const StudentActivityPage({super.key});
 
+  // Helper function to get status label
   String _statusLabel(String status) {
     switch (status) {
       case 'approved':
@@ -25,6 +29,7 @@ class StudentActivityPage extends StatelessWidget {
     }
   }
 
+  // Helper function to get status text style
   TextStyle _statusTextStyle(String status) {
     switch (status) {
       case 'approved':
@@ -42,6 +47,7 @@ class StudentActivityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    // Check if user is logged in
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('My Activities'), backgroundColor: kPrimaryColor),
@@ -49,6 +55,7 @@ class StudentActivityPage extends StatelessWidget {
       );
     }
 
+    // Stream for user's activities
     final activitiesStream = FirebaseFirestore.instance
         .collection('Users')
         .doc(user.uid)
@@ -57,6 +64,7 @@ class StudentActivityPage extends StatelessWidget {
         .snapshots();
 
     return Scaffold(
+      // App bar with title
       appBar: AppBar(title: const Text('My Activities'), backgroundColor: kPrimaryColor),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -75,6 +83,7 @@ class StudentActivityPage extends StatelessWidget {
               return const Center(child: Text('No activities logged yet.'));
             }
 
+            // Data table for activities
             return Card(
               clipBehavior: Clip.hardEdge,
               child: Padding(
@@ -106,8 +115,11 @@ class StudentActivityPage extends StatelessWidget {
                               : 'No date';
 
                           return DataRow(cells: [
+                            // Organization cell
                             DataCell(Text(data['organization']?.toString() ?? '')),
+                            // Date cell
                             DataCell(Text(dateStr)),
+                            // Status cell with label and message if needed
                             DataCell(
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,6 +136,7 @@ class StudentActivityPage extends StatelessWidget {
                                 ],
                               ),
                             ),
+                            // Action cell for editing if more info requested
                             DataCell(
                               status == 'more_info'
                                   ? TextButton(
@@ -157,6 +170,7 @@ class StudentActivityPage extends StatelessWidget {
   }
 }
 
+// Activity edit page widget for resubmitting activities that need more info
 class ActivityEditPage extends StatefulWidget {
   final String activityId;
   final Map<String, dynamic> activityData;
@@ -167,20 +181,26 @@ class ActivityEditPage extends StatefulWidget {
   State<ActivityEditPage> createState() => _ActivityEditPageState();
 }
 
+// State class for ActivityEditPage
 class _ActivityEditPageState extends State<ActivityEditPage> {
+  // Controllers for form fields
   final _organizationController = TextEditingController();
   final _advisorNameController = TextEditingController();
   final _advisorEmailController = TextEditingController();
   final _advisorNumberController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _highNeedsDescriptionController = TextEditingController();
+  // Selected date
   DateTime? _selectedDate;
+  // High needs flag
   bool _isHighNeeds = false;
+  // Saving state
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
+    // Initialize fields with existing data
     final data = widget.activityData;
     _organizationController.text = data['organization']?.toString() ?? '';
     _advisorNameController.text = data['advisorName']?.toString() ?? '';
@@ -193,6 +213,7 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
     _selectedDate = timestamp?.toDate();
   }
 
+  // Function to pick date
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -204,9 +225,11 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
+  // Function to save changes and resubmit
   Future<void> _saveChanges() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+    // Validate date
     if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a date before resubmitting.')),
@@ -216,6 +239,7 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
 
     setState(() => _isSaving = true);
     try {
+      // Update activity in Firestore
       await FirebaseFirestore.instance
           .collection('Users')
           .doc(user.uid)
@@ -235,12 +259,14 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
       });
 
       if (!mounted) return;
+      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Activity resubmitted for approval.'), backgroundColor: Colors.green),
       );
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
+      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error saving activity: $e'), backgroundColor: Colors.red),
       );
@@ -254,6 +280,7 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
     final requestMessage = widget.activityData['requestMessage']?.toString() ?? '';
 
     return Scaffold(
+      // App bar with title and back button
       appBar: AppBar(
         title: const Text('Edit Activity'),
         backgroundColor: kPrimaryColor,
@@ -268,6 +295,7 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Show admin request message if present
             if (requestMessage.isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(16),
@@ -287,6 +315,7 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
               ),
               const SizedBox(height: 20),
             ],
+            // Form fields
             TextField(controller: _organizationController, decoration: const InputDecoration(labelText: 'Organization', border: OutlineInputBorder())),
             const SizedBox(height: 12),
             TextField(controller: _descriptionController, maxLines: 3, decoration: const InputDecoration(labelText: 'Activity Description', border: OutlineInputBorder())),
@@ -304,17 +333,20 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
             const SizedBox(height: 12),
             TextField(controller: _advisorNumberController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Advisor Phone Number', border: OutlineInputBorder())),
             const SizedBox(height: 12),
+            // High needs checkbox
             CheckboxListTile(
               title: const Text('High Needs Activity'),
               value: _isHighNeeds,
               onChanged: (value) => setState(() => _isHighNeeds = value ?? false),
               contentPadding: EdgeInsets.zero,
             ),
+            // Conditional high needs description
             if (_isHighNeeds) ...[
               const SizedBox(height: 8),
               TextField(controller: _highNeedsDescriptionController, maxLines: 3, decoration: const InputDecoration(labelText: 'Why is it high needs?', border: OutlineInputBorder())),
             ],
             const SizedBox(height: 20),
+            // Save button
             ElevatedButton(
               onPressed: _isSaving ? null : _saveChanges,
               style: ElevatedButton.styleFrom(backgroundColor: kPrimaryColor, padding: const EdgeInsets.symmetric(vertical: 16)),

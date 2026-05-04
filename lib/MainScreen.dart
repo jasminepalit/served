@@ -1,3 +1,4 @@
+// Import necessary packages for Flutter, Firebase, and local files
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
@@ -8,12 +9,14 @@ import 'StudentActivityPage.dart';
 import 'main.dart';
 import 'auth_helpers.dart';
 
+// Define color constants for the app's theme
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
+// Main screen widget for the app's primary navigation
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -21,16 +24,21 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
+// State class for MainScreen
 class _MainScreenState extends State<MainScreen> {
+  // Index for selected tab
   int _selectedIndex = 0;
+  // Selected option for log submenu
   String _selectedLogOption = 'Log Hours';
 
+  // Get the current page based on selected index
   Widget _getPage() {
     if (_selectedIndex == 0) return HomePage(title: "Home",);
     if (_selectedIndex == 2) return const StudentActivityPage();
     return _getLogPage();
   }
 
+  // Get the log page based on selected log option
   Widget _getLogPage() {
     if (_selectedLogOption == 'Log Hours') {
       return VolunteerFormPage(
@@ -41,6 +49,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  // User data variables
   String userType = 'user';
   String firstName = 'Loading...';
   String lastName = 'Loading...';
@@ -54,10 +63,12 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar with title, logout button, and navigation buttons
       appBar: AppBar(
         title: const Text('Servd'),
         centerTitle: true,
         backgroundColor: kPrimaryColor,
+        // Logout button
         leading: IconButton(
           icon: const Icon(Icons.logout, color: Colors.white),
           onPressed: () async {
@@ -67,14 +78,17 @@ class _MainScreenState extends State<MainScreen> {
           },
         ),
         actions: [
+          // Home button
           TextButton(
             onPressed: () => setState(() => _selectedIndex = 0),
             child: const Text('Home', style: TextStyle(color: Colors.white)),
           ),
+          // Activities button
           TextButton(
             onPressed: () => setState(() => _selectedIndex = 2),
             child: const Text('Activities', style: TextStyle(color: Colors.white)),
           ),
+          // Log popup menu with options
           PopupMenuButton<String>(
             onSelected: (value) {
               setState(() {
@@ -93,6 +107,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
+      // Body displays the selected page
       body: _getPage(),
     );
   }

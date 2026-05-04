@@ -1,23 +1,28 @@
+// Import necessary packages for Flutter and Firebase
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Define color constants for the app's theme
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
+// Admin activity approval page widget for reviewing pending activities
 class AdminActivityApproval extends StatelessWidget {
   const AdminActivityApproval({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar with title
       appBar: AppBar(
         title: const Text('Activity Approvals'),
         backgroundColor: kPrimaryColor,
       ),
       body: StreamBuilder<QuerySnapshot>(
+        // Stream of pending activities from all users
         stream: FirebaseFirestore.instance.collectionGroup('Activities').where('status', isEqualTo: 'pending').snapshots(),
         builder: (context, snapshot) {
   if (snapshot.hasError) {
@@ -29,6 +34,7 @@ class AdminActivityApproval extends StatelessWidget {
             return const Center(child: Text('No pending activities for approval.'));
           }
           
+          // List view of pending activities
           return ListView.builder(
             itemCount: activities.length,
             itemBuilder: (context, index) {
@@ -51,6 +57,7 @@ class AdminActivityApproval extends StatelessWidget {
                       ),
                   ],
                 ),
+                // Navigate to detail page on tap
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -70,6 +77,7 @@ class AdminActivityApproval extends StatelessWidget {
   }
 }
 
+// Detail page for activity approval with full information and actions
 class ActivityApprovalDetailPage extends StatefulWidget {
   final String studentId;
   final String activityId;
@@ -87,6 +95,7 @@ class ActivityApprovalDetailPage extends StatefulWidget {
       _ActivityApprovalDetailPageState();
 }
 
+// State class for ActivityApprovalDetailPage
 class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage> {
   late Future<Map<String, dynamic>> studentInfoFuture;
   bool isLoading = false;
@@ -94,9 +103,11 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
   @override
   void initState() {
     super.initState();
+    // Fetch student info asynchronously
     studentInfoFuture = _fetchStudentInfo();
   }
 
+  // Fetch student information from Firestore
   Future<Map<String, dynamic>> _fetchStudentInfo() async {
     final doc = await FirebaseFirestore.instance
         .collection('Users')
@@ -105,6 +116,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
     return doc.data() ?? {};
   }
 
+  // Approve the activity
   Future<void> _approveActivity() async {
     setState(() => isLoading = true);
     try {
@@ -133,6 +145,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
     }
   }
 
+  // Reject the activity
   Future<void> _rejectActivity() async {
     setState(() => isLoading = true);
     try {
@@ -161,6 +174,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
     }
   }
 
+  // Request more information from student
   void _requestMoreInfo() {
     final messageController = TextEditingController();
 
@@ -235,6 +249,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar with title
       appBar: AppBar(
         title: const Text('Activity Approval'),
         backgroundColor: kPrimaryColor,
@@ -272,7 +287,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header Card
+                // Header Card with student info
                 Container(
                   decoration: BoxDecoration(
                     color: kPrimaryColor,
@@ -445,7 +460,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
 
                 const SizedBox(height: 32),
 
-                // Action Buttons
+                // Action Buttons for approve, reject, request more info
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -500,6 +515,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
     );
   }
 
+  // Helper widget to build info rows
   Widget _buildInfoRow(String label, String value, Color textColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -527,6 +543,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
     );
   }
 
+  // Helper widget to build detail rows
   Widget _buildDetailRow(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

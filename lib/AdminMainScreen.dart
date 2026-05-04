@@ -1,3 +1,4 @@
+// Import necessary packages for Flutter, Firebase, and local files
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:served/AdminDatabaseView.dart';
@@ -7,6 +8,7 @@ import 'AdminHomePage.dart';
 import 'auth_helpers.dart';
 import 'AdminActivityApproval.dart';
 
+// Admin main screen widget for admin navigation
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
 
@@ -14,9 +16,12 @@ class AdminMainScreen extends StatefulWidget {
   State<AdminMainScreen> createState() => _AdminMainScreenState();
 }
 
+// State class for AdminMainScreen
 class _AdminMainScreenState extends State<AdminMainScreen> {
+  // Selected index for navigation
   int _selectedIndex = 0;
 
+  // Get the current page based on selected index
   Widget _getPage() {
     if (_selectedIndex == 0) {
       return const AdminHomePage();
@@ -34,6 +39,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     }
   }
 
+  // User data variables
   String userType = 'user';
   String firstName = 'Loading...';
   String lastName = 'Loading...';
@@ -43,6 +49,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     super.initState();
     print("Mainscreen");
 
+    // Load user data asynchronously
     loadFirstName().then((value) {
       if (!mounted) return;
       setState(() {
@@ -69,10 +76,12 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar with sign out button and navigation buttons
       appBar: AppBar(
         title: Text(firstName),
         centerTitle: true,
         backgroundColor: const Color(0xFF5128B5),
+        // Sign out button
         leading: TextButton(
           onPressed: () async {
             await FirebaseAuth.instance.signOut();
@@ -82,6 +91,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
         actions: [
+          // Admin Home button
           TextButton(
             onPressed: () {
               setState(() {
@@ -95,6 +105,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               ),
             ),
           ),
+          // View User Data button
           TextButton(
             onPressed: () {
               setState(() {
@@ -109,6 +120,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             ),
           ),
 
+          // Edit User Status button
           TextButton(
             onPressed: () {
               setState(() {
@@ -122,6 +134,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               ),
             ),
           ),
+          // Approve Activities button
           TextButton(
             onPressed: () {
               setState(() {
@@ -137,6 +150,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           ),
         ],
       ),
+      // Body displays the selected page
       body: _getPage(),
     );
   }

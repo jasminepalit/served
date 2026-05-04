@@ -1,3 +1,4 @@
+// Import necessary packages for Flutter, Firebase, and other components
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,14 +7,15 @@ import 'auth_helpers.dart';
 import 'AdminUserDataView.dart';
 import 'main.dart';
 
+// Admin delete accounts widget for managing user roles and status
 class AdminDeleteAccounts extends StatefulWidget {
   const AdminDeleteAccounts({super.key});
-
 
   @override
   State<AdminDeleteAccounts> createState() => _AdminDeleteAccountsState();
 }
 
+// State class for AdminDeleteAccounts
 class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
   final _firestore = FirebaseFirestore.instance;
   late final Future<List<String>> displayInfoFuture;
@@ -21,10 +23,9 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
   @override
   void initState() {
     super.initState();
+    // Load admin's first name and user type
     displayInfoFuture = Future.wait([loadFirstName(), loadUserType()]);
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +41,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
+              // Stream of all users from Firestore
               stream: _firestore.collection('Users').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
@@ -69,61 +71,31 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                           DataCell(Text(data['type'] ?? '', textAlign: TextAlign.center)),
                           DataCell(
                             TextButton(
+                              // Toggle user role between admin and user
                               onPressed: () async {
-                                // Show confirmation dialog
-                            
-                                    // Delete all Hours sub-documents first
                                 if (data['type'] == 'user') {
-                                final docs = await _firestore
-                                        .collection('Users')
-                                        .doc(doc.id)
-                                        .get();
-                                    if (docs.exists) {
-                                      
-                                      await _firestore.collection('Users').doc(doc.id).update({'type': 'admin'});
-                                    }
+                                  await _firestore.collection('Users').doc(doc.id).update({'type': 'admin'});
                                 } else {
-
-                                    
-                                      
-                                      await _firestore.collection('Users').doc(doc.id).update({'type': 'user'});
-                                    
-
-                                  }
+                                  await _firestore.collection('Users').doc(doc.id).update({'type': 'user'});
                                 }
-                              ,
+                              },
                               child: Text(data['type'] == 'admin' ? 'Make User' : 'Make Admin'),
                             ),
                           ),
                           DataCell(Text(data['status'] ?? '', textAlign: TextAlign.center)),
                           DataCell(
                             TextButton(
+                              // Toggle user status between Active and Inactive
                               onPressed: () async {
-                                // Show confirmation dialog
                                 if (data['status'] == 'Active') {
-
-                                    // Delete all Hours sub-documents first
-                                    final docs = await _firestore
-                                        .collection('Users')
-                                        .doc(doc.id)
-                                        .get();
-                                    if (docs.exists) {
-                                      
-                                      await _firestore.collection('Users').doc(doc.id).update({'status': 'Inactive'});
-
-                                    // Delete the main user document
-                                    }
+                                  await _firestore.collection('Users').doc(doc.id).update({'status': 'Inactive'});
                                 } else {
                                   await _firestore.collection('Users').doc(doc.id).update({'status': 'Active'});
-                                  
                                 }
                               },
-                              child:  Text(data['status'] == 'Active' ? 'Deactivate' : 'Activate'),
+                              child: Text(data['status'] == 'Active' ? 'Deactivate' : 'Activate'),
                             ),
                           ),
-
-
-
                         ]);
                       }).toList(),
                     ),

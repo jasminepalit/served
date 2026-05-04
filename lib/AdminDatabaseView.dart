@@ -1,3 +1,4 @@
+// Import necessary packages for Flutter, Firebase, and other components
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,14 +7,15 @@ import 'auth_helpers.dart';
 import 'AdminUserDataView.dart';
 import 'main.dart';
 
+// Admin database view widget for displaying active users in a table
 class AdminDatabaseView extends StatefulWidget {
   const AdminDatabaseView({super.key});
-
 
   @override
   State<AdminDatabaseView> createState() => _AdminDatabaseViewState();
 }
 
+// State class for AdminDatabaseView
 class _AdminDatabaseViewState extends State<AdminDatabaseView> {
   final _firestore = FirebaseFirestore.instance;
   late final Future<List<String>> displayInfoFuture;
@@ -21,10 +23,9 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
   @override
   void initState() {
     super.initState();
+    // Load admin's first name and user type
     displayInfoFuture = Future.wait([loadFirstName(), loadUserType()]);
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +41,14 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
+              // Stream of active users from Firestore
               stream: _firestore.collection('Users').where('type', isEqualTo: 'user').where('status', isEqualTo: 'Active').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('No users found.'));
 
-                return 
+                return
                 Align(
                   alignment: Alignment.topCenter,
                   child: SizedBox(
@@ -73,6 +75,7 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                               DataCell(Text(data['type'] ?? '', textAlign: TextAlign.center)),
                               DataCell(
                                 FutureBuilder<double>(
+                                  // Fetch and display total hours for each user
                                   future: fetchSpecificStudentHours(doc.id),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -87,6 +90,7 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                               ),
                               DataCell(
                                 TextButton(
+                                  // Navigate to detailed user view
                                   onPressed: () {
                                     Navigator.push(context, MaterialPageRoute(builder: (context) {
                                       return AdminUserDataView(uid: doc.id);
@@ -102,6 +106,7 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                     ),
                   ),
                 );
+                // Note: There appears to be duplicate code below, possibly a remnant
                 Scrollbar(
                   thumbVisibility: true,
                   child: SingleChildScrollView(

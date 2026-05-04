@@ -1,3 +1,4 @@
+// Import necessary packages for Flutter, Firebase, and local files
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,13 +7,14 @@ import 'ActivityFormPage.dart';
 import 'StudentActivityPage.dart';
 import 'auth_helpers.dart';
 
+// Define color constants for the app's theme
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-
+// Home page widget displaying user's service hours and navigation options
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
   final String title;
@@ -21,14 +23,19 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+// State class for HomePage
 class _HomePageState extends State<HomePage> {
+  // Firestore instance
   final _firestore = FirebaseFirestore.instance;
+  // Current user
   final user = FirebaseAuth.instance.currentUser;
+  // Future for loading first name
   late final Future<String> firstNameFuture;
 
   @override
   void initState() {
     super.initState();
+    // Load first name asynchronously
     firstNameFuture = loadFirstName();
   }
 
@@ -36,6 +43,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
+    // Check if user is authenticated
     if (user == null) {
       return const Scaffold(
         body: Center(child: Text('No authenticated user.')),
@@ -43,6 +51,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
+      // App bar with user's first name as title
       appBar: AppBar(
         title: FutureBuilder<String>(
           future: firstNameFuture,
@@ -59,8 +68,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+                // Section title for service hours
                 Text('Service Hours', style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 12),
+                // Stream builder for user's hours data
                 StreamBuilder<QuerySnapshot>(
                   stream: _firestore
                       .collection('Users')
@@ -69,6 +80,7 @@ class _HomePageState extends State<HomePage> {
                       .snapshots(),
                   builder: (context, snapshot) {
                     double totalHours = 0;
+                    // Calculate total hours from documents
                     if (snapshot.hasData) {
                       for (final doc in snapshot.data!.docs) {
                         final data = doc.data() as Map<String, dynamic>;
@@ -76,10 +88,12 @@ class _HomePageState extends State<HomePage> {
                         if (h is num) totalHours += h.toDouble();
                       }
                     }
+                    // Calculate progress towards 50 hours goal
                     final progress = (totalHours / 50).clamp(0.0, 1.0);
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Display total hours and remaining
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -98,6 +112,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                         const SizedBox(height: 6),
+                        // Progress bar
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: LinearProgressIndicator(
@@ -114,6 +129,7 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
+            // Buttons for logging activity and hours
             Row(
               children: [
                 Expanded(
@@ -140,6 +156,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             const SizedBox(height: 12),
+            // Button to view submitted activities
             ElevatedButton(
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -149,6 +166,7 @@ class _HomePageState extends State<HomePage> {
               child: const Text('View Submitted Activities'),
             ),
             const SizedBox(height: 18),
+            // Card containing the hours log table
             Expanded(
               child: Card(
                 clipBehavior: Clip.hardEdge,
@@ -166,6 +184,7 @@ class _HomePageState extends State<HomePage> {
                       final docs = snapshot.data!.docs;
                       if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
 
+                      // Scrollable data table for hours entries
                       return Scrollbar(
                         thumbVisibility: true,
                         child: SingleChildScrollView(
