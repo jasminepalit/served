@@ -74,7 +74,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(firstName),
+        title: Text(firstName, style: const TextStyle(color: Colors.white)),
         centerTitle: true,
         backgroundColor: const Color(0xFF5128B5),
         leading: TextButton(

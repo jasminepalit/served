@@ -61,6 +61,19 @@ class _SignUpPageState extends State<SignUpPage> {
               },
               child: const Text('Sign Up'),
             ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () async {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(),
+                    ),
+                  );
+                
+              },
+              child: const Text('Login'),
+            ),
           ],
         ),
       ),
