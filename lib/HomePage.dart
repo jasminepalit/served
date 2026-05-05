@@ -59,8 +59,61 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Service Hours', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 12),
+                Text('Service Hours', style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 12),
+                StreamBuilder<QuerySnapshot>(
+                  stream: _firestore
+                      .collection('Users')
+                      .doc(user.uid)
+                      .collection('Hours')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    double totalHours = 0;
+                    if (snapshot.hasData) {
+                      for (final doc in snapshot.data!.docs) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final h = data['hours'];
+                        if (h is num) totalHours += h.toDouble();
+                      }
+                    }
+                    final progress = (totalHours / 50).clamp(0.0, 1.0);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${totalHours.toStringAsFixed(1)} / 50 hours',
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                            ),
+                            Text(
+                              totalHours >= 50 ? '🎉 Goal reached!' : '${(50 - totalHours).toStringAsFixed(1)} hrs to go',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: totalHours >= 50 ? Colors.green : Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 16,
+                            backgroundColor: kAccentColor.withOpacity(0.3),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              totalHours >= 50 ? Colors.green : kPrimaryColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    );
+                  },
+                ),
             Row(
               children: [
                 Expanded(

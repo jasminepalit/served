@@ -14,13 +14,12 @@ const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
 class ActivityFormPage extends StatefulWidget {
-  const ActivityFormPage({super.key});
+  final VoidCallback? onSuccess;
+  const ActivityFormPage({super.key, this.onSuccess});
 
   @override
   State<ActivityFormPage> createState() => _ActivityFormPageState();
 }
-
-
 
 class _ActivityFormPageState extends State<ActivityFormPage> {
   final _organizationController = TextEditingController();
@@ -61,7 +60,6 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         .doc(user.uid)
         .collection('Activities')
         .add({
-      
       'organization': organization,
       'advisorName': advisorName,
       'advisorEmail': advisorEmail,
@@ -70,6 +68,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       'isHighNeeds': _isHighNeeds,
       'highNeedsDescription': highNeedsDescription,
       'status': 'pending',
+      'date': Timestamp.now(),
     });
 
     if (!context.mounted) return;
@@ -82,11 +81,16 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     _descriptionController.clear();
     _highNeedsDescriptionController.clear();
     setState(() {
-      
       _isHighNeeds = false;
     });
 
-    Navigator.pop(context);
+    if (widget.onSuccess != null) {
+      widget.onSuccess!();
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
 
   }
 

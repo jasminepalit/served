@@ -6,6 +6,7 @@ import 'LoginPage.dart';
 import 'AdminHomePage.dart';
 import 'auth_helpers.dart';
 import 'AdminActivityApproval.dart';
+import 'AdminHourApproval.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -28,6 +29,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     }
     else if (_selectedIndex == 3) {
       return const AdminActivityApproval();
+    }
+    else if (_selectedIndex == 4) {
+      return const AdminHourApproval();
     }
     else{
     return const AdminHomePage();
@@ -132,6 +136,19 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               'Approve Activities',
               style: TextStyle(
                 color: _selectedIndex == 3 ? Color(0xFFFF8600) : Colors.white,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _selectedIndex = 4;
+              });
+            },
+            child: Text(
+              'Approve Hours',
+              style: TextStyle(
+                color: _selectedIndex == 4 ? Color(0xFFFF8600) : Colors.white,
               ),
             ),
           ),

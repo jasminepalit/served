@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/src/painting/text_style.dart';
+import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -65,8 +66,8 @@ class AdminActivityApproval extends StatelessWidget {
                       activityId: activityDoc.id,
                       activityData: activityData,
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           );
@@ -255,7 +256,11 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
           }
 
           final studentInfo = snapshot.data ?? {};
-          final studentName = studentInfo['displayName'] ?? 'Unknown Student';
+          final firstName = studentInfo['firstName']?.toString() ?? '';
+          final lastName = studentInfo['lastName']?.toString() ?? '';
+          final studentName = (firstName.isNotEmpty || lastName.isNotEmpty)
+              ? '$firstName $lastName'.trim()
+              : 'Unknown Student';
           final studentEmail = studentInfo['email'] ?? 'No email';
           final activityDate = widget.activityData['date'] as Timestamp?;
           final organization = widget.activityData['organization'] ?? 'N/A';
