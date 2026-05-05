@@ -60,7 +60,6 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         .doc(user.uid)
         .collection('Activities')
         .add({
-      
       'organization': organization,
       'advisorName': advisorName,
       'advisorEmail': advisorEmail,
@@ -69,6 +68,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       'isHighNeeds': _isHighNeeds,
       'highNeedsDescription': highNeedsDescription,
       'status': 'pending',
+      'date': Timestamp.now(),
     });
 
     if (!context.mounted) return;
