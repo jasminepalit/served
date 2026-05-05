@@ -40,7 +40,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('Users').snapshots(),
+              stream: _firestore.collection('Users').orderBy('yearOfGraduation', descending: true).snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
@@ -55,6 +55,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                         DataColumn(label: Text('First Name')),
                         DataColumn(label: Text('Last Name')),
                         DataColumn(label: Text('Email')),
+                        DataColumn(label: Text('YOG')),
                         DataColumn(label: Text('Role')),
                         DataColumn(label: Text('Change Role')),
                         DataColumn(label: Text('Status')),
@@ -66,7 +67,8 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                           DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
                           DataCell(Text(data['lastName'] ?? '', textAlign: TextAlign.center)),
                           DataCell(Text(data['email'] ?? '', textAlign: TextAlign.center)),
-                          DataCell(Text(data['type'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(Text(data['yearOfGraduation'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(Text((data['type']== 'admin') ? 'Admin' : 'User', textAlign: TextAlign.center)),
                           DataCell(
                             TextButton(
                               onPressed: () async {

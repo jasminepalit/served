@@ -49,13 +49,13 @@ class AdminActivityApproval extends StatelessWidget {
                     if (isHighNeeds)
                       const Text(
                         'High Needs: Yes',
-                        style: TextStyle(color: Color.fromARGB(255, 54, 244, 114), fontWeight: FontWeight.bold)
+                        style: TextStyle(color: Color.fromARGB(255, 54, 244, 114), fontWeight: FontWeight.bold),
                       )
-                      else
-                        const Text(
-                          'High Needs: No',
-                          style: TextStyle(color: Color.fromARGB(255, 255, 0, 0), fontWeight: FontWeight.bold),
-                        ),
+                    else
+                      const Text(
+                        'High Needs: No',
+                        style: TextStyle(color: Color.fromARGB(255, 255, 0, 0), fontWeight: FontWeight.bold),
+                      ),
                   ],
                 ),
                 onTap: () => Navigator.push(
@@ -66,8 +66,8 @@ class AdminActivityApproval extends StatelessWidget {
                       activityId: activityDoc.id,
                       activityData: activityData,
                     ),
-                  );
-                },
+                  ),
+                ),
               );
             },
           );
