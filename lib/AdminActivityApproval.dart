@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -37,30 +38,37 @@ class AdminActivityApproval extends StatelessWidget {
               final studentId = activityDoc.reference.parent.parent!.id; // Get user ID from path
               final isHighNeeds = activityData['isHighNeeds'] ?? false;
               final dateText = activityData['date']?.toDate()?.toString().split(' ')[0] ?? 'No date';
-              return ListTile(
-                title: Text(activityData['organization'] ?? 'Unknown Organization'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Date: $dateText'),
-                    if (isHighNeeds)
-                      const Text(
-                        'High Needs: Yes',
-                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                      ),
-                  ],
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ActivityApprovalDetailPage(
-                      studentId: studentId,
-                      activityId: activityDoc.id,
-                      activityData: activityData,
+              return FutureBuilder<String>(
+                future: loadNameSpecific(studentId),
+                builder: (context, nameSnapshot) {
+                  final studentName = nameSnapshot.data ?? 'Unknown Student';
+                  return ListTile(
+                    title: Text(activityData['organization'] ?? 'Unknown Organization'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Student: $studentName'),
+                        Text('Date: $dateText'),
+                        if (isHighNeeds)
+                          const Text(
+                            'High Needs: Yes',
+                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          ),
+                      ],
                     ),
-                  ),
-                ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ActivityApprovalDetailPage(
+                          studentId: studentId,
+                          activityId: activityDoc.id,
+                          activityData: activityData,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -249,7 +257,11 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
           }
 
           final studentInfo = snapshot.data ?? {};
-          final studentName = studentInfo['displayName'] ?? 'Unknown Student';
+          final firstName = studentInfo['firstName']?.toString() ?? '';
+          final lastName = studentInfo['lastName']?.toString() ?? '';
+          final studentName = (firstName.isNotEmpty || lastName.isNotEmpty)
+              ? '$firstName $lastName'.trim()
+              : 'Unknown Student';
           final studentEmail = studentInfo['email'] ?? 'No email';
           final activityDate = widget.activityData['date'] as Timestamp?;
           final organization = widget.activityData['organization'] ?? 'N/A';

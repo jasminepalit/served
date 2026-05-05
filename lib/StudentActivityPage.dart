@@ -20,8 +20,9 @@ class StudentActivityPage extends StatelessWidget {
       case 'more_info':
         return 'More Info Requested';
       case 'pending':
+        return 'Pending';
       default:
-        return 'pending';
+        return 'Pending';
     }
   }
 
@@ -42,10 +43,11 @@ class StudentActivityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final firestore = FirebaseFirestore.instance;
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('My Activities'), backgroundColor: kPrimaryColor),
-        body: const Center(child: Text('No logged-in student found.')),
+        appBar: AppBar(title: const Text('All Activities'), backgroundColor: kPrimaryColor),
+        body: const Center(child: Text('No logged-in user found.')),
       );
     }
 
@@ -85,8 +87,8 @@ class StudentActivityPage extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: SingleChildScrollView(
                       child: DataTable(
-                        headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
-                        dataRowColor: MaterialStateProperty.all(Colors.white),
+                        headingRowColor: WidgetStateProperty.all(kSecondaryColor.withOpacity(0.18)),
+                        dataRowColor: WidgetStateProperty.all(Colors.white),
                         headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
                         dataTextStyle: const TextStyle(color: Colors.black87),
                         columnSpacing: 30,
