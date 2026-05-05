@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/src/painting/text_style.dart';
 import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
@@ -37,35 +38,33 @@ class AdminActivityApproval extends StatelessWidget {
               final activityData = activityDoc.data() as Map<String, dynamic>;
               final studentId = activityDoc.reference.parent.parent!.id; // Get user ID from path
               final isHighNeeds = activityData['isHighNeeds'] ?? false;
-              final dateText = activityData['date']?.toDate()?.toString().split(' ')[0] ?? 'No date';
-              return FutureBuilder<String>(
-                future: loadNameSpecific(studentId),
-                builder: (context, nameSnapshot) {
-                  final studentName = nameSnapshot.data ?? 'Unknown Student';
-                  return ListTile(
-                    title: Text(activityData['organization'] ?? 'Unknown Organization'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Student: $studentName'),
-                        Text('Date: $dateText'),
-                        if (isHighNeeds)
-                          const Text(
-                            'High Needs: Yes',
-                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                          ),
-                      ],
-                    ),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ActivityApprovalDetailPage(
-                          studentId: studentId,
-                          activityId: activityDoc.id,
-                          activityData: activityData,
+             
+              return ListTile(
+                title: Text(activityData['organization'] ?? 'Unknown Organization'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    
+                    if (isHighNeeds)
+                      const Text(
+                        'High Needs: Yes',
+                        style: TextStyle(color: Color.fromARGB(255, 54, 244, 114), fontWeight: FontWeight.bold)
+                      )
+                      else
+                        const Text(
+                          'High Needs: No',
+                          style: TextStyle(color: Color.fromARGB(255, 255, 0, 0), fontWeight: FontWeight.bold),
                         ),
-                      ),
+                  ],
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ActivityApprovalDetailPage(
+                      studentId: studentId,
+                      activityId: activityDoc.id,
+                      activityData: activityData,
                     ),
                   );
                 },
