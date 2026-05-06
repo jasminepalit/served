@@ -5,6 +5,7 @@ import 'SignUpPage.dart';
 import 'main.dart';
 import 'LoginPage.dart';
 import 'AdminActivityApproval.dart';
+import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -35,15 +36,46 @@ class _AdminHomePageState extends State<AdminHomePage> {
           .get();
       for (final hoursDoc in hoursSnapshot.docs) {
         final data = hoursDoc.data();
-        final hoursValue = data['hours'];
-        if (hoursValue is num) {
-          total += hoursValue.toDouble();
-        } else if (hoursValue is String) {
-          total += double.tryParse(hoursValue) ?? 0;
+        final status = data['status'] ?? 'pending';
+        if (status == 'approved') {
+          final hoursValue = data['hours'];
+          if (hoursValue is num) {
+            total += hoursValue.toDouble();
+          } else if (hoursValue is String) {
+            total += double.tryParse(hoursValue) ?? 0;
+          }
         }
       }
     }
     return total;
+  }
+
+  Future<double> _fetchAverageHoursPerStudent() async {
+    double total = 0;
+    final firestore = FirebaseFirestore.instance;
+    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    final studentCount = students.docs.length;
+    if (studentCount == 0) return 0;
+    for (final student in students.docs) {
+      final hoursSnapshot = await firestore
+          .collection('Users')
+          .doc(student.id)
+          .collection('Hours')
+          .get();
+      for (final hoursDoc in hoursSnapshot.docs) {
+        final data = hoursDoc.data();
+        final status = data['status'] ?? 'pending';
+        if (status == 'approved') {
+          final hoursValue = data['hours'];
+          if (hoursValue is num) {
+            total += hoursValue.toDouble();
+          } else if (hoursValue is String) {
+            total += double.tryParse(hoursValue) ?? 0;
+          }
+        }
+      }
+    }
+    return total / studentCount;
   }
    
   @override
@@ -98,14 +130,58 @@ class _AdminHomePageState extends State<AdminHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(
                 4,
-                (index) => Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF93a1fd),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
+                (index) {
+                  if (index == 0) {
+                    return FutureBuilder<double>(
+                      future: _fetchAverageHoursPerStudent(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF93a1fd),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+                          );
+                        }
+                        final averageHours = snapshot.data ?? 0;
+                        return Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF93a1fd),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                averageHours.toStringAsFixed(1),
+                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                              const Text(
+                                'Avg Hours\nPer Student',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  } else {
+                    return Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF93a1fd),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    );
+                  }
+                },
               ),
             ),
           ],

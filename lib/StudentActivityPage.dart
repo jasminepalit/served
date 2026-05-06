@@ -77,57 +77,60 @@ class StudentActivityPage extends StatelessWidget {
               return const Center(child: Text('No activities logged yet.'));
             }
 
-            return Card(
-              clipBehavior: Clip.hardEdge,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SingleChildScrollView(
-                      child: DataTable(
-                        headingRowColor: WidgetStateProperty.all(kSecondaryColor.withOpacity(0.18)),
-                        dataRowColor: WidgetStateProperty.all(Colors.white),
-                        headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-                        dataTextStyle: const TextStyle(color: Colors.black87),
-                        columnSpacing: 30,
-                        columns: const [
-                          DataColumn(label: Text('Organization')),
-                          DataColumn(label: Text('Date')),
-                          DataColumn(label: Text('Status')),
-                          DataColumn(label: Text('Action')),
-                        ],
-                        rows: docs.map((doc) {
-                          final data = doc.data()! as Map<String, dynamic>;
-                          final status = (data['status'] ?? 'pending').toString();
-                          final requestMessage = data['requestMessage']?.toString() ?? '';
-                          final timestamp = data['date'] as Timestamp?;
-                          final dateStr = timestamp != null
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Card(
+                  clipBehavior: Clip.hardEdge,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SingleChildScrollView(
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
+                            dataRowColor: MaterialStateProperty.all(Colors.white),
+                            headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+                            dataTextStyle: const TextStyle(color: Colors.black87),
+                            columnSpacing: 30,
+                            columns: const [
+                              DataColumn(label: Text('Organization')),
+                              DataColumn(label: Text('Date')),
+                              DataColumn(label: Text('Status')),
+                              DataColumn(label: Text('Action')),
+                            ],
+                            rows: docs.map((doc) {
+                              final data = doc.data()! as Map<String, dynamic>;
+                              final status = (data['status'] ?? 'pending').toString();
+                              final requestMessage = data['requestMessage']?.toString() ?? '';
+                              final timestamp = data['date'] as Timestamp?;
+                              final dateStr = timestamp != null
                               ? timestamp.toDate().toLocal().toString().split(' ')[0]
                               : 'No date';
 
-                          return DataRow(cells: [
-                            DataCell(Text(data['organization']?.toString() ?? '')),
-                            DataCell(Text(dateStr)),
-                            DataCell(
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(_statusLabel(status), style: _statusTextStyle(status)),
-                                  if (status == 'more_info' && requestMessage.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      requestMessage,
-                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            DataCell(
-                              status == 'more_info'
+                              return DataRow(cells: [
+                                DataCell(Text(data['organization']?.toString() ?? '')),
+                                DataCell(Text(dateStr)),
+                                DataCell(
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(_statusLabel(status), style: _statusTextStyle(status)),
+                                      if (status == 'more_info' && requestMessage.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          requestMessage,
+                                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                       ),
+                                      ],
+                                    ],   
+                                  ),
+                               ),
+                                DataCell(
+                                  status == 'more_info'
                                   ? TextButton(
                                       onPressed: () {
                                         Navigator.push(
@@ -147,6 +150,8 @@ class StudentActivityPage extends StatelessWidget {
                           ]);
                         }).toList(),
                       ),
+                    ),
+                  ),
                     ),
                   ),
                 ),

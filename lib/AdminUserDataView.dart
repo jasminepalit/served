@@ -57,17 +57,11 @@ class _AdminUserDataViewState extends State<AdminUserDataView> {
           },
         ),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
+    
           children: [
-            TextButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const VolunteerFormPage();
-                }));
-              },
-              child: const Text('Next'),
-            ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _firestore
@@ -81,28 +75,64 @@ class _AdminUserDataViewState extends State<AdminUserDataView> {
                   final docs = snapshot.data!.docs;
                   if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
 
-                  return Scrollbar(
-                    thumbVisibility: true,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: DataTable(
-                        columns: const [
-                          DataColumn(label: Text('Name')),
-                          DataColumn(label: Text('Place')),
-                          DataColumn(label: Text('Hours')),
-                          DataColumn(label: Text('Date')),
-                        ],
-                        rows: docs.map((doc) {
-                          final data = doc.data()! as Map<String, dynamic>;
-                          final timestamp = data['date'] as Timestamp?;
-                          final dateStr = timestamp != null ? timestamp.toDate().toLocal().toString().split(' ')[0] : '';
-                          return DataRow(cells: [
-                            DataCell(Text(data['name'] ?? '')),
-                            DataCell(Text(data['place'] ?? '')),
-                            DataCell(Text(data['hours']?.toString() ?? '')),
-                            DataCell(Text(dateStr)),
-                          ]);
-                        }).toList(),
+                  return Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1100),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Scrollbar(
+                            thumbVisibility: true,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: DataTable(
+                                  border: TableBorder(
+                                    horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
+                                  ),
+                                  columnSpacing: 40,
+                                  horizontalMargin: 24,
+                                  headingRowHeight: 56,
+                                  dataRowHeight: 52,
+                                  headingTextStyle: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  headingRowColor: MaterialStateProperty.resolveWith(
+                                    (states) => Theme.of(context).colorScheme.primary.withOpacity(0.95),
+                                  ),
+                                  dataRowColor: MaterialStateProperty.resolveWith((states) {
+                                    if (states.contains(MaterialState.selected)) {
+                                      return Theme.of(context).colorScheme.primary.withOpacity(0.12);
+                                    }
+                                    return Colors.white;
+                                  }),
+                                  columns: const [
+                                    DataColumn(label: Text('Place')),
+                                    DataColumn(label: Text('Hours')),
+                                    DataColumn(label: Text('Date')),
+                                  ],
+                                  rows: docs.map((doc) {
+                                    final data = doc.data()! as Map<String, dynamic>;
+                                    final timestamp = data['date'] as Timestamp?;
+                                    final dateStr = timestamp != null ? timestamp.toDate().toLocal().toString().split(' ')[0] : '';
+                                    return DataRow(cells: [
+                                      DataCell(Text(data['place'] ?? '')),
+                                      DataCell(Text(data['hours']?.toString() ?? '')),
+                                      DataCell(Text(dateStr)),
+                                    ]);
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   );

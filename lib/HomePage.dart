@@ -189,18 +189,24 @@ class _HomePageState extends State<HomePage> {
                       final docs = snapshot.data!.docs;
                       if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
 
-                      return Scrollbar(
-                        thumbVisibility: true,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: DataTable(
-                            headingRowColor: WidgetStateProperty.all(kSecondaryColor.withValues(alpha: 0.18)),
-                            dataRowColor: WidgetStateProperty.all(Colors.white),
-                            dividerThickness: 1,
-                            headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-                            dataTextStyle: const TextStyle(color: Colors.black87),
-                            columnSpacing: 32,
-                            columns: const [
+                      return Center(
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width - 32,
+                          child: Scrollbar(
+                            thumbVisibility: true,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 32),
+                                child: DataTable(
+                                  headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
+                                  dataRowColor: MaterialStateProperty.all(Colors.white),
+                              dividerThickness: 1,
+                              headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+                              dataTextStyle: const TextStyle(color: Colors.black87),
+                              columnSpacing: 40,
+                              horizontalMargin: 24,
+                              columns: const [
                               DataColumn(label: Text('Place')),
                               DataColumn(label: Text('Hours')),
                               DataColumn(label: Text('Date')),
@@ -228,6 +234,9 @@ class _HomePageState extends State<HomePage> {
                                 DataCell(Text(status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold))),
                               ]);
                             }).toList(),
+                              ),
+                          ),
+                        ),
                           ),
                         ),
                       );

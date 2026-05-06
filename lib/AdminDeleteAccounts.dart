@@ -59,6 +59,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                             DataColumn(label: Text('First Name')),
                             DataColumn(label: Text('Last Name')),
                             DataColumn(label: Text('Email')),
+                            DataColumn(label:  Text('Year of Graduation')),
                             DataColumn(label: Text('Role')),
                             DataColumn(label: Text('Change Role')),
                             DataColumn(label: Text('Status')),
