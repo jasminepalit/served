@@ -22,6 +22,7 @@ class AdminDatabaseView extends StatefulWidget {
 class _AdminDatabaseViewState extends State<AdminDatabaseView> {
   final _firestore = FirebaseFirestore.instance;
   late final Future<List<String>> displayInfoFuture;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -31,65 +32,87 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
 
   
 
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('No authenticated user.')),
-      );
+      return const Center(child: Text('No authenticated user.'));
     }
 
-    return Scaffold(
-      backgroundColor: kBackgroundColor,
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('Users').where('type', isEqualTo: 'user').where('status', isEqualTo: 'Active').snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-                  final docs = snapshot.data!.docs;
-                  if (docs.isEmpty) return const Center(child: Text('No users found.'));
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Search users...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('Users').orderBy('yearOfGraduation', descending: true).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                final docs = snapshot.data!.docs;
+                if (docs.isEmpty) return const Center(child: Text('No users found.'));
 
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                      width: 1000,
-                      child: Card(
-                        clipBehavior: Clip.hardEdge,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Scrollbar(
-                            thumbVisibility: true,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: DataTable(
-                                headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
-                                dataRowColor: MaterialStateProperty.all(Colors.white),
-                                headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-                                dataTextStyle: const TextStyle(color: Colors.black87),
-                                columnSpacing: 30,
-                                columns: const [
-                                  DataColumn(label: Text('First Name')),
-                                  DataColumn(label: Text('Last Name')),
-                                  DataColumn(label: Text('Email')),
-                                  DataColumn(label: Text('Type')),
-                                  DataColumn(label: Text('Hours')),
-                                  DataColumn(label: Text('High Needs Hours')),
-                                  DataColumn(label: Text('View'))
-                                ],
-                                rows: docs.map((doc) {
-                                  final data = doc.data()! as Map<String, dynamic>;
-                                  return DataRow(cells: [
-                                    DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
-                                    DataCell(Text(data['lastName'] ?? '', textAlign: TextAlign.center)),
-                                    DataCell(Text(data['email'] ?? '', textAlign: TextAlign.center)),
-                                    DataCell(Text(data['type'] ?? '', textAlign: TextAlign.center)),
-                                    DataCell(
+                // Filter docs based on search query
+                final filteredDocs = docs.where((doc) {
+                  final data = doc.data()! as Map<String, dynamic>;
+                  final firstName = (data['firstName'] ?? '').toLowerCase();
+                  final lastName = (data['lastName'] ?? '').toLowerCase();
+                  final email = (data['email'] ?? '').toLowerCase();
+                  final type = (data['type'] ?? '').toLowerCase();
+                  final yearOfGraduation = (data['yearOfGraduation'] ?? '').toLowerCase();
+                  return firstName.contains(_searchQuery) ||
+                         lastName.contains(_searchQuery) ||
+                         email.contains(_searchQuery) ||
+                         type.contains(_searchQuery) || yearOfGraduation.contains(_searchQuery);
+                }).toList();
+
+                if (filteredDocs.isEmpty) return const Center(child: Text('No users match the search.'));
+
+                return Scrollbar(
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text('First Name')),
+                            DataColumn(label: Text('Last Name')),
+                            DataColumn(label: Text('Email')),
+                            DataColumn(label: Text('Year of Graduation')),
+                            DataColumn(label: Text('Type')),
+                            DataColumn(label: Text('Hours')),
+                            DataColumn(label: Text('High Needs Hours')),
+                            DataColumn(label: Text('View')),
+                          ],
+                          rows: filteredDocs.map((doc) {
+                        final data = doc.data()! as Map<String, dynamic>;
+                        return DataRow(cells: [
+                          DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(Text(data['lastName'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(Text(data['email'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(Text(data['yearOfGraduation'] ?? '', textAlign: TextAlign.center)),
+                          DataCell(Text((data['type']== 'admin') ? 'Admin' : 'User', textAlign: TextAlign.center)),
+                          DataCell(
                                       FutureBuilder<double>(
                                         future: fetchSpecificStudentHours(doc.id),
                                         builder: (context, snapshot) {
@@ -126,21 +149,18 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                                         },
                                         child: const Text('View'),
                                       ),
-                                    ),
-                                  ]);
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+
+
+
+                          )]);
+                      }).toList(),
                     ),
-                  );
-                },
-              ),
+                  ),
+                )));
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

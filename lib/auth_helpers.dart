@@ -167,9 +167,10 @@ Future<double> fetchSpecificStudentHours(uid) async {
     for (final hoursDoc in hoursSnapshot.docs) {
         final data = hoursDoc.data();
         final hoursValue = data['hours'];
-        if (hoursValue is num) {
+        final status = data['status'] as String?;
+        if (hoursValue is num && status == 'approved') {
           total += hoursValue.toDouble();
-        } else if (hoursValue is String) {
+        } else if (hoursValue is String && status == 'approved') {
           total += double.tryParse(hoursValue) ?? 0;
         }
       }
@@ -200,6 +201,7 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
       .collection('Users')
       .doc(uid)
       .collection('Hours')
+      .where('status', isEqualTo: 'approved')
       .get();
 
   // Sum hours where place is in high needs organizations
@@ -207,10 +209,11 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
     final data = hoursDoc.data();
     final place = data['place'] as String?;
     final hoursValue = data['hours'];
-    if (place != null && highNeedsOrganizations.contains(place)) {
+    final status = data['status'] as String?;
+    if (place != null && highNeedsOrganizations.contains(place) && status == 'approved') {
       if (hoursValue is num) {
         total += hoursValue.toDouble();
-      } else if (hoursValue is String) {
+      } else if (hoursValue is String && status == 'approved') {
         total += double.tryParse(hoursValue) ?? 0;
       }
     }
