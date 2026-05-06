@@ -26,6 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _passwordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _yogController = TextEditingController();
 
 
   @override
@@ -40,11 +41,12 @@ class _SignUpPageState extends State<SignUpPage> {
             TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
             TextField(controller: _firstNameController, decoration: const InputDecoration(labelText: 'First Name')),
             TextField(controller: _lastNameController, decoration: const InputDecoration(labelText: 'Last Name')),
+            TextField(controller: _yogController, decoration: const InputDecoration(labelText: 'Year of Graduation')),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 print("Attempting to sign up with email: ${_emailController.text.trim()}");
-                final user = await signUp(_emailController.text.trim(), _passwordController.text.trim(), _firstNameController.text.trim(), _lastNameController.text.trim());
+                final user = await signUp(_emailController.text.trim(), _passwordController.text.trim(), _firstNameController.text.trim(), _lastNameController.text.trim(), _yogController.text.trim());
                 print("User signed up: ${user?.uid}");
 
                 if (!context.mounted) return;

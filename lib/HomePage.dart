@@ -69,14 +69,25 @@ class _HomePageState extends State<HomePage> {
                       .snapshots(),
                   builder: (context, snapshot) {
                     double totalHours = 0;
+                    double highNeedsHours = 0;
                     if (snapshot.hasData) {
                       for (final doc in snapshot.data!.docs) {
                         final data = doc.data() as Map<String, dynamic>;
-                        final h = data['hours'];
-                        if (h is num) totalHours += h.toDouble();
+                        final status = data['status'] ?? 'pending';
+                        if (status == 'approved') {
+                          final h = data['hours'];
+                          if (h is num) {
+                            totalHours += h.toDouble();
+                            final isHighNeeds = data['high_needs'] ?? false;
+                            if (isHighNeeds) {
+                              highNeedsHours += h.toDouble();
+                            }
+                          }
+                        }
                       }
                     }
                     final progress = (totalHours / 50).clamp(0.0, 1.0);
+                    final highNeedsProgress = (highNeedsHours / 50).clamp(0.0, 1.0);
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -100,13 +111,25 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 6),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 16,
-                            backgroundColor: kAccentColor.withOpacity(0.3),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              totalHours >= 50 ? Colors.green : kPrimaryColor,
-                            ),
+                          child: Stack(
+                            children: [
+                              LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 16,
+                                backgroundColor: kAccentColor.withOpacity(0.3),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  totalHours >= 50 ? Colors.green : kPrimaryColor,
+                                ),
+                              ),
+                              LinearProgressIndicator(
+                                value: highNeedsProgress,
+                                minHeight: 16,
+                                backgroundColor: Colors.transparent,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  kAccentOrange,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -181,15 +204,28 @@ class _HomePageState extends State<HomePage> {
                               DataColumn(label: Text('Place')),
                               DataColumn(label: Text('Hours')),
                               DataColumn(label: Text('Date')),
+                              DataColumn(label: Text('Status')),
                             ],
                             rows: docs.map((doc) {
                               final data = doc.data()! as Map<String, dynamic>;
                               final timestamp = data['date'] as Timestamp?;
                               final dateStr = timestamp != null ? timestamp.toDate().toLocal().toString().split(' ')[0] : '';
+                              final status = data['status'] ?? 'pending';
+                              
+                              Color statusColor;
+                              if (status == 'approved') {
+                                statusColor = Colors.green;
+                              } else if (status == 'rejected') {
+                                statusColor = Colors.red;
+                              } else {
+                                statusColor = kAccentOrange;
+                              }
+                              
                               return DataRow(cells: [
                                 DataCell(Text(data['place'] ?? '')),
                                 DataCell(Text(data['hours']?.toString() ?? '')),
                                 DataCell(Text(dateStr)),
+                                DataCell(Text(status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold))),
                               ]);
                             }).toList(),
                           ),

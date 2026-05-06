@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/src/painting/text_style.dart';
-import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -9,80 +7,12 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-class AdminActivityApproval extends StatelessWidget {
-  const AdminActivityApproval({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Activity Approvals'),
-        backgroundColor: kPrimaryColor,
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collectionGroup('Activities').where('status', isEqualTo: 'pending').snapshots(),
-        builder: (context, snapshot) {
-  if (snapshot.hasError) {
-    return Center(child: Text('Error: ${snapshot.error}'));
-  }
-  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          final activities = snapshot.data!.docs;
-          if (activities.isEmpty) {
-            return const Center(child: Text('No pending activities for approval.'));
-          }
-          
-          return ListView.builder(
-            itemCount: activities.length,
-            itemBuilder: (context, index) {
-              final activityDoc = activities[index];
-              final activityData = activityDoc.data() as Map<String, dynamic>;
-              final studentId = activityDoc.reference.parent.parent!.id; // Get user ID from path
-              final isHighNeeds = activityData['isHighNeeds'] ?? false;
-             
-              return ListTile(
-                title: Text(activityData['organization'] ?? 'Unknown Organization'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    
-                    if (isHighNeeds)
-                      const Text(
-                        'High Needs: Yes',
-                        style: TextStyle(color: Color.fromARGB(255, 54, 244, 114), fontWeight: FontWeight.bold),
-                      )
-                    else
-                      const Text(
-                        'High Needs: No',
-                        style: TextStyle(color: Color.fromARGB(255, 255, 0, 0), fontWeight: FontWeight.bold),
-                      ),
-                  ],
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ActivityApprovalDetailPage(
-                      studentId: studentId,
-                      activityId: activityDoc.id,
-                      activityData: activityData,
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class ActivityApprovalDetailPage extends StatefulWidget {
+class ActivityApprovalPage extends StatefulWidget {
   final String studentId;
   final String activityId;
   final Map<String, dynamic> activityData;
 
-  const ActivityApprovalDetailPage({
+  const ActivityApprovalPage({
     super.key,
     required this.studentId,
     required this.activityId,
@@ -90,11 +20,11 @@ class ActivityApprovalDetailPage extends StatefulWidget {
   });
 
   @override
-  State<ActivityApprovalDetailPage> createState() =>
-      _ActivityApprovalDetailPageState();
+  State<ActivityApprovalPage> createState() =>
+      _ActivityApprovalPageState();
 }
 
-class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage> {
+class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
   late Future<Map<String, dynamic>> studentInfoFuture;
   bool isLoading = false;
 
@@ -130,6 +60,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
         ),
       );
       Navigator.pop(context, true);
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -157,6 +88,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
           backgroundColor: Colors.red,
         ),
       );
+      Navigator.pop(context, true);
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
@@ -222,6 +154,8 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                     backgroundColor: kAccentOrange,
                   ),
                 );
+                Navigator.pop(context, true);
+                Navigator.pop(context, true);
               } catch (e) {
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -256,11 +190,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
           }
 
           final studentInfo = snapshot.data ?? {};
-          final firstName = studentInfo['firstName']?.toString() ?? '';
-          final lastName = studentInfo['lastName']?.toString() ?? '';
-          final studentName = (firstName.isNotEmpty || lastName.isNotEmpty)
-              ? '$firstName $lastName'.trim()
-              : 'Unknown Student';
+          final studentName = studentInfo['displayName'] ?? 'Unknown Student';
           final studentEmail = studentInfo['email'] ?? 'No email';
           final activityDate = widget.activityData['date'] as Timestamp?;
           final organization = widget.activityData['organization'] ?? 'N/A';
@@ -457,48 +387,50 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
                 const SizedBox(height: 32),
 
                 // Action Buttons
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                Row(
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: isLoading ? null : _approveActivity,
-                      icon: const Icon(Icons.check_circle),
-                      label: const Text('Approve Activity'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _approveActivity,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
+                        child: const Text('Approve'),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: isLoading ? null : _rejectActivity,
-                      icon: const Icon(Icons.cancel),
-                      label: const Text('Reject Activity'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _rejectActivity,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
+                        child: const Text('Reject'),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: isLoading ? null : _requestMoreInfo,
-                      icon: const Icon(Icons.info),
-                      label: const Text('Request More Information'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kAccentOrange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _requestMoreInfo,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kAccentOrange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
+                        child: const Text('More Info'),
                       ),
                     ),
                   ],
@@ -563,4 +495,3 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
     );
   }
 }
-

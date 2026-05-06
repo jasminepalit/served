@@ -107,7 +107,7 @@ Future<String> loadNameSpecific(uid) async {
   return 'Doe';
 }
 
-Future<User?> signUp(String email, String password, String firstName, String lastName) async {
+Future<User?> signUp(String email, String password, String firstName, String lastName, String yearOfGraduation) async {
   print("Received sign up request for email: $email");
   try {
     final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -126,6 +126,7 @@ Future<User?> signUp(String email, String password, String firstName, String las
       'type': 'user',
       'firstName': firstName,
       'lastName': lastName,
+      'yearOfGraduation': yearOfGraduation,
       'status': 'Active',
     });
 
