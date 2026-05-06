@@ -66,8 +66,8 @@ class AdminActivityApproval extends StatelessWidget {
                       activityId: activityDoc.id,
                       activityData: activityData,
                     ),
-                  );
-                },
+                  ),
+                ),
               );
             },
           );

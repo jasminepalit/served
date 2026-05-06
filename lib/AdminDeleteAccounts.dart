@@ -37,6 +37,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -49,18 +50,21 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                 return Scrollbar(
                   thumbVisibility: true,
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: DataTable(
-                      columns: const [
-                        DataColumn(label: Text('First Name')),
-                        DataColumn(label: Text('Last Name')),
-                        DataColumn(label: Text('Email')),
-                        DataColumn(label: Text('Role')),
-                        DataColumn(label: Text('Change Role')),
-                        DataColumn(label: Text('Status')),
-                        DataColumn(label: Text('Change Status')),
-                      ],
-                      rows: docs.map((doc) {
+                    scrollDirection: Axis.horizontal,
+                    child: Center(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text('First Name')),
+                            DataColumn(label: Text('Last Name')),
+                            DataColumn(label: Text('Email')),
+                            DataColumn(label: Text('Role')),
+                            DataColumn(label: Text('Change Role')),
+                            DataColumn(label: Text('Status')),
+                            DataColumn(label: Text('Change Status')),
+                          ],
+                          rows: docs.map((doc) {
                         final data = doc.data()! as Map<String, dynamic>;
                         return DataRow(cells: [
                           DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
@@ -128,7 +132,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                       }).toList(),
                     ),
                   ),
-                );
+                )));
               },
             ),
           ),
