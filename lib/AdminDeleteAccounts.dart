@@ -17,6 +17,7 @@ class AdminDeleteAccounts extends StatefulWidget {
 class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
   final _firestore = FirebaseFirestore.instance;
   late final Future<List<String>> displayInfoFuture;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -39,6 +40,21 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Search users...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('Users').orderBy('yearOfGraduation', descending: true).snapshots(),
@@ -47,11 +63,31 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) return const Center(child: Text('No users found.'));
 
+                // Filter docs based on search query
+                final filteredDocs = docs.where((doc) {
+                  final data = doc.data()! as Map<String, dynamic>;
+                  final firstName = (data['firstName'] ?? '').toLowerCase();
+                  final lastName = (data['lastName'] ?? '').toLowerCase();
+                  final email = (data['email'] ?? '').toLowerCase();
+                  final type = (data['type'] ?? '').toLowerCase();
+                  final status = (data['status'] ?? '').toLowerCase();
+                  final yearOfGraduation = (data['yearOfGraduation'] ?? '').toLowerCase();
+                  return firstName.contains(_searchQuery) ||
+                         lastName.contains(_searchQuery) ||
+                         email.contains(_searchQuery) ||
+                         type.contains(_searchQuery) ||
+                         status.contains(_searchQuery) ||
+                         yearOfGraduation.contains(_searchQuery);
+                }).toList();
+
+                if (filteredDocs.isEmpty) return const Center(child: Text('No users match the search.'));
+
                 return Scrollbar(
                   thumbVisibility: true,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Center(
+                    child: Scrollbar(
+                      thumbVisibility: true,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: DataTable(
@@ -59,12 +95,13 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                             DataColumn(label: Text('First Name')),
                             DataColumn(label: Text('Last Name')),
                             DataColumn(label: Text('Email')),
+                            DataColumn(label: Text('Year of Graduation')),
                             DataColumn(label: Text('Role')),
                             DataColumn(label: Text('Change Role')),
                             DataColumn(label: Text('Status')),
                             DataColumn(label: Text('Change Status')),
                           ],
-                          rows: docs.map((doc) {
+                          rows: filteredDocs.map((doc) {
                         final data = doc.data()! as Map<String, dynamic>;
                         return DataRow(cells: [
                           DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
