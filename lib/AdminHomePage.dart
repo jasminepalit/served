@@ -16,18 +16,18 @@ const Color kAccentOrange = Color(0xFFFF8600);
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
 
-
   @override
   State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
 class _AdminHomePageState extends State<AdminHomePage> {
- 
-
   Future<double> _fetchStudentHours() async {
     double total = 0;
     final firestore = FirebaseFirestore.instance;
-    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    final students = await firestore
+        .collection('Users')
+        .where('type', isEqualTo: 'user')
+        .get();
     for (final student in students.docs) {
       final hoursSnapshot = await firestore
           .collection('Users')
@@ -53,7 +53,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Future<double> _fetchAverageHoursPerStudent() async {
     double total = 0;
     final firestore = FirebaseFirestore.instance;
-    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    final students = await firestore
+        .collection('Users')
+        .where('type', isEqualTo: 'user')
+        .get();
     final studentCount = students.docs.length;
     if (studentCount == 0) return 0;
     for (final student in students.docs) {
@@ -81,7 +84,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Future<int> _fetchApprovedActivitiesCount() async {
     int count = 0;
     final firestore = FirebaseFirestore.instance;
-    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    final students = await firestore
+        .collection('Users')
+        .where('type', isEqualTo: 'user')
+        .get();
     for (final student in students.docs) {
       final activitiesSnapshot = await firestore
           .collection('Users')
@@ -102,7 +108,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Future<int> _fetchPendingActivitiesCount() async {
     int count = 0;
     final firestore = FirebaseFirestore.instance;
-    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    final students = await firestore
+        .collection('Users')
+        .where('type', isEqualTo: 'user')
+        .get();
     for (final student in students.docs) {
       final activitiesSnapshot = await firestore
           .collection('Users')
@@ -123,7 +132,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Future<double> _fetchPendingHoursCount() async {
     double total = 0;
     final firestore = FirebaseFirestore.instance;
-    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+    final students = await firestore
+        .collection('Users')
+        .where('type', isEqualTo: 'user')
+        .get();
     for (final student in students.docs) {
       final hoursSnapshot = await firestore
           .collection('Users')
@@ -145,18 +157,67 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
     return total;
   }
-   
+
+  Widget _buildStatCardContent(String value, String label) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
+      backgroundColor: kBackgroundColor,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
               'Welcome Admin!',
-              style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 39, 24, 126)),
+              style: TextStyle(
+                fontSize: 64,
+                fontWeight: FontWeight.bold,
+                color: kPrimaryColor,
+              ),
             ),
             const SizedBox(height: 20),
             FutureBuilder<double>(
@@ -172,21 +233,43 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 final totalHours = snapshot.data ?? 0;
                 return Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 18.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 18.0,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF93a1fd),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: kPrimaryColor.withOpacity(0.5),
+                      width: 1.8,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Total Student Hours',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: kPrimaryColor,
+                        ),
                       ),
                       Text(
                         totalHours.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: kPrimaryColor,
+                        ),
                       ),
                     ],
                   ),
@@ -196,181 +279,178 @@ class _AdminHomePageState extends State<AdminHomePage> {
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                4,
-                (index) {
-                  if (index == 0) {
-                    return FutureBuilder<double>(
-                      future: _fetchAverageHoursPerStudent(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF93a1fd),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
-                          );
-                        }
-                        final averageHours = snapshot.data ?? 0;
+              children: List.generate(4, (index) {
+                if (index == 0) {
+                  return FutureBuilder<double>(
+                    future: _fetchAverageHoursPerStudent(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return Container(
-                          width: 120,
-                          height: 120,
+                          width: 200,
+                          height: 200,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF93a1fd),
+                            color: kAccentOrange,
                             borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white24,
+                              width: 1.2,
+                            ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                averageHours.toStringAsFixed(1),
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                              ),
-                              const Text(
-                                'Avg Hours\nPer Student',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
                           ),
                         );
-                      },
-                    );
-                  } else if (index == 1) {
-                    return FutureBuilder<int>(
-                      future: _fetchApprovedActivitiesCount(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF93a1fd),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
-                          );
-                        }
-                        final approvedActivities = snapshot.data ?? 0;
+                      }
+                      final averageHours = snapshot.data ?? 0;
+                      return Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: kAccentOrange,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white24, width: 1.2),
+                        ),
+                        child: _buildStatCardContent(
+                          averageHours.toStringAsFixed(1),
+                          'Avg Hours\nPer Student',
+                        ),
+                      );
+                    },
+                  );
+                } else if (index == 1) {
+                  return FutureBuilder<int>(
+                    future: _fetchApprovedActivitiesCount(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return Container(
-                          width: 120,
-                          height: 120,
+                          width: 200,
+                          height: 200,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF93a1fd),
+                            color: kPrimaryColor,
                             borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white24,
+                              width: 1.2,
+                            ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                approvedActivities.toString(),
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                              ),
-                              const Text(
-                                'Approved\nActivities',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
                           ),
                         );
-                      },
-                    );
-                  } else if (index == 2) {
-                    return FutureBuilder<int>(
-                      future: _fetchPendingActivitiesCount(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF93a1fd),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
-                          );
-                        }
-                        final pendingActivities = snapshot.data ?? 0;
+                      }
+                      final approvedActivities = snapshot.data ?? 0;
+                      return Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: kPrimaryColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white24, width: 1.2),
+                        ),
+                        child: _buildStatCardContent(
+                          approvedActivities.toString(),
+                          'Approved\nActivities',
+                        ),
+                      );
+                    },
+                  );
+                } else if (index == 2) {
+                  return FutureBuilder<int>(
+                    future: _fetchPendingActivitiesCount(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return Container(
-                          width: 120,
-                          height: 120,
+                          width: 200,
+                          height: 200,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF93a1fd),
+                            color: kSecondaryColor,
                             borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white24,
+                              width: 1.2,
+                            ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                pendingActivities.toString(),
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                              ),
-                              const Text(
-                                'Pending\nActivities',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
                           ),
                         );
-                      },
-                    );
-                  } else if (index == 3) {
-                    return FutureBuilder<double>(
-                      future: _fetchPendingHoursCount(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF93a1fd),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
-                          );
-                        }
-                        final pendingHours = snapshot.data ?? 0;
+                      }
+                      final pendingActivities = snapshot.data ?? 0;
+                      return Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: kSecondaryColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white24, width: 1.2),
+                        ),
+                        child: _buildStatCardContent(
+                          pendingActivities.toString(),
+                          'Pending\nActivities',
+                        ),
+                      );
+                    },
+                  );
+                } else if (index == 3) {
+                  return FutureBuilder<double>(
+                    future: _fetchPendingHoursCount(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return Container(
-                          width: 120,
-                          height: 120,
+                          width: 200,
+                          height: 200,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF93a1fd),
+                            color: kAccentColor,
                             borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white24,
+                              width: 1.2,
+                            ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                pendingHours.toStringAsFixed(1),
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                              ),
-                              const Text(
-                                'Pending\nHours',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
                           ),
                         );
-                      },
-                    );
-                  } else {
-                    return Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF93a1fd),
-                        borderRadius: BorderRadius.circular(16),
+                      }
+                      final pendingHours = snapshot.data ?? 0;
+                      return Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: kAccentColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white24, width: 1.2),
+                        ),
+                        child: _buildStatCardContent(
+                          pendingHours.toStringAsFixed(1),
+                          'Pending\nHours',
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: kAccentColor.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: kAccentColor.withOpacity(0.5),
+                        width: 1.6,
                       ),
-                    );
-                  }
-                },
-              ),
+                    ),
+                  );
+                }
+              }),
             ),
           ],
         ),
