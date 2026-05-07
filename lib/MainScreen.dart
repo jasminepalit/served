@@ -57,7 +57,14 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Servd', style: TextStyle(color: Colors.white)),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('lib/images/servd.png', height: 40),
+          
+          ],
+        ),
         centerTitle: true,
         backgroundColor: kPrimaryColor,
         leading: IconButton(
