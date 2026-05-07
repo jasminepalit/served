@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   final _firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
   late final Future<String> firstNameFuture;
+  String statusName = 'Loading...';
 
   @override
   void initState() {
@@ -226,12 +227,23 @@ class _HomePageState extends State<HomePage> {
                               } else {
                                 statusColor = kAccentOrange;
                               }
+
+                              switch (status) {
+                                case 'approved':
+                                  statusName = 'Approved';
+                                  break;
+                                case 'rejected':
+                                  statusName = 'Rejected';
+                                  break;
+                                default:
+                                  statusName = 'Pending';
+                              }
                               
                               return DataRow(cells: [
                                 DataCell(Text(data['place'] ?? '')),
                                 DataCell(Text(data['hours']?.toString() ?? '')),
                                 DataCell(Text(dateStr)),
-                                DataCell(Text(status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold))),
+                                DataCell(Text(statusName, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold))),
                               ]);
                             }).toList(),
                               ),
