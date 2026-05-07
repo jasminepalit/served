@@ -58,21 +58,6 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     });
 
     widget.onSuccess?.call();
-
-    // Navigate back to home
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    } else {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(title: 'Home')));
-    }
-
-    // Navigate back to home
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    } else {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(title: 'Home')));
-    }
-
   }
 
   Future<void> _pickDate() async {
