@@ -7,14 +7,19 @@ import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
 
+const Color kPrimaryColor = Color(0xFF5128B5);
+const Color kSecondaryColor = Color(0xFF758BFD);
+const Color kAccentColor = Color(0xFFAEB8FE);
+const Color kBackgroundColor = Color(0xFFF2F1F6);
+const Color kAccentOrange = Color(0xFFFF8600);
 
 class ActivityFormPage extends StatefulWidget {
-  const ActivityFormPage({super.key});
+  final VoidCallback? onSuccess;
+  const ActivityFormPage({super.key, this.onSuccess});
 
   @override
   State<ActivityFormPage> createState() => _ActivityFormPageState();
 }
-
 
 class _ActivityFormPageState extends State<ActivityFormPage> {
   final _organizationController = TextEditingController();
@@ -23,13 +28,12 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   final _advisorNumberController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _highNeedsDescriptionController = TextEditingController();
-  DateTime? _selectedDate;
   bool _isHighNeeds = false;
 
   final _firestore = FirebaseFirestore.instance;
 
   Future<void> _addEntry() async {
-    final date = _selectedDate;
+    
     final organization = _organizationController.text.trim();
     final advisorName = _advisorNameController.text.trim();
     final advisorEmail = _advisorEmailController.text.trim();
@@ -39,14 +43,23 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    if (date == null) return;
+    // Validation: Check that all required fields are filled
+    if (organization.isEmpty || advisorName.isEmpty || advisorEmail.isEmpty || 
+        advisorNumber.isEmpty || description.isEmpty || 
+        (_isHighNeeds && highNeedsDescription.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all required fields.')),
+      );
+      return;
+    }
+
+    
 
     await _firestore
         .collection('Users')
         .doc(user.uid)
         .collection('Activities')
         .add({
-      'date': Timestamp.fromDate(date),
       'organization': organization,
       'advisorName': advisorName,
       'advisorEmail': advisorEmail,
@@ -54,6 +67,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       'description': description,
       'isHighNeeds': _isHighNeeds,
       'highNeedsDescription': highNeedsDescription,
+      'status': 'pending',
+      'date': Timestamp.now(),
     });
 
     if (!context.mounted) return;
@@ -66,26 +81,19 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     _descriptionController.clear();
     _highNeedsDescriptionController.clear();
     setState(() {
-      _selectedDate = null;
       _isHighNeeds = false;
     });
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) { // ignore: use_build_context_synchronously
-            return HomePage(title: "HomePage");
-          }));
+    if (widget.onSuccess != null) {
+      widget.onSuccess!();
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
 
   }
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) setState(() => _selectedDate = picked);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,12 +126,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                           const SizedBox(height: 8),
                           TextField(controller: _descriptionController, maxLines: 3, decoration: const InputDecoration(labelText: 'Activity Description', border: OutlineInputBorder())),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(child: Text(_selectedDate == null ? 'No date selected' : 'Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}')),
-                              TextButton(onPressed: _pickDate, child: const Text('Pick Date')),
-                            ],
-                          ),
+                          
                         ],
                       ),
                     ),
@@ -166,3 +169,5 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     );
   }
 }
+
+
