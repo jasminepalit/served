@@ -1,3 +1,6 @@
+/**
+ * HomePage.dart is the main screen of the app where students can view their service hours, log new activities, and see the status of their submissions. It connects to Firestore to fetch and display the user's service hour entries in a table format, showing the place, hours, date, and approval status. The page also includes a progress bar to visualize how close the student is to reaching the 50-hour goal, with a special highlight for high-needs hours.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,7 +15,9 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-
+/**
+ * HomePage is a StatefulWidget that displays the main dashboard for students. It shows their total service hours, allows them to log new activities, and view the status of their submissions. The page uses Firestore to fetch the user's service hour entries and displays them in a DataTable, along with a progress bar to track their progress towards the 50-hour goal.
+ */
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
   final String title;
@@ -20,19 +25,37 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
 }
-
+/**
+ * _HomePageState manages the state of the HomePage widget. It initializes a connection to Firestore and retrieves the current user's information. The state includes a Future to load the user's first name for display in the app bar, and it builds the UI to show the service hours, log activity buttons, and a table of submitted hours with their statuses. The build method also handles the case where there is no authenticated user.
+ */
 class _HomePageState extends State<HomePage> {
   final _firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
   late final Future<String> firstNameFuture;
   String statusName = 'Loading...';
-
+/**
+ * initState initializes the state of the HomePage. It calls the loadFirstName function to fetch the user's first name from Firestore and stores it in a Future. This Future is then used in a FutureBuilder to display the user's name in the app bar once it is loaded.
+ */
   @override
   void initState() {
     super.initState();
     firstNameFuture = loadFirstName();
   }
-
+/**
+ * loadFirstName is an asynchronous function that retrieves the current user's first name from the Firestore database. It accesses the 'Users' collection, gets the document corresponding to the user's UID, and returns the 'first_name' field. If there is an error during this process, it catches the exception and returns 'No One' as a fallback.
+ */
+  Future<String> loadFirstName() async {
+    try {
+      final doc = await _firestore.collection('Users').doc(user!.uid).get();
+      return doc['first_name'] ?? 'No One';
+    } catch (e) {
+      print('Error loading first name: $e');
+      return 'No One';
+    }
+  }
+ /**
+  * build constructs the UI of the HomePage. It first checks if there is an authenticated user; if not, it displays a message indicating that no user is authenticated. If a user is present, it builds a Scaffold with an AppBar that shows the user's first name (loaded asynchronously). The body of the Scaffold includes a section for service hours with a progress bar, buttons to log new activities and hours, and a DataTable that lists all submitted service hour entries along with their place, hours, date, and approval status. The DataTable updates in real-time using a StreamBuilder that listens to changes in the Firestore collection for the user's hours.
+  */
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;

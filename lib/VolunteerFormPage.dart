@@ -1,3 +1,6 @@
+/**
+ * VolunteerFormPage.dart is the Flutter page that allows users to log their volunteer hours. It includes a form where users can select a place from a dropdown (populated with approved activities), enter the number of hours volunteered, and pick a date. Upon submission, the entry is saved to Firestore under the user's document. The page also provides feedback if any fields are missing and includes navigation back to the home page.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +10,9 @@ const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
-
+/**
+ * VolunteerFormPage allows users to log their volunteer hours by selecting a place, entering hours, and picking a date. It saves the entry to Firestore under the user's document and provides feedback on success or missing fields. The form also dynamically populates the place dropdown based on approved activities from Firestore.
+ */
 class VolunteerFormPage extends StatefulWidget {
   final VoidCallback? onSuccess;
   const VolunteerFormPage({super.key, this.onSuccess});
@@ -15,14 +20,18 @@ class VolunteerFormPage extends StatefulWidget {
   @override
   State<VolunteerFormPage> createState() => _VolunteerFormPageState();
 }
-
+/**
+ * _VolunteerFormPageState manages the state of the VolunteerFormPage, including form inputs and interactions with Firestore. It handles adding new volunteer hour entries, picking dates, and dynamically loading approved activity places for the dropdown. The state ensures proper validation and user feedback throughout the process.
+ */
 class _VolunteerFormPageState extends State<VolunteerFormPage> {
   String _selectedPlace = '';
   final _hoursController = TextEditingController();
   DateTime? _selectedDate;
 
   final _firestore = FirebaseFirestore.instance;
-
+/**
+ * _addEntry validates the form inputs and, if valid, saves the volunteer hours entry to Firestore under the current user's document. It checks for empty fields, parses the hours input, and ensures a date is selected. Upon successful addition, it clears the form and calls the onSuccess callback if provided.
+ */
   Future<void> _addEntry() async {
     final place = _selectedPlace;
     final hours = double.tryParse(_hoursController.text.trim());
@@ -59,7 +68,9 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
 
     widget.onSuccess?.call();
   }
-
+/**
+ * _pickDate opens a date picker dialog for the user to select a date. It sets the selected date in the state, which is then displayed in the form. The date picker is configured to allow selection between the years 2000 and 2100.
+ */
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -70,7 +81,9 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
-
+/**
+ * build constructs the UI of the VolunteerFormPage, including the app bar, form fields for place, hours, and date selection, and buttons for saving hours and navigating back to the home page. It uses a StreamBuilder to populate the place dropdown with approved activities from Firestore. The form is wrapped in a SingleChildScrollView to ensure it is scrollable on smaller screens.
+ */
   @override
   Widget build(BuildContext context) {
     return Scaffold(

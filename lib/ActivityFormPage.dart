@@ -1,3 +1,6 @@
+/**
+ * ActivityFormPage.dart is a Flutter page that allows users to submit new activities. It includes a form with fields for organization name, advisor information, and activity description. Users can also mark the activity as "high needs" and provide additional details if applicable. When the form is submitted, the data is validated and saved to Firestore under the current user's collection. The page also provides feedback to the user if any required fields are missing and clears the form upon successful submission.
+ */
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,7 +15,9 @@ const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
-
+/**
+ * ActivityFormPage is a form for users to submit new activities. It collects information about the organization, advisor, and activity details. When the form is submitted, it validates the input and saves the data to Firestore under the current user's collection. The form also includes an option to mark the activity as "high needs" with an additional description field if selected.
+ */
 class ActivityFormPage extends StatefulWidget {
   final VoidCallback? onSuccess;
   const ActivityFormPage({super.key, this.onSuccess});
@@ -20,7 +25,9 @@ class ActivityFormPage extends StatefulWidget {
   @override
   State<ActivityFormPage> createState() => _ActivityFormPageState();
 }
-
+/**
+ * The _ActivityFormPageState class manages the state of the ActivityFormPage. It includes text controllers for each form field, a boolean to track if the activity is marked as high needs, and a reference to Firestore. The _addEntry method handles form submission, including validation and saving data to Firestore. The build method constructs the UI of the form, which includes text fields for organization and advisor information, a checkbox for high needs, and a submit button.
+ */
 class _ActivityFormPageState extends State<ActivityFormPage> {
   final _organizationController = TextEditingController();
   final _advisorNameController = TextEditingController();
@@ -31,7 +38,9 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   bool _isHighNeeds = false;
 
   final _firestore = FirebaseFirestore.instance;
-
+  /**
+   * The _addEntry method is called when the user submits the form. It first retrieves and trims the input from each text controller. It then checks if any required fields are empty, showing a SnackBar if validation fails. If validation passes, it saves the activity data to Firestore under the current user's collection. After saving, it clears the form fields and resets the high needs checkbox. Finally, it either calls the onSuccess callback or pops the current page to return to the previous screen.
+   */
   Future<void> _addEntry() async {
     
     final organization = _organizationController.text.trim();
@@ -94,7 +103,9 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
 
   }
 
-
+  /**
+   * The build method constructs the UI of the ActivityFormPage. It uses a Scaffold with an AppBar and a body that contains a padded SingleChildScrollView. Inside the scroll view, there is a Container with a border and padding that holds the form fields. The form is organized into two columns: one for activity information and another for advisor information. Each column contains text fields for the respective information, and there is a checkbox to mark the activity as high needs, which reveals an additional text field if selected. Finally, there is a submit button that triggers the _addEntry method when pressed.
+   */
   @override
   Widget build(BuildContext context) {
     return Scaffold(

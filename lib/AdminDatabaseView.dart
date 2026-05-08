@@ -1,3 +1,6 @@
+/**
+ * AdminDatabaseView is a StatefulWidget that displays a searchable and sortable table of all users in the Firestore database. It allows admins to view user details, including first name, last name, email, year of graduation, user type, total hours, and high needs hours. The table supports real-time updates and includes a search bar for filtering users based on their information. Each user row has a "View" button that navigates to a detailed view of the user's data.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +13,9 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-
+/**
+ * AdminDatabaseView is a StatefulWidget that displays a searchable and sortable table of all users in the Firestore database. It allows admins to view user details, including first name, last name, email, year of graduation, user type, total hours, and high needs hours. The table supports real-time updates and includes a search bar for filtering users based on their information. Each user row has a "View" button that navigates to a detailed view of the user's data.
+ */
 class AdminDatabaseView extends StatefulWidget {
   const AdminDatabaseView({super.key});
 
@@ -18,12 +23,14 @@ class AdminDatabaseView extends StatefulWidget {
   @override
   State<AdminDatabaseView> createState() => _AdminDatabaseViewState();
 }
-
+/**
+ * _AdminDatabaseViewState is the state class for AdminDatabaseView. It manages the state of the user data table, including fetching user information from Firestore, handling search queries, and updating the UI in real-time as data changes. The state class initializes
+ */
 class _AdminDatabaseViewState extends State<AdminDatabaseView> {
   final _firestore = FirebaseFirestore.instance;
   late final Future<List<String>> displayInfoFuture;
   String _searchQuery = '';
-
+  // Fetches the first name of the currently authenticated user from Firestore.
   @override
   void initState() {
     super.initState();
@@ -32,7 +39,9 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
 
   
 
-
+  /**
+   * build method builds the UI for the AdminDatabaseView. It displays a search bar and a DataTable that lists all users in the Firestore database. The DataTable includes columns for first name, last name, email, year of graduation, user type, total hours, and high needs hours. The table supports real-time updates and filtering based on the search query. Each user row has a "View" button that navigates to a detailed view of the user's data.
+   */
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;

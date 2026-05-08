@@ -1,3 +1,6 @@
+/**
+ * ActivityApprovalPage.dart is a Flutter widget that provides an interface for administrators to review and manage student activity submissions. It displays detailed information about the student and the activity, and allows administrators to approve, reject, or request more information from the student. The page interacts with Firebase Firestore to fetch student data and update activity status based on the administrator's actions. The UI is designed to be clean and user-friendly, making it easy for administrators to effectively manage student activities.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -6,7 +9,9 @@ const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
-
+/**
+ * ActivityApprovalPage is a Flutter widget that allows administrators to review and manage student activity submissions. It displays detailed information about the student and the activity, and provides options to approve, reject, or request more information from the student. The page interacts with Firebase Firestore to fetch student data and update activity status based on the administrator's actions.
+ */
 class ActivityApprovalPage extends StatefulWidget {
   final String studentId;
   final String activityId;
@@ -23,7 +28,9 @@ class ActivityApprovalPage extends StatefulWidget {
   State<ActivityApprovalPage> createState() =>
       _ActivityApprovalPageState();
 }
-
+/**
+ * _ActivityApprovalPageState manages the state of the ActivityApprovalPage widget. It handles fetching student information from Firebase Firestore, updating the activity status based on administrator actions (approve, reject, request more info), and displaying appropriate feedback to the user through SnackBars. The state also manages loading states to prevent multiple actions while a request is being processed.
+ */
 class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
   late Future<Map<String, dynamic>> studentInfoFuture;
   bool isLoading = false;
@@ -33,7 +40,9 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
     super.initState();
     studentInfoFuture = _fetchStudentInfo();
   }
-
+  /**
+   * _fetchStudentInfo retrieves the student's information from the 'Users' collection in Firebase Firestore using the provided studentId. It returns a Future that resolves to a Map containing the student's data, which is used to display the student's name and email on the ActivityApprovalPage.
+   */
   Future<Map<String, dynamic>> _fetchStudentInfo() async {
     final doc = await FirebaseFirestore.instance
         .collection('Users')
@@ -41,7 +50,9 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
         .get();
     return doc.data() ?? {};
   }
-
+  /**
+   * _approveActivity updates the status of the activity to 'approved' in Firebase Firestore. It also records the time of approval. After successfully updating the status, it shows a success SnackBar and navigates back to the previous screens. If an error occurs during the update, it catches the exception and displays an error SnackBar. The method also manages the loading state to prevent multiple submissions while the request is being processed.
+   */
   Future<void> _approveActivity() async {
     setState(() => isLoading = true);
     try {
@@ -70,7 +81,9 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
       if (mounted) setState(() => isLoading = false);
     }
   }
-
+  /**
+   * _rejectActivity updates the status of the activity to 'rejected' in Firebase Firestore. It also records the time of rejection. After successfully updating the status, it shows a rejection SnackBar and navigates back to the previous screens. If an error occurs during the update, it catches the exception and displays an error SnackBar. The method also manages the loading state to prevent multiple submissions while the request is being processed.
+   */
   Future<void> _rejectActivity() async {
     setState(() => isLoading = true);
     try {
@@ -99,7 +112,9 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
       if (mounted) setState(() => isLoading = false);
     }
   }
-
+  /**
+   * _requestMoreInfo allows the administrator to request additional information from the student regarding the activity. It opens a dialog where the administrator can enter a message explaining what information is needed. Upon sending, it updates the activity status to 'more_info' in Firebase Firestore and includes the request message and timestamp. It also provides feedback through SnackBars and manages the loading state during the process.
+   */
   void _requestMoreInfo() {
     final messageController = TextEditingController();
 
@@ -172,7 +187,9 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
       ),
     );
   }
-
+  /**
+   * build is the main method that constructs the user interface of the ActivityApprovalPage. It uses a Scaffold to create the basic layout, including an AppBar and a body that displays student and activity information. The body utilizes a FutureBuilder to fetch and display student data asynchronously. It also includes action buttons for approving, rejecting, or requesting more information about the activity, with appropriate styling and feedback mechanisms through SnackBars. The UI is designed to be clean and user-friendly, making it easy for administrators to review and manage student activities effectively.
+   */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -442,7 +459,9 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
       ),
     );
   }
-
+  /**
+   * _buildInfoRow is a helper method that creates a row widget displaying a label and its corresponding value. It takes in the label, value, and text color as parameters and returns a Row widget with the label on the left and the value on the right. The text styles are applied to differentiate between the label and value, making it visually clear for the user when viewing student information on the ActivityApprovalPage.
+   */
   Widget _buildInfoRow(String label, String value, Color textColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -469,7 +488,9 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
       ],
     );
   }
-
+  /**
+   * _buildDetailRow is a helper method that creates a column widget displaying a label and its corresponding value in a vertical layout. It takes in the label and value as parameters and returns a Column widget with the label at the top and the value below it. The method applies specific text styles to the label and value to enhance readability and visual hierarchy when displaying activity details on the ActivityApprovalPage.
+   */
   Widget _buildDetailRow(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

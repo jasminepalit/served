@@ -1,3 +1,6 @@
+/**
+ * AdminHomePage.dart is a Flutter widget that serves as the main dashboard for administrators in a student hours tracking application. It provides an overview of key statistics related to student hours and activities, such as total student hours, average hours per student, count of approved activities, count of pending activities, and total pending hours. The data is fetched from Firestore and displayed in a visually appealing manner using color-coded cards. Each card shows a specific statistic, and the UI is designed to be clean and modern, making it easy for administrators to quickly assess the status of student hours and activities.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,15 +15,22 @@ const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
-
+/**
+ * AdminHomePage is the main dashboard for administrators, providing an overview of key statistics related to student hours and activities. It fetches data from Firestore to display total student hours, average hours per student, count of approved activities, count of pending activities, and total pending hours. The UI is designed with a clean and modern aesthetic, using color-coded cards to differentiate between different types of statistics.
+ */
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
 
   @override
   State<AdminHomePage> createState() => _AdminHomePageState();
 }
-
+/**
+ * _AdminHomePageState manages the state of the AdminHomePage, including fetching data from Firestore and building the UI. It contains methods to fetch total student hours, average hours per student, count of approved activities, count of pending activities, and total pending hours. The build method constructs the UI, displaying a welcome message and a series of cards that show the fetched statistics. Each card is styled with colors and borders to enhance visual appeal and readability.
+ */
 class _AdminHomePageState extends State<AdminHomePage> {
+  /**
+   * _fetchStudentHours retrieves the total number of approved hours logged by all students. It queries the 'Users' collection to find all documents where the 'type' field is 'user', then iterates through each student document to access their 'Hours' subcollection. For each hours document, it checks if the status is 'approved' and sums up the hours accordingly. The method returns the total approved hours as a double.
+   */
   Future<double> _fetchStudentHours() async {
     double total = 0;
     final firestore = FirebaseFirestore.instance;
@@ -49,7 +59,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
     return total;
   }
-
+  /**
+   * _fetchAverageHoursPerStudent calculates the average number of approved hours per student. It first retrieves all student documents from the 'Users' collection, then iterates through each student to access their 'Hours' subcollection. For each hours document, it checks if the status is 'approved' and sums up the hours. Finally, it divides the total approved hours by the number of students to get the average hours per student, which is returned as a double.
+   */
   Future<double> _fetchAverageHoursPerStudent() async {
     double total = 0;
     final firestore = FirebaseFirestore.instance;
@@ -80,7 +92,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
     return total / studentCount;
   }
-
+  /**
+   * _fetchApprovedActivitiesCount counts the total number of approved activities across all students. It queries the 'Users' collection to find all student documents, then iterates through each student to access their 'Activities' subcollection. For each activity document, it checks if the status is 'approved' and increments the count accordingly. The method returns the total count of approved activities as an integer.
+   */
   Future<int> _fetchApprovedActivitiesCount() async {
     int count = 0;
     final firestore = FirebaseFirestore.instance;
@@ -104,7 +118,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
     return count;
   }
-
+  /**
+   * _fetchPendingActivitiesCount counts the total number of pending activities across all students. It queries the 'Users' collection to find all student documents, then iterates through each student to access their 'Activities' subcollection. For each activity document, it checks if the status is 'pending' and increments the count accordingly. The method returns the total count of pending activities as an integer.
+   */
   Future<int> _fetchPendingActivitiesCount() async {
     int count = 0;
     final firestore = FirebaseFirestore.instance;
@@ -128,7 +144,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
     return count;
   }
-
+  /**
+   * _fetchPendingHoursCount calculates the total number of pending hours across all students. It queries the 'Users' collection to find all student documents, then iterates through each student to access their 'Hours' subcollection. For each hours document, it checks if the status is 'pending' and sums up the hours accordingly. The method returns the total pending hours as a double.
+   */
   Future<double> _fetchPendingHoursCount() async {
     double total = 0;
     final firestore = FirebaseFirestore.instance;
@@ -157,7 +175,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
     return total;
   }
-
+  /**
+   * _buildStatCardContent is a helper method that builds the content for each statistic card displayed on the dashboard. It takes a value and a label as parameters and returns a widget that displays the value in a large, bold font and the label in a smaller, semi-bold font below it. The content is centered and padded to ensure good spacing and readability within the card.
+   */
   Widget _buildStatCardContent(String value, String label) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -202,7 +222,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
     );
   }
-
+  /**
+   * build constructs the UI for the AdminHomePage. It uses a Scaffold with a centered Column to display a welcome message and a series of statistic cards. The first card shows the total student hours, while the next four cards display average hours per student, count of approved activities, count of pending activities, and total pending hours. Each card uses a FutureBuilder to fetch data asynchronously and displays a loading indicator while waiting for the data. The cards are styled with different background colors and borders to enhance visual appeal and differentiate between the types of statistics being displayed.
+   */
   @override
   Widget build(BuildContext context) {
     return Scaffold(

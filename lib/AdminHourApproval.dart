@@ -1,3 +1,6 @@
+/**
+ * AdminHourApproval.dart is a Flutter screen that allows administrators to view and manage pending hour submissions from students. It retrieves all users from the Firestore database, checks for any hours with a "pending" status, and displays them in a list. Each list item shows the student's name, email, hours submitted, place, and date. Tapping on an item navigates to a detailed view of the hour submission where the admin can approve or reject it.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'HourDetailPage.dart';
@@ -7,10 +10,14 @@ const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
-
+/**
+ * AdminHourApproval is a screen that allows administrators to view and manage pending hour submissions from students. It retrieves all users from the Firestore database, checks for any hours with a "pending" status, and displays them in a list. Each list item shows the student's name, email, hours submitted, place, and date. Tapping on an item navigates to a detailed view of the hour submission where the admin can approve or reject it.
+ */
 class AdminHourApproval extends StatelessWidget {
   const AdminHourApproval({super.key});
-
+  /**
+   * Builds the AdminHourApproval screen with an AppBar and a body that listens to changes in the 'Users' collection in Firestore. It uses a StreamBuilder to fetch user data and a FutureBuilder to retrieve pending hours for each user. The pending hours are displayed in a ListView, and tapping on an item navigates to the HourDetailPage for that specific hour submission.
+   */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +34,9 @@ class AdminHourApproval extends StatelessWidget {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           
           final users = snapshot.data!.docs;
-          
+          /**
+           * The FutureBuilder is used here to fetch pending hours for all users. It calls the _getPendingHours method, which iterates through each user and retrieves their hours with a "pending" status. The resulting list of pending hours is then displayed in a ListView. Each item in the ListView shows details about the hour submission, and tapping on it navigates to a detailed view of that submission.
+           */
           return FutureBuilder<List<Map<String, dynamic>>>(
             future: _getPendingHours(users),
             builder: (context, hoursSnapshot) {
@@ -86,7 +95,9 @@ class AdminHourApproval extends StatelessWidget {
       ),
     );
   }
-  
+  /**
+   * Retrieves pending hours for a list of users. It iterates through each user document, fetches their hours with a "pending" status, and compiles a list of maps containing relevant information about each pending hour submission, including the student's name, email, hours submitted, place, date, and the hour's document ID. This method is used in the FutureBuilder to display pending hours in the UI.
+   */
   Future<List<Map<String, dynamic>>> _getPendingHours(List<QueryDocumentSnapshot> users) async {
     final pendingHours = <Map<String, dynamic>>[];
     

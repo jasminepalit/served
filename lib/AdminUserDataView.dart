@@ -1,23 +1,34 @@
+/**
+ * AdminUserDataView.dart - This file defines the AdminUserDataView widget, which is a screen that displays a specific user's volunteer hours in a DataTable format. It fetches the user's first and last name to display in the AppBar title and lists all their volunteer entries with place, hours, and date. The data is retrieved from Firestore and updates in real-time as changes occur.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'VolunteerFormPage.dart';
 import 'auth_helpers.dart';
-
+/**
+ * AdminUserDataView is a screen that displays a specific user's volunteer hours in a DataTable format. It fetches the user's first and last name to display in the AppBar title and lists all their volunteer entries with place, hours, and date. The data is retrieved from Firestore and updates in real-time as changes occur.
+ */
 class AdminUserDataView extends StatefulWidget {
   const AdminUserDataView({super.key, required this.uid});
   final String uid;
-
+  /**
+   * Creates the state for AdminUserDataView, which manages the loading of user data and the display of volunteer hours in a DataTable. It initializes futures to load the user's first and last name and combines them for display in the AppBar title. The build method constructs the UI, including a StreamBuilder to listen for real-time updates to the user's volunteer hours from Firestore.
+   */
   @override
   State<AdminUserDataView> createState() => _AdminUserDataViewState();
 }
-
+/**
+ * _AdminUserDataViewState is the state class for AdminUserDataView. It initializes futures to load the user's first and last name from Firestore and combines them for display in the AppBar title. The build method constructs the UI, including a StreamBuilder that listens for real-time updates to the user's volunteer hours from Firestore. It displays the data in a DataTable format, showing the place, hours, and date of each volunteer entry. If there are no entries, it shows a message indicating that there are no entries yet.
+ */
 class _AdminUserDataViewState extends State<AdminUserDataView> {
   final _firestore = FirebaseFirestore.instance;
   late final Future<String> firstNameFuture;
   late final Future<String> lastNameFuture;
   late final Future<String> nameFuture;
-
+  /**
+   * Initializes the state by loading the user's first and last name from Firestore using the provided UID. It sets up futures for both the first and last name, and then combines them into a single future that will be used to display the user's full name in the AppBar title. This allows the UI to show a loading state while fetching the data and then update once the names are retrieved.
+   */
   @override
   void initState() {
     super.initState();
@@ -25,7 +36,9 @@ class _AdminUserDataViewState extends State<AdminUserDataView> {
     lastNameFuture = loadLastNameSpecific(widget.uid);
     nameFuture = Future.wait([firstNameFuture, lastNameFuture]).then((values) => '${values[0]} ${values[1]}');
   }
-
+  /**
+   * Builds the UI for the AdminUserDataView screen. It checks if there is an authenticated user and displays a message if not. If there is a user, it constructs a Scaffold with an AppBar that shows the user's full name (loaded from Firestore) and a body that contains a StreamBuilder. The StreamBuilder listens to the 'Hours' collection for the specific user and displays the volunteer entries in a DataTable format. Each entry shows the place, hours, and date of volunteering. If there are no entries, it shows a message indicating that there are no entries yet.
+   */
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;

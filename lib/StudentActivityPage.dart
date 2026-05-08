@@ -1,3 +1,6 @@
+/**
+ * StudentActivityPage.dart is a Flutter widget that displays a list of activities logged by the currently authenticated student user. It retrieves activity data from Firestore and shows it in a DataTable format. Each activity displays the organization, date, status, and any admin feedback if applicable. If an activity requires more information, the student can click an "Edit & Resubmit" button to navigate to an edit page where they can update the activity details and resubmit it for approval. The page also handles loading states and error messages gracefully.
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +10,9 @@ const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
-
+/**
+ * StudentActivityPage is a StatelessWidget that displays the logged activities of the currently authenticated student user. It listens to changes in the Firestore collection for the user's activities and updates the UI accordingly. Each activity shows its organization, date, status, and any admin feedback if the status is "more_info". If an activity requires more information, a button is provided to navigate to an edit page where the student can update the activity details and resubmit it for approval.
+ */
 class StudentActivityPage extends StatelessWidget {
   const StudentActivityPage({super.key});
 
@@ -25,7 +30,9 @@ class StudentActivityPage extends StatelessWidget {
         return 'Pending';
     }
   }
-
+/**
+ * _statusTextStyle returns a TextStyle based on the activity status. Approved activities are shown in green, rejected in red, and those requiring more information in orange. Pending activities are displayed in a default black color. This method helps visually differentiate the status of each activity in the DataTable.
+ */
   TextStyle _statusTextStyle(String status) {
     switch (status) {
       case 'approved':
@@ -39,7 +46,9 @@ class StudentActivityPage extends StatelessWidget {
         return const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold);
     }
   }
-
+/**
+ * build method constructs the UI for the StudentActivityPage. It first checks if there is a logged-in user and retrieves their activities from Firestore. The activities are displayed in a DataTable with columns for organization, date, status, and action. The status column uses the _statusLabel and _statusTextStyle methods to display the status with appropriate text and color. If an activity requires more information, an "Edit & Resubmit" button is shown that navigates to the ActivityEditPage, allowing the student to update the activity details and resubmit it for approval. The page also handles loading states and displays messages when there are no activities or if an error occurs while fetching data.
+ */
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -163,7 +172,9 @@ class StudentActivityPage extends StatelessWidget {
     );
   }
 }
-
+/**
+ * ActivityEditPage is a StatefulWidget that allows students to edit and resubmit an activity that requires more information. It takes the activity ID and its current data as parameters. The page pre-fills the form fields with the existing activity data, allowing the student to make necessary changes. The student can update the organization, description, date, advisor information, and specify if it's a high needs activity along with a description for it. Upon saving, the updated activity is sent back to Firestore with its status reset to "pending" and any previous admin feedback removed. The page also handles loading states and displays success or error messages accordingly.
+ */
 class ActivityEditPage extends StatefulWidget {
   final String activityId;
   final Map<String, dynamic> activityData;
@@ -173,7 +184,9 @@ class ActivityEditPage extends StatefulWidget {
   @override
   State<ActivityEditPage> createState() => _ActivityEditPageState();
 }
-
+/**
+ * _ActivityEditPageState is the state class for ActivityEditPage. It manages the form fields for editing an activity, including organization, description, date, advisor information, and high needs details. The state initializes the form fields with the existing activity data and provides functionality to pick a date and save changes back to Firestore. When saving, it updates the activity document with the new data, resets the status to "pending", and removes any previous admin feedback. The state also handles loading states and displays appropriate messages based on the success or failure of the save operation.
+ */
 class _ActivityEditPageState extends State<ActivityEditPage> {
   final _organizationController = TextEditingController();
   final _advisorNameController = TextEditingController();
@@ -184,7 +197,9 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
   DateTime? _selectedDate;
   bool _isHighNeeds = false;
   bool _isSaving = false;
-
+/**
+ * initState initializes the form fields with the existing activity data passed from the previous page. It retrieves the organization, advisor information, description, high needs details, and date from the activity data and populates the respective controllers and state variables. This allows the student to see the current values of the activity and make necessary edits before resubmitting it for approval.
+ */
   @override
   void initState() {
     super.initState();
@@ -199,7 +214,9 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
     final timestamp = data['date'] as Timestamp?;
     _selectedDate = timestamp?.toDate();
   }
-
+/**
+ * pickDate shows a date picker dialog to the user, allowing them to select a new date for the activity. The initial date shown in the picker is either the currently selected date or the current date if no date is selected. The user can choose a date between January 1, 2000, and December 31, 2100. If the user picks a date, it updates the _selectedDate state variable with the new value, which will be displayed in the form and saved back to Firestore when the user saves their changes.
+ */
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -210,7 +227,9 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
-
+/**
+ * saveChanges validates the form data and updates the activity document in Firestore with the new values entered by the student. It first checks if there is a logged-in user and if a date has been selected. If validation passes, it sets the _isSaving state to true to show a loading indicator. It then updates the activity document with the new organization, advisor information, description, date, high needs details, and resets the status to "pending" while removing any previous admin feedback. After a successful update, it shows a success message and navigates back to the previous page. If an error occurs during the save operation, it catches the exception and displays an error message to the user. Finally, it resets the _isSaving state to false regardless of the outcome.
+ */
   Future<void> _saveChanges() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -255,7 +274,9 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
       if (mounted) setState(() => _isSaving = false);
     }
   }
-
+/**
+ * build method constructs the UI for the ActivityEditPage. It displays a form with fields pre-filled with the existing activity data, allowing the student to edit the organization, description, date, advisor information, and high needs details. If there is an admin request for more information, it shows a highlighted message at the top of the form. The student can pick a new date using a date picker and save their changes by clicking the "Save and Resubmit" button. The button shows a loading indicator while the save operation is in progress. The page also includes a back button in the app bar to navigate back to the previous page without saving changes.
+ */
   @override
   Widget build(BuildContext context) {
     final requestMessage = widget.activityData['requestMessage']?.toString() ?? '';

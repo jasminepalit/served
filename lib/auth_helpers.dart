@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+//Loads User Type from Firestore, defaults to 'user' if not found or on error. If uid is provided, it fetches for that uid; otherwise, it uses the current user's uid.
 Future<String> loadUserType({String? uid}) async {
   final currentUser = FirebaseAuth.instance.currentUser;
   final targetUid = uid ?? currentUser?.uid;
@@ -18,6 +19,7 @@ Future<String> loadUserType({String? uid}) async {
   return 'user';
 }
 
+//Loads User Status from Firestore, defaults to 'active' if not found or on error. If uid is provided, it fetches for that uid; otherwise, it uses the current user's uid.
 Future<String> loadUserStatus({String? uid}) async {
   final currentUser = FirebaseAuth.instance.currentUser;
   final targetUid = uid ?? currentUser?.uid;
@@ -35,6 +37,7 @@ Future<String> loadUserStatus({String? uid}) async {
   return 'active';
 }
 
+//Loads the user's first name, default to Jane
 Future<String> loadFirstName() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return 'Jane';
@@ -50,6 +53,7 @@ Future<String> loadFirstName() async {
   return 'Jane';
 }
 
+//Loads the user's last name, default to Doe
 Future<String> loadLastName() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return 'Doe';
@@ -65,6 +69,7 @@ Future<String> loadLastName() async {
   return 'Doe';
 }
 
+//Loads another user's first name based on their uid, default to Jane
 Future<String> loadFirstNameSpecific(uid) async {
   final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
   try {
@@ -78,6 +83,7 @@ Future<String> loadFirstNameSpecific(uid) async {
   return 'Jane';
 }
 
+//Loads another user's last name based on their uid, default to Doe
 Future<String> loadLastNameSpecific(uid) async {
   final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
   try {
@@ -91,6 +97,7 @@ Future<String> loadLastNameSpecific(uid) async {
   return 'Doe';
 }
 
+//Loads another user's full name based on their uid, default to Jane Doe
 Future<String> loadNameSpecific(uid) async {
   final docRef = FirebaseFirestore.instance.collection('Users').doc(uid);
   try {
@@ -107,6 +114,7 @@ Future<String> loadNameSpecific(uid) async {
   return 'Doe';
 }
 
+//Signs up a new user with email and password, and stores additional info in Firestore. Returns the User object on success, or null on failure.
 Future<User?> signUp(String email, String password, String firstName, String lastName, String yearOfGraduation) async {
   print("Received sign up request for email: $email");
   try {
@@ -137,6 +145,7 @@ Future<User?> signUp(String email, String password, String firstName, String las
   }
 }
 
+//Signs in an existing user with email and password. Returns the User object on success, or null on failure.
 Future<User?> signIn(String email, String password) async {
   try {
     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -150,10 +159,12 @@ Future<User?> signIn(String email, String password) async {
   }
 }
 
+// Signs out the current user.
 Future<void> signOut() async {
   await FirebaseAuth.instance.signOut();
 }
 
+// Fetches the total approved hours for a specific student based on their uid.
 Future<double> fetchSpecificStudentHours(uid) async {
     double total = 0;
     final firestore = FirebaseFirestore.instance;
@@ -177,6 +188,7 @@ Future<double> fetchSpecificStudentHours(uid) async {
     return total;
   }
 
+// Fetches the total approved hours for high needs activities for a specific student based on their uid.
 Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
   double total = 0;
   final firestore = FirebaseFirestore.instance;
