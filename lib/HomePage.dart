@@ -1,5 +1,5 @@
 /**
- * HomePage.dart is the main screen of the app where students can view their service hours, log new activities, and see the status of their submissions. It connects to Firestore to fetch and display the user's service hour entries in a table format, showing the place, hours, date, and approval status. The page also includes a progress bar to visualize how close the student is to reaching the 50-hour goal, with a special highlight for high-needs hours.
+ * HomePage.dart is the main screen of the app where students can view their service hours, log new activities, and see the status of their submissions. It connects to Firestore to fetch and display the user's service hour entries in a table format, showing the place, hours, date, and approval status. The page also includes a progress bar to visualize how close the student is to reaching the 100-hour goal, with a special highlight for high-needs hours.
  */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,7 +16,7 @@ const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
 /**
- * HomePage is a StatefulWidget that displays the main dashboard for students. It shows their total service hours, allows them to log new activities, and view the status of their submissions. The page uses Firestore to fetch the user's service hour entries and displays them in a DataTable, along with a progress bar to track their progress towards the 50-hour goal.
+ * HomePage is a StatefulWidget that displays the main dashboard for students. It shows their total service hours, allows them to log new activities, and view the status of their submissions. The page uses Firestore to fetch the user's service hour entries and displays them in a DataTable, along with a progress bar to track their progress towards the 100-hour goal.
  */
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -98,8 +98,8 @@ class _HomePageState extends State<HomePage> {
                         }
                       }
                     }
-                    final progress = (totalHours / 50).clamp(0.0, 1.0);
-                    final highNeedsProgress = (highNeedsHours / 50).clamp(0.0, 1.0);
+                    final progress = (totalHours / 100).clamp(0.0, 1.0);
+                    final highNeedsProgress = (highNeedsHours / 100).clamp(0.0, 1.0);
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -107,14 +107,14 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              '${totalHours.toStringAsFixed(1)} / 50 hours',
+                              '${totalHours.toStringAsFixed(1)} / 100 hours',
                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                             ),
                             Text(
-                              totalHours >= 50 ? '🎉 Goal reached!' : '${(50 - totalHours).toStringAsFixed(1)} hrs to go',
+                              totalHours >= 100 ? '🎉 Goal reached!' : '${(100 - totalHours).toStringAsFixed(1)} hrs to go',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: totalHours >= 50 ? Colors.green : Colors.grey[600],
+                                color: totalHours >= 100 ? Colors.green : Colors.grey[600],
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -130,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                                 minHeight: 16,
                                 backgroundColor: kAccentColor.withOpacity(0.3),
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  totalHours >= 50 ? Colors.green : kPrimaryColor,
+                                  totalHours >= 100 ? Colors.green : kPrimaryColor,
                                 ),
                               ),
                               LinearProgressIndicator(
