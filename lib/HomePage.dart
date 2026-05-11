@@ -41,19 +41,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     firstNameFuture = loadFirstName();
   }
-/**
- * loadFirstName is an asynchronous function that retrieves the current user's first name from the Firestore database. It accesses the 'Users' collection, gets the document corresponding to the user's UID, and returns the 'first_name' field. If there is an error during this process, it catches the exception and returns 'No One' as a fallback.
- */
-  Future<String> loadFirstName() async {
-    try {
-      final doc = await _firestore.collection('Users').doc(user!.uid).get();
-      return doc['first_name'] ?? 'No One';
-    } catch (e) {
-      print('Error loading first name: $e');
-      return 'No One';
-    }
-  }
- /**
+/** 
   * build constructs the UI of the HomePage. It first checks if there is an authenticated user; if not, it displays a message indicating that no user is authenticated. If a user is present, it builds a Scaffold with an AppBar that shows the user's first name (loaded asynchronously). The body of the Scaffold includes a section for service hours with a progress bar, buttons to log new activities and hours, and a DataTable that lists all submitted service hour entries along with their place, hours, date, and approval status. The DataTable updates in real-time using a StreamBuilder that listens to changes in the Firestore collection for the user's hours.
   */
   @override
