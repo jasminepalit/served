@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     firstNameFuture = loadFirstName();
   }
-/*
+/** 
   * build constructs the UI of the HomePage. It first checks if there is an authenticated user; if not, it displays a message indicating that no user is authenticated. If a user is present, it builds a Scaffold with an AppBar that shows the user's first name (loaded asynchronously). The body of the Scaffold includes a section for service hours with a progress bar, buttons to log new activities and hours, and a DataTable that lists all submitted service hour entries along with their place, hours, date, and approval status. The DataTable updates in real-time using a StreamBuilder that listens to changes in the Firestore collection for the user's hours.
   */
   @override
