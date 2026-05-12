@@ -162,7 +162,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
           .get();
       for (final hoursDoc in hoursSnapshot.docs) {
         final data = hoursDoc.data();
-        final status = data['status'] ?? 'pending';
+        final status = data['status'] ?? '';
         if (status == 'pending') {
           final hoursValue = data['hours'];
           if (hoursValue is num) {
