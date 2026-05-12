@@ -41,7 +41,13 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
 
     if (place.isEmpty || hours == null || date == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill out place, hours, and date.')),
+        const SnackBar(content: Text('Please fill out place, hours, and date.'), backgroundColor: Colors.red,),
+      );
+      return;
+    }
+    if (hours <= 0 || hours > 100) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid number of hours.'), backgroundColor: Colors.red,),
       );
       return;
     }
