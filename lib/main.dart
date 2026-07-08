@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,6 +12,8 @@ import 'VolunteerFormPage.dart';
 import 'ActivityFormPage.dart';
 import 'SignUpPage.dart';
 import 'MainScreen.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -64,7 +67,27 @@ void main() async {
       print(user.uid);
     }
   });
+    // Connect to local emulators only during local debug/development
+  if (kDebugMode) {
+    const String localhost = 'localhost'; // For web, 'localhost' or '127.0.0.1' works perfectly
 
+    try {
+      // 1. Authentication Emulator (Default Port: 9099)
+      await FirebaseAuth.instance.useAuthEmulator(localhost, 9099);
+
+      // 2. Firestore Emulator (Default Port: 8080)
+      FirebaseFirestore.instance.useFirestoreEmulator(localhost, 8080);
+      
+      // 3. Cloud Storage Emulator (Default Port: 9199)
+      await FirebaseStorage.instance.useStorageEmulator(localhost, 9199);
+      
+      // Note: If using Cloud Functions, add:
+      // FirebaseFunctions.instance.useFunctionsEmulator(localhost, 5001);
+      
+    } catch (e) {
+      print('Error connecting to Firebase emulators: $e');
+    }
+  }
   runApp(const MyApp());
 }
 
