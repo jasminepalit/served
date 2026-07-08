@@ -9,6 +9,7 @@ import 'SignUpPage.dart';
 import 'auth_helpers.dart';
 import 'AdminDatabaseView.dart';
 import 'AdminMainScreen.dart';
+import 'ResetPassword.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -95,6 +96,19 @@ class _LoginPageState extends State<LoginPage> {
                 
               },
               child: const Text('Sign Up'),
+            ),
+                      const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () async {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ResetPassword(),
+                    ),
+                  );
+                
+              },
+              child: const Text('Forgot your password?'),
             ),
           ],
         ),
