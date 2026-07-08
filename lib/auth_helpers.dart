@@ -220,3 +220,23 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
   }
   return total;
 }
+
+
+Future<void> resetUserPassword(String email) async {
+  try {
+    // Call the Firebase method to send the reset link
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+    print("Password reset email sent successfully to $email.");
+  } on FirebaseAuthException catch (e) {
+    // Handle specific Firebase Auth errors
+    if (e.code == 'user-not-found') {
+      print('No user found for that email.');
+    } else if (e.code == 'invalid-email') {
+      print('The email address is badly formatted.');
+    } else {
+      print('Error: ${e.message}');
+    }
+  } catch (e) {
+    print('An unexpected error occurred: $e');
+  }
+}
