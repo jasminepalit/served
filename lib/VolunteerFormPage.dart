@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'HomePage.dart';
+import 'package:signature/signature.dart';
+import 'dart:developer';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:signature/signature.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
@@ -22,20 +31,27 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
   DateTime? _selectedDate;
 
   final _firestore = FirebaseFirestore.instance;
+  final user = FirebaseAuth.instance.currentUser;
 
   Future<void> _addEntry() async {
+    print('Adding entry...');
     final place = _selectedPlace;
     final hours = double.tryParse(_hoursController.text.trim());
     final date = _selectedDate;
     final user = FirebaseAuth.instance.currentUser;
+
     if (user == null) return;
 
-    if (place.isEmpty || hours == null || date == null) {
+    if (place.isEmpty || hours == null || date == null || _controller.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill out place, hours, and date.')),
+        const SnackBar(content: Text('Please fill out place, hours, date, and signature.')),
       );
       return;
     }
+
+    print('Getting signature...');
+    final signatureUrl = await exportImage(context);
+
 
     await _firestore
         .collection('Users')
@@ -46,9 +62,12 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       'hours': hours,
       'date': Timestamp.fromDate(date),
       'status': 'pending',
+      'signatureUrl': signatureUrl,
     });
 
+
     if (!context.mounted) return;
+
 
     // Clear form
     _selectedPlace = '';
@@ -70,6 +89,114 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
+
+  final SignatureController _controller = SignatureController(
+    penStrokeWidth: 5,
+    strokeCap: StrokeCap.butt,
+    strokeJoin: StrokeJoin.miter,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.transparent,
+    exportPenColor: Colors.black,
+    onDrawStart: () => log('onDrawStart called!'),
+    onDrawEnd: () => log('onDrawEnd called!'),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _controller
+      ..addListener(() => log('Value changed'))
+      ..onDrawEnd = () => setState(
+            () {
+              // setState for build to update value of "empty label" in gui
+            },
+          );
+  }
+
+  @override
+  void dispose() {
+    // IMPORTANT to dispose of the controller
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<String?> exportImage(BuildContext context) async {
+    if (_controller.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          key: Key('snackbarPNG'),
+          content: Text('No content'),
+        ),
+      );
+      return null;
+    }
+
+    final Uint8List? data =
+        await _controller.toPngBytes(height: 300, width: 300);
+    if (data == null) {
+      return null;
+    }
+    try{
+            // 3. Create a unique filename using timestamp
+        final String fileName = 'signatures/${DateTime.now().millisecondsSinceEpoch}.png';
+
+        // 4. Reference Firebase Storage and upload using putData
+        final Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+        
+        // Metadata is recommended to let browsers/apps view it properly
+        final SettableMetadata metadata = SettableMetadata(contentType: 'image/png');
+        
+        final UploadTask uploadTask = storageRef.putData(data, metadata);
+        
+        // 5. Wait for the upload task to finish
+        final TaskSnapshot snapshot = await uploadTask;
+        
+        // 6. Optional: Grab the download URL if you need to save it to Firestore
+        final String downloadUrl = await snapshot.ref.getDownloadURL();
+
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Signature uploaded successfully!')))
+          ;
+
+        return downloadUrl;
+
+    }
+    catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error uploading signature: $e')))
+          ;
+      return null;
+    }
+  }
+
+  Future<void> exportSVG(BuildContext context) async {
+    if (_controller.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          key: Key('snackbarSVG'),
+          content: Text('No content'),
+        ),
+      );
+      return;
+    }
+    String? rawSVGoptimized = _controller.toRawSVG();
+    String? rawSVGnonoptimized =
+        _controller.toRawSVG(minDistanceBetweenPoints: 0);
+    debugPrint('Raw svg without optimalizations: ');
+    
+    debugPrint("----");
+    debugPrint('size is: ${rawSVGnonoptimized?.length ?? 0} chars long');
+    debugPrint('Raw svg with optimalizations: ');
+
+    debugPrint("----");
+    debugPrint('size is: ${rawSVGoptimized?.length ?? 0} chars long');
+
+    final SvgPicture data = _controller.toSVG()!;
+
+    if (!mounted) return;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +269,13 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                         ),
                       ],
                     ),
+                    Signature(
+                      controller: _controller,
+                      width: 300,
+                      height: 300,
+                      backgroundColor: Colors.white,
+                    ),
+
                     const SizedBox(height: 24),
                     ElevatedButton(onPressed: _addEntry, child: const Text('Save Hours')),
                     const SizedBox(height: 16),

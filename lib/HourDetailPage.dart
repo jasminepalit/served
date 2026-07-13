@@ -31,6 +31,7 @@ class _HourDetailPageState extends State<HourDetailPage> {
   void initState() {
     super.initState();
     studentInfoFuture = _fetchStudentInfo();
+    print("In HourDetailPage");
   }
 
   Future<Map<String, dynamic>> _fetchStudentInfo() async {
@@ -63,6 +64,7 @@ class _HourDetailPageState extends State<HourDetailPage> {
           final hourDate = widget.hourData['date'] as Timestamp?;
           final place = widget.hourData['place'] ?? 'N/A';
           final hours = widget.hourData['hours'] ?? 'N/A';
+          final signatureUrl = widget.hourData['signatureUrl'] ?? '';
 
           final formattedDate = hourDate != null
               ? DateTime.fromMillisecondsSinceEpoch(hourDate.millisecondsSinceEpoch)
@@ -138,7 +140,16 @@ class _HourDetailPageState extends State<HourDetailPage> {
                       _buildDetailRow('Hours', hours.toString()),
                       _buildDetailRow('Place', place),
                       _buildDetailRow('Date', formattedDate),
-                    ],
+                    Image.network(
+                      signatureUrl,
+                      height: 300,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                         print('Error loading signature image: $error');
+                        return const Text('No signature available');
+                       
+                      },
+                    )],
                   ),
                 ),
 

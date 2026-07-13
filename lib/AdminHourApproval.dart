@@ -103,6 +103,7 @@ class AdminHourApproval extends StatelessWidget {
           .doc(studentId)
           .collection('Hours')
           .where('status', isEqualTo: 'pending')
+          // .orderBy('date', descending: true)
           .get();
       
       for (final hourDoc in hoursSnapshot.docs) {
