@@ -5,6 +5,7 @@ import 'VolunteerFormPage.dart';
 import 'auth_helpers.dart';
 import 'AdminUserDataView.dart';
 import 'main.dart';
+import 'AdminWipeAccounts.dart';
 
 class AdminDeleteAccounts extends StatefulWidget {
   const AdminDeleteAccounts({super.key});
@@ -39,7 +40,17 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: [const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminWipePanel()),
+              );
+            },
+            child: const Text('Wipe Accounts by Year of Graduation'),
+          ),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: TextField(
