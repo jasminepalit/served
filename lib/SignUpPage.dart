@@ -1,18 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:served/footer_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
 import 'MainScreen.dart';
 import 'AdminHomePage.dart';
 import 'auth_helpers.dart';
 
-
 const Color kPrimaryColor = Color(0xFF5128B5);
-const Color kSecondaryColor = Color(0xFF758BFD);   
+const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
-
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -28,36 +27,75 @@ class _SignUpPageState extends State<SignUpPage> {
   final _lastNameController = TextEditingController();
   final _yogController = TextEditingController();
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: FooterBar(),
       appBar: AppBar(title: const Text('Sign Up')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
-            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-            TextField(controller: _firstNameController, decoration: const InputDecoration(labelText: 'First Name')),
-            TextField(controller: _lastNameController, decoration: const InputDecoration(labelText: 'Last Name')),
-            TextField(controller: _yogController, decoration: const InputDecoration(labelText: 'Year of Graduation')),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _firstNameController,
+              decoration: const InputDecoration(labelText: 'First Name'),
+            ),
+            TextField(
+              controller: _lastNameController,
+              decoration: const InputDecoration(labelText: 'Last Name'),
+            ),
+            TextField(
+              controller: _yogController,
+              decoration: const InputDecoration(
+                labelText: 'Year of Graduation',
+              ),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                print("Attempting to sign up with email: ${_emailController.text.trim()}");
-                final user = await signUp(_emailController.text.trim(), _passwordController.text.trim(), _firstNameController.text.trim(), _lastNameController.text.trim(), _yogController.text.trim());
+                print(
+                  "Attempting to sign up with email: ${_emailController.text.trim()}",
+                );
+                final user = await signUp(
+                  _emailController.text.trim(),
+                  _passwordController.text.trim(),
+                  _firstNameController.text.trim(),
+                  _lastNameController.text.trim(),
+                  _yogController.text.trim(),
+                );
                 print("User signed up: ${user?.uid}");
 
                 if (!context.mounted) return;
 
                 if (user != null) {
                   // Check user role in Firestore
-                  DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+                  DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                      .collection('Users')
+                      .doc(user.uid)
+                      .get();
                   if (userDoc.exists && userDoc['type'] == 'admin') {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AdminHomePage()));
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminHomePage(),
+                      ),
+                    );
                   } else {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MainScreen(),
+                      ),
+                    );
                   }
                 }
               },
@@ -66,13 +104,10 @@ class _SignUpPageState extends State<SignUpPage> {
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () async {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LoginPage(),
-                    ),
-                  );
-                
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
               },
               child: const Text('Login'),
             ),

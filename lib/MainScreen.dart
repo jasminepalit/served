@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:served/footer_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
 import 'HomePage.dart';
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   String _selectedLogOption = 'Log Hours';
 
   Widget _getPage() {
-    if (_selectedIndex == 0) return HomePage(title: "Home",);
+    if (_selectedIndex == 0) return HomePage(title: "Home");
     if (_selectedIndex == 2) return const StudentActivityPage();
     return _getLogPage();
   }
@@ -46,7 +47,7 @@ class _MainScreenState extends State<MainScreen> {
   String userType = 'user';
   String firstName = 'Loading...';
   String lastName = 'Loading...';
-  
+
   @override
   void initState() {
     super.initState();
@@ -56,14 +57,12 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: FooterBar(),
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('lib/images/servd.png', height: 40),
-          
-          ],
+          children: [Image.asset('lib/images/servd.png', height: 40)],
         ),
         centerTitle: true,
         backgroundColor: kPrimaryColor,
@@ -71,8 +70,15 @@ class _MainScreenState extends State<MainScreen> {
           icon: const Icon(Icons.logout, color: Colors.white),
           onPressed: () async {
             await FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) {
-              return LoginPage();}), (route) => false,);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return LoginPage();
+                },
+              ),
+              (route) => false,
+            );
           },
         ),
         actions: [
@@ -82,7 +88,10 @@ class _MainScreenState extends State<MainScreen> {
           ),
           TextButton(
             onPressed: () => setState(() => _selectedIndex = 2),
-            child: const Text('Activities', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Activities',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -106,7 +115,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-
-  
-
-

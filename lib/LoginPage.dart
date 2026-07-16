@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:served/footer_bar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:served/AdminHomePage.dart';
@@ -31,92 +32,100 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')
-    
-      ),
+      bottomNavigationBar: FooterBar(),
+      appBar: AppBar(title: const Text('Login')),
       body: Center(
         child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
-            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-            const SizedBox(height: 20),
-            ElevatedButton(
-            onPressed: () async {
-              final user = await signIn(
-                _emailController.text.trim(),
-                _passwordController.text.trim(),
-              );
-              if (!context.mounted) return;
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                  TextField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final user = await signIn(
+                        _emailController.text.trim(),
+                        _passwordController.text.trim(),
+                      );
+                      if (!context.mounted) return;
 
-              if (user != null) {
-                      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-                .collection('Users')
-                .doc(user.uid)
-                .get();
+                      if (user != null) {
+                        DocumentSnapshot userDoc = await FirebaseFirestore
+                            .instance
+                            .collection('Users')
+                            .doc(user.uid)
+                            .get();
 
-            if (!context.mounted) return;
+                        if (!context.mounted) return;
 
-            if (userDoc.exists && userDoc['status'] == 'Inactive') {
-              signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            }
+                        if (userDoc.exists && userDoc['status'] == 'Inactive') {
+                          signOut();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                          );
+                        }
 
-            if (userDoc.exists && userDoc['type'] == 'admin') {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminMainScreen()),
-              );
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const MainScreen()),
-              );
-              }
-              }
-            },
-            child: const Text('Login'),
+                        if (userDoc.exists && userDoc['type'] == 'admin') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminMainScreen(),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainScreen(),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: const Text('Login'),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignUpPage()),
+                      );
+                    },
+                    child: const Text('Sign Up'),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ResetPassword(),
+                        ),
+                      );
+                    },
+                    child: const Text('Forgot your password?'),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () async {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SignUpPage(),
-                    ),
-                  );
-                
-              },
-              child: const Text('Sign Up'),
-            ),
-                      const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () async {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ResetPassword(),
-                    ),
-                  );
-                
-              },
-              child: const Text('Forgot your password?'),
-            ),
-          ],
         ),
-        ),
-        ),
-      ),
       ),
     );
   }
 }
-

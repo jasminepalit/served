@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:served/footer_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:served/AdminDatabaseView.dart';
 import 'package:served/AdminDeleteAccounts.dart';
@@ -23,25 +24,21 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       return const AdminHomePage();
     } else if (_selectedIndex == 1) {
       return const AdminDatabaseView();
-    }
-    else if (_selectedIndex == 2) {
-       return const AdminDeleteAccounts();
-    }
-    else if (_selectedIndex == 3) {
+    } else if (_selectedIndex == 2) {
+      return const AdminDeleteAccounts();
+    } else if (_selectedIndex == 3) {
       return const AdminActivityApproval();
-    }
-    else if (_selectedIndex == 4) {
+    } else if (_selectedIndex == 4) {
       return const AdminHourApproval();
-    }
-    else{
-    return const AdminHomePage();
+    } else {
+      return const AdminHomePage();
     }
   }
 
   String userType = 'user';
   String firstName = 'Loading...';
   String lastName = 'Loading...';
-  
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +70,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: FooterBar(),
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -85,13 +83,20 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF5128B5),
-        leading: TextButton(
+        leading: IconButton(
+          icon: const Icon(Icons.logout, color: Colors.white),
           onPressed: () async {
             await FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) {
-              return LoginPage();}), (route) => false,);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return LoginPage();
+                },
+              ),
+              (route) => false,
+            );
           },
-          child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
         actions: [
           TextButton(

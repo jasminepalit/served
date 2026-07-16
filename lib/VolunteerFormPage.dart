@@ -10,7 +10,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:signature/signature.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
 const Color kAccentColor = Color(0xFFAEB8FE);
@@ -44,7 +43,9 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
 
     if (place.isEmpty || hours == null || date == null || _controller.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill out place, hours, date, and signature.')),
+        const SnackBar(
+          content: Text('Please fill out place, hours, date, and signature.'),
+        ),
       );
       return;
     }
@@ -52,12 +53,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     print('Getting signature...');
     final signatureUrl = await exportImage(context);
 
-
-    await _firestore
-        .collection('Users')
-        .doc(user.uid)
-        .collection('Hours')
-        .add({
+    await _firestore.collection('Users').doc(user.uid).collection('Hours').add({
       'place': place,
       'hours': hours,
       'date': Timestamp.fromDate(date),
@@ -65,9 +61,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       'signatureUrl': signatureUrl,
     });
 
-
     if (!context.mounted) return;
-
 
     // Clear form
     _selectedPlace = '';
@@ -106,11 +100,9 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     super.initState();
     _controller
       ..addListener(() => log('Value changed'))
-      ..onDrawEnd = () => setState(
-            () {
-              // setState for build to update value of "empty label" in gui
-            },
-          );
+      ..onDrawEnd = () => setState(() {
+        // setState for build to update value of "empty label" in gui
+      });
   }
 
   @override
@@ -123,49 +115,50 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
   Future<String?> exportImage(BuildContext context) async {
     if (_controller.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          key: Key('snackbarPNG'),
-          content: Text('No content'),
-        ),
+        const SnackBar(key: Key('snackbarPNG'), content: Text('No content')),
       );
       return null;
     }
 
-    final Uint8List? data =
-        await _controller.toPngBytes(height: 300, width: 300);
+    final Uint8List? data = await _controller.toPngBytes(
+      height: 300,
+      width: 300,
+    );
     if (data == null) {
       return null;
     }
-    try{
-            // 3. Create a unique filename using timestamp
-        final String fileName = 'signatures/${DateTime.now().millisecondsSinceEpoch}.png';
+    try {
+      // 3. Create a unique filename using timestamp
+      final String fileName =
+          'signatures/${DateTime.now().millisecondsSinceEpoch}.png';
 
-        // 4. Reference Firebase Storage and upload using putData
-        final Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-        
-        // Metadata is recommended to let browsers/apps view it properly
-        final SettableMetadata metadata = SettableMetadata(contentType: 'image/png');
-        
-        final UploadTask uploadTask = storageRef.putData(data, metadata);
-        
-        // 5. Wait for the upload task to finish
-        final TaskSnapshot snapshot = await uploadTask;
-        
-        // 6. Optional: Grab the download URL if you need to save it to Firestore
-        final String downloadUrl = await snapshot.ref.getDownloadURL();
+      // 4. Reference Firebase Storage and upload using putData
+      final Reference storageRef = FirebaseStorage.instance.ref().child(
+        fileName,
+      );
 
+      // Metadata is recommended to let browsers/apps view it properly
+      final SettableMetadata metadata = SettableMetadata(
+        contentType: 'image/png',
+      );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Signature uploaded successfully!')))
-          ;
+      final UploadTask uploadTask = storageRef.putData(data, metadata);
 
-        return downloadUrl;
+      // 5. Wait for the upload task to finish
+      final TaskSnapshot snapshot = await uploadTask;
 
-    }
-    catch(e){
+      // 6. Optional: Grab the download URL if you need to save it to Firestore
+      final String downloadUrl = await snapshot.ref.getDownloadURL();
+
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading signature: $e')))
-          ;
+        SnackBar(content: Text('Signature uploaded successfully!')),
+      );
+
+      return downloadUrl;
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error uploading signature: $e')));
       return null;
     }
   }
@@ -173,18 +166,16 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
   Future<void> exportSVG(BuildContext context) async {
     if (_controller.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          key: Key('snackbarSVG'),
-          content: Text('No content'),
-        ),
+        const SnackBar(key: Key('snackbarSVG'), content: Text('No content')),
       );
       return;
     }
     String? rawSVGoptimized = _controller.toRawSVG();
-    String? rawSVGnonoptimized =
-        _controller.toRawSVG(minDistanceBetweenPoints: 0);
+    String? rawSVGnonoptimized = _controller.toRawSVG(
+      minDistanceBetweenPoints: 0,
+    );
     debugPrint('Raw svg without optimalizations: ');
-    
+
     debugPrint("----");
     debugPrint('size is: ${rawSVGnonoptimized?.length ?? 0} chars long');
     debugPrint('Raw svg with optimalizations: ');
@@ -196,7 +187,6 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
 
     if (!mounted) return;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -218,17 +208,22 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                     const SizedBox(height: 2),
                     StreamBuilder<QuerySnapshot>(
                       stream: _firestore
-                        .collection('Users')
-                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                        .collection('Activities')
-                        .where('status', isEqualTo: 'approved')  
-                        .snapshots(),
+                          .collection('Users')
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .collection('Activities')
+                          .where('status', isEqualTo: 'approved')
+                          .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
                         final activities = snapshot.data!.docs;
-                        final organizations = activities.map((doc) => doc['organization'] as String).toSet().toList();
+                        final organizations = activities
+                            .map((doc) => doc['organization'] as String)
+                            .toSet()
+                            .toList();
                         return DropdownButtonFormField<String>(
                           value: _selectedPlace.isEmpty ? null : _selectedPlace,
                           decoration: const InputDecoration(labelText: 'Place'),
@@ -247,7 +242,11 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    TextField(controller: _hoursController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Hours')),
+                    TextField(
+                      controller: _hoursController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Hours'),
+                    ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -256,7 +255,10 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                             _selectedDate == null
                                 ? 'No date selected'
                                 : 'Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
-                            style: const TextStyle(fontSize: 16, color: Colors.black87),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
                           ),
                         ),
                         ElevatedButton(
@@ -277,14 +279,22 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                     ),
 
                     const SizedBox(height: 24),
-                    ElevatedButton(onPressed: _addEntry, child: const Text('Save Hours')),
+                    ElevatedButton(
+                      onPressed: _addEntry,
+                      child: const Text('Save Hours'),
+                    ),
                     const SizedBox(height: 16),
                     OutlinedButton(
                       onPressed: () {
                         if (Navigator.of(context).canPop()) {
                           Navigator.of(context).pop();
                         } else {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(title: 'Home')));
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomePage(title: 'Home'),
+                            ),
+                          );
                         }
                       },
                       style: OutlinedButton.styleFrom(

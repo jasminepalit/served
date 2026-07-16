@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:served/footer_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
@@ -20,8 +21,7 @@ class HourDetailPage extends StatefulWidget {
   });
 
   @override
-  State<HourDetailPage> createState() =>
-      _HourDetailPageState();
+  State<HourDetailPage> createState() => _HourDetailPageState();
 }
 
 class _HourDetailPageState extends State<HourDetailPage> {
@@ -45,6 +45,7 @@ class _HourDetailPageState extends State<HourDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: FooterBar(),
       appBar: AppBar(
         title: const Text('Hour Details'),
         backgroundColor: kPrimaryColor,
@@ -59,7 +60,8 @@ class _HourDetailPageState extends State<HourDetailPage> {
           }
 
           final studentInfo = snapshot.data ?? {};
-          final studentName = '${studentInfo['firstName'] ?? 'Unknown'} ${studentInfo['lastName'] ?? 'Student'}';
+          final studentName =
+              '${studentInfo['firstName'] ?? 'Unknown'} ${studentInfo['lastName'] ?? 'Student'}';
           final studentEmail = studentInfo['email'] ?? 'No email';
           final hourDate = widget.hourData['date'] as Timestamp?;
           final place = widget.hourData['place'] ?? 'N/A';
@@ -67,9 +69,9 @@ class _HourDetailPageState extends State<HourDetailPage> {
           final signatureUrl = widget.hourData['signatureUrl'] ?? '';
 
           final formattedDate = hourDate != null
-              ? DateTime.fromMillisecondsSinceEpoch(hourDate.millisecondsSinceEpoch)
-                  .toString()
-                  .split(' ')[0]
+              ? DateTime.fromMillisecondsSinceEpoch(
+                  hourDate.millisecondsSinceEpoch,
+                ).toString().split(' ')[0]
               : 'No date';
 
           return SingleChildScrollView(
@@ -140,16 +142,16 @@ class _HourDetailPageState extends State<HourDetailPage> {
                       _buildDetailRow('Hours', hours.toString()),
                       _buildDetailRow('Place', place),
                       _buildDetailRow('Date', formattedDate),
-                    Image.network(
-                      signatureUrl,
-                      height: 300,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                         print('Error loading signature image: $error');
-                        return const Text('No signature available');
-                       
-                      },
-                    )],
+                      Image.network(
+                        signatureUrl,
+                        height: 300,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('Error loading signature image: $error');
+                          return const Text('No signature available');
+                        },
+                      ),
+                    ],
                   ),
                 ),
 
@@ -178,7 +180,11 @@ class _HourDetailPageState extends State<HourDetailPage> {
                         icon: const CircleAvatar(
                           radius: 8,
                           backgroundColor: Colors.white,
-                          child: Icon(Icons.check, size: 16, color: Colors.green),
+                          child: Icon(
+                            Icons.check,
+                            size: 16,
+                            color: Colors.green,
+                          ),
                         ),
                         label: const Text('Approve Hours'),
                         style: ElevatedButton.styleFrom(
@@ -239,17 +245,17 @@ class _HourDetailPageState extends State<HourDetailPage> {
         const SizedBox(height: 6),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 14,
-          ),
+          style: const TextStyle(color: Colors.black87, fontSize: 14),
         ),
         const SizedBox(height: 12),
       ],
     );
   }
 
-  Future<void> _updateHourStatus(String status, [String? requestMessage]) async {
+  Future<void> _updateHourStatus(
+    String status, [
+    String? requestMessage,
+  ]) async {
     try {
       final updateData = <String, dynamic>{
         'status': status,
@@ -282,8 +288,8 @@ class _HourDetailPageState extends State<HourDetailPage> {
         status == 'approved'
             ? 'Hour approved'
             : status == 'rejected'
-                ? 'Hour rejected'
-                : 'Requested more information',
+            ? 'Hour rejected'
+            : 'Requested more information',
       );
     } catch (e) {
       _showSnackBar('Failed to update hour: $e');
@@ -320,12 +326,12 @@ class _HourDetailPageState extends State<HourDetailPage> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-    void _approveHour() {
+  void _approveHour() {
     _updateHourStatus('approved').then((_) {
       Navigator.of(context).pop();
     });

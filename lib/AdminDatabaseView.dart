@@ -10,10 +10,8 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-
 class AdminDatabaseView extends StatefulWidget {
   const AdminDatabaseView({super.key});
-
 
   @override
   State<AdminDatabaseView> createState() => _AdminDatabaseViewState();
@@ -29,9 +27,6 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
     super.initState();
     displayInfoFuture = Future.wait([loadFirstName(), loadUserType()]);
   }
-
-  
-
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +58,16 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('Users').orderBy('yearOfGraduation', descending: true).snapshots(),
+              stream: _firestore
+                  .collection('Users')
+                  .orderBy('yearOfGraduation', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData)
+                  return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
-                if (docs.isEmpty) return const Center(child: Text('No users found.'));
+                if (docs.isEmpty)
+                  return const Center(child: Text('No users found.'));
 
                 // Filter docs based on search query
                 final filteredDocs = docs.where((doc) {
@@ -76,14 +76,19 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                   final lastName = (data['lastName'] ?? '').toLowerCase();
                   final email = (data['email'] ?? '').toLowerCase();
                   final type = (data['type'] ?? '').toLowerCase();
-                  final yearOfGraduation = (data['yearOfGraduation'] ?? '').toLowerCase();
+                  final yearOfGraduation = (data['yearOfGraduation'] ?? '')
+                      .toLowerCase();
                   return firstName.contains(_searchQuery) ||
-                         lastName.contains(_searchQuery) ||
-                         email.contains(_searchQuery) ||
-                         type.contains(_searchQuery) || yearOfGraduation.contains(_searchQuery);
+                      lastName.contains(_searchQuery) ||
+                      email.contains(_searchQuery) ||
+                      type.contains(_searchQuery) ||
+                      yearOfGraduation.contains(_searchQuery);
                 }).toList();
 
-                if (filteredDocs.isEmpty) return const Center(child: Text('No users match the search.'));
+                if (filteredDocs.isEmpty)
+                  return const Center(
+                    child: Text('No users match the search.'),
+                  );
 
                 return Scrollbar(
                   thumbVisibility: true,
@@ -105,58 +110,118 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
                             DataColumn(label: Text('View')),
                           ],
                           rows: filteredDocs.map((doc) {
-                        final data = doc.data()! as Map<String, dynamic>;
-                        return DataRow(cells: [
-                          DataCell(Text(data['firstName'] ?? '', textAlign: TextAlign.center)),
-                          DataCell(Text(data['lastName'] ?? '', textAlign: TextAlign.center)),
-                          DataCell(Text(data['email'] ?? '', textAlign: TextAlign.center)),
-                          DataCell(Text(data['yearOfGraduation'] ?? '', textAlign: TextAlign.center)),
-                          DataCell(Text((data['type']== 'admin') ? 'Admin' : 'User', textAlign: TextAlign.center)),
-                          DataCell(
-                                      FutureBuilder<double>(
-                                        future: fetchSpecificStudentHours(doc.id),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
-                                            return const Text('Loading...', textAlign: TextAlign.center);
-                                          } else if (snapshot.hasError) {
-                                            return const Text('Error', textAlign: TextAlign.center);
-                                          } else {
-                                            return Text(snapshot.data?.toStringAsFixed(1) ?? '0', textAlign: TextAlign.center);
-                                          }
-                                        },
-                                      ),
+                            final data = doc.data()! as Map<String, dynamic>;
+                            return DataRow(
+                              cells: [
+                                DataCell(
+                                  Text(
+                                    data['firstName'] ?? '',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataCell(
+                                  Text(
+                                    data['lastName'] ?? '',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataCell(
+                                  Text(
+                                    data['email'] ?? '',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataCell(
+                                  Text(
+                                    data['yearOfGraduation'] ?? '',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataCell(
+                                  Text(
+                                    (data['type'] == 'admin')
+                                        ? 'Admin'
+                                        : 'User',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataCell(
+                                  FutureBuilder<double>(
+                                    future: fetchSpecificStudentHours(doc.id),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Text(
+                                          'Loading...',
+                                          textAlign: TextAlign.center,
+                                        );
+                                      } else if (snapshot.hasError) {
+                                        return const Text(
+                                          'Error',
+                                          textAlign: TextAlign.center,
+                                        );
+                                      } else {
+                                        return Text(
+                                          snapshot.data?.toStringAsFixed(1) ??
+                                              '0',
+                                          textAlign: TextAlign.center,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                                DataCell(
+                                  FutureBuilder<double>(
+                                    future: fetchSpecificStudentHighNeedsHours(
+                                      doc.id,
                                     ),
-                                    DataCell(
-                                      FutureBuilder<double>(
-                                        future: fetchSpecificStudentHighNeedsHours(doc.id),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
-                                            return const Text('Loading...', textAlign: TextAlign.center);
-                                          } else if (snapshot.hasError) {
-                                            return const Text('Error', textAlign: TextAlign.center);
-                                          } else {
-                                            return Text(snapshot.data?.toStringAsFixed(1) ?? '0', textAlign: TextAlign.center);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    DataCell(
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                            return AdminUserDataView(uid: doc.id);
-                                          }));
-                                        },
-                                        child: const Text('View'),
-                                      ),
-
-
-
-                          )]);
-                      }).toList(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Text(
+                                          'Loading...',
+                                          textAlign: TextAlign.center,
+                                        );
+                                      } else if (snapshot.hasError) {
+                                        return const Text(
+                                          'Error',
+                                          textAlign: TextAlign.center,
+                                        );
+                                      } else {
+                                        return Text(
+                                          snapshot.data?.toStringAsFixed(1) ??
+                                              '0',
+                                          textAlign: TextAlign.center,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                                DataCell(
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return AdminUserDataView(
+                                              uid: doc.id,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('View'),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
-                )));
+                );
               },
             ),
           ),
@@ -165,5 +230,3 @@ class _AdminDatabaseViewState extends State<AdminDatabaseView> {
     );
   }
 }
-
-

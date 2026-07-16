@@ -24,21 +24,25 @@ class AdminHourApproval extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
+
           final users = snapshot.data!.docs;
-          
+
           return FutureBuilder<List<Map<String, dynamic>>>(
             future: _getPendingHours(users),
             builder: (context, hoursSnapshot) {
-              if (!hoursSnapshot.hasData) return const Center(child: CircularProgressIndicator());
-              
+              if (!hoursSnapshot.hasData)
+                return const Center(child: CircularProgressIndicator());
+
               final pendingHours = hoursSnapshot.data ?? [];
-              
+
               if (pendingHours.isEmpty) {
-                return const Center(child: Text('No pending hours for approval.'));
+                return const Center(
+                  child: Text('No pending hours for approval.'),
+                );
               }
-              
+
               return ListView.builder(
                 itemCount: pendingHours.length,
                 itemBuilder: (context, index) {
@@ -51,9 +55,12 @@ class AdminHourApproval extends StatelessWidget {
                   final dateText = item['dateText'] as String;
                   final hourId = item['hourId'] as String;
                   final hourData = item['hourData'] as Map<String, dynamic>;
-                  
+
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     child: ListTile(
                       title: Text(studentName),
                       subtitle: Column(
@@ -86,10 +93,12 @@ class AdminHourApproval extends StatelessWidget {
       ),
     );
   }
-  
-  Future<List<Map<String, dynamic>>> _getPendingHours(List<QueryDocumentSnapshot> users) async {
+
+  Future<List<Map<String, dynamic>>> _getPendingHours(
+    List<QueryDocumentSnapshot> users,
+  ) async {
     final pendingHours = <Map<String, dynamic>>[];
-    
+
     for (final userDoc in users) {
       final userData = userDoc.data() as Map<String, dynamic>;
       final firstName = userData['firstName'] ?? 'Unknown';
@@ -97,21 +106,29 @@ class AdminHourApproval extends StatelessWidget {
       final studentName = '$firstName $lastName';
       final studentEmail = userData['email'] ?? 'No email';
       final studentId = userDoc.id;
-      
+
       final hoursSnapshot = await FirebaseFirestore.instance
           .collection('Users')
           .doc(studentId)
           .collection('Hours')
           .where('status', isEqualTo: 'pending')
-          // .orderBy('date', descending: true)
           .get();
-      
+
       for (final hourDoc in hoursSnapshot.docs) {
         final hourData = hourDoc.data();
-        final dateText = hourData['date']?.toDate()?.toString().split(' ')[0] ?? 'No date';
+        final rawDate = hourData['date'];
+        DateTime? parsedDate;
+        if (rawDate is Timestamp) {
+          parsedDate = rawDate.toDate();
+        } else if (rawDate is DateTime) {
+          parsedDate = rawDate;
+        }
+
+        final dateText =
+            parsedDate?.toLocal().toString().split(' ')[0] ?? 'No date';
         final place = hourData['place'] ?? 'Unknown Place';
         final hoursValue = hourData['hours'] ?? 'N/A';
-        
+
         pendingHours.add({
           'studentName': studentName,
           'studentEmail': studentEmail,
@@ -121,10 +138,21 @@ class AdminHourApproval extends StatelessWidget {
           'dateText': dateText,
           'hourId': hourDoc.id,
           'hourData': hourData,
+          'dateValue': parsedDate,
         });
       }
     }
-      
+
+    pendingHours.sort((a, b) {
+      final aDate = a['dateValue'] as DateTime?;
+      final bDate = b['dateValue'] as DateTime?;
+
+      if (aDate == null && bDate == null) return 0;
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+      return aDate.compareTo(bDate);
+    });
+
     return pendingHours;
   }
 }

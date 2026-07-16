@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:served/footer_bar.dart';
 import 'package:served/AdminUserDataView.dart';
 import 'package:served/AdminDeleteAccounts.dart';
 
@@ -19,9 +20,13 @@ class _AdminWipePanelState extends State<AdminWipePanel> {
     setState(() => _isLoading = true);
 
     try {
-      final FirebaseFunctions functions = FirebaseFunctions.instanceFor(region: 'us-east1');
-      final HttpsCallable callable = functions.httpsCallable('delete_users_by_yog_callable');
-      
+      final FirebaseFunctions functions = FirebaseFunctions.instanceFor(
+        region: 'us-east1',
+      );
+      final HttpsCallable callable = functions.httpsCallable(
+        'delete_users_by_yog_callable',
+      );
+
       final HttpsCallableResult result = await callable.call({
         'yearOfGraduation': targetYear,
         'yog': targetYear,
@@ -34,13 +39,14 @@ class _AdminWipePanelState extends State<AdminWipePanel> {
           backgroundColor: Colors.green,
         ),
       );
-      
+
       _yogController.clear();
     } on FirebaseFunctionsException catch (e) {
       final details = e.details;
       final messageParts = <String>[
         e.message ?? 'Unknown Firebase Functions error',
-        if (details != null && details.toString().isNotEmpty) details.toString(),
+        if (details != null && details.toString().isNotEmpty)
+          details.toString(),
       ];
       final fullMessage = messageParts.join(' - ');
       print('Cloud function error: $fullMessage');
@@ -50,7 +56,10 @@ class _AdminWipePanelState extends State<AdminWipePanel> {
     } catch (e, stackTrace) {
       print('Unexpected wipe error: $e\n$stackTrace');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Unexpected error: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -93,7 +102,9 @@ class _AdminWipePanelState extends State<AdminWipePanel> {
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 12),
-              const Text('This action cannot be undone. To proceed, type the year below to confirm:'),
+              const Text(
+                'This action cannot be undone. To proceed, type the year below to confirm:',
+              ),
               const SizedBox(height: 10),
               TextField(
                 controller: _verifyController,
@@ -119,15 +130,22 @@ class _AdminWipePanelState extends State<AdminWipePanel> {
                   _executeBackendWipe(targetYear); // Fire backend task loop
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const AdminDeleteAccounts()),
+                    MaterialPageRoute(
+                      builder: (context) => const AdminDeleteAccounts(),
+                    ),
                   ); // Return to previous screen after execution
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Confirmation year mismatch. Aborted.')),
+                    const SnackBar(
+                      content: Text('Confirmation year mismatch. Aborted.'),
+                    ),
                   );
                 }
               },
-              child: const Text('PROCEED WITH DELETION', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'PROCEED WITH DELETION',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -138,6 +156,7 @@ class _AdminWipePanelState extends State<AdminWipePanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: FooterBar(),
       appBar: AppBar(title: const Text('Admin Dashboard')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -159,11 +178,18 @@ class _AdminWipePanelState extends State<AdminWipePanel> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _showConfirmationDialog, // Trigger verification layer
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      onPressed:
+                          _showConfirmationDialog, // Trigger verification layer
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
                       child: const Text(
-                        'Wipe All Users in YOG', 
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)
+                        'Wipe All Users in YOG',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),

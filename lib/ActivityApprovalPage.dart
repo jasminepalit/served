@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:served/footer_bar.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -20,8 +21,7 @@ class ActivityApprovalPage extends StatefulWidget {
   });
 
   @override
-  State<ActivityApprovalPage> createState() =>
-      _ActivityApprovalPageState();
+  State<ActivityApprovalPage> createState() => _ActivityApprovalPageState();
 }
 
 class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
@@ -142,10 +142,10 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
                     .collection('Activities')
                     .doc(widget.activityId)
                     .update({
-                  'status': 'more_info',
-                  'requestMessage': requestMessage,
-                  'moreInfoRequestedAt': Timestamp.now(),
-                });
+                      'status': 'more_info',
+                      'requestMessage': requestMessage,
+                      'moreInfoRequestedAt': Timestamp.now(),
+                    });
 
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -159,7 +159,10 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
               } catch (e) {
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                  SnackBar(
+                    content: Text('Error: $e'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               } finally {
                 if (mounted) setState(() => isLoading = false);
@@ -181,6 +184,7 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
         backgroundColor: kPrimaryColor,
         elevation: 0,
       ),
+      bottomNavigationBar: FooterBar(),
       backgroundColor: kBackgroundColor,
       body: FutureBuilder<Map<String, dynamic>>(
         future: studentInfoFuture,
@@ -199,13 +203,13 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
           final advisorEmail = widget.activityData['advisorEmail'] ?? 'N/A';
           final advisorPhone = widget.activityData['advisorNumber'] ?? 'N/A';
           final isHighNeeds = widget.activityData['isHighNeeds'] ?? false;
-          final highNeedsDescription = widget.activityData['highNeedsDescription'] ?? '';
+          final highNeedsDescription =
+              widget.activityData['highNeedsDescription'] ?? '';
 
           final formattedDate = activityDate != null
               ? DateTime.fromMillisecondsSinceEpoch(
-                      activityDate.millisecondsSinceEpoch)
-                  .toString()
-                  .split(' ')[0]
+                  activityDate.millisecondsSinceEpoch,
+                ).toString().split(' ')[0]
               : 'No date';
 
           return SingleChildScrollView(
@@ -241,7 +245,11 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
                       const SizedBox(height: 16),
                       _buildInfoRow('Student Name', studentName, Colors.white),
                       const SizedBox(height: 12),
-                      _buildInfoRow('Student Email', studentEmail, Colors.white),
+                      _buildInfoRow(
+                        'Student Email',
+                        studentEmail,
+                        Colors.white,
+                      ),
                     ],
                   ),
                 ),
@@ -485,10 +493,7 @@ class _ActivityApprovalPageState extends State<ActivityApprovalPage> {
         const SizedBox(height: 6),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 14,
-          ),
+          style: const TextStyle(color: Colors.black87, fontSize: 14),
         ),
         const SizedBox(height: 12),
       ],

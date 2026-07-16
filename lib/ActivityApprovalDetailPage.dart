@@ -496,4 +496,3 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
     );
   }
 }
-
