@@ -83,14 +83,18 @@ class _HomePageState extends State<HomePage> {
                       }
                     }
 
-                    final progress = (totalHours / 50).clamp(0.0, 1.0);
+                    final goalReached = totalHours >= 50;
+                    final progress = goalReached
+                        ? 1.0
+                        : (totalHours / 50).clamp(0.0, 1.0);
 
                     return FutureBuilder<double>(
                       future: fetchSpecificStudentHighNeedsHours(user.uid),
                       builder: (context, highNeedsSnapshot) {
                         final highNeedsHours = highNeedsSnapshot.data ?? 0.0;
-                        final highNeedsProgress =
-                            (highNeedsHours / 50).clamp(0.0, 1.0);
+                        final highNeedsProgress = goalReached
+                            ? 0.0
+                            : (highNeedsHours / 50).clamp(0.0, 1.0);
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
