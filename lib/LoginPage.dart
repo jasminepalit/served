@@ -27,6 +27,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _errorMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,24 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
-            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+              onChanged: (value) {
+                setState(() {
+                  _errorMessage = '';
+                });
+              },
+            ),
+            if (_errorMessage != null && _errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  _errorMessage,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
             const SizedBox(height: 20),
             ElevatedButton(
             onPressed: () async {
@@ -80,6 +98,10 @@ class _LoginPageState extends State<LoginPage> {
                 MaterialPageRoute(builder: (context) => const MainScreen()),
               );
               }
+              } else {
+                setState(() {
+                  _errorMessage = 'Incorrect password';
+                });
               }
             },
             child: const Text('Login'),
