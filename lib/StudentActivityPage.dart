@@ -124,6 +124,7 @@ class StudentActivityPage extends StatelessWidget {
                             columns: const [
                               DataColumn(label: Text('Organization')),
                               DataColumn(label: Text('Date')),
+                              DataColumn(label: Text('High Needs')),
                               DataColumn(label: Text('Status')),
                               DataColumn(label: Text('Action')),
                             ],
@@ -131,6 +132,11 @@ class StudentActivityPage extends StatelessWidget {
                               final data = doc.data()! as Map<String, dynamic>;
                               final status = (data['status'] ?? 'pending')
                                   .toString();
+                              final isHighNeedsRaw =
+                                  data['isHighNeeds'] ?? data['high_needs'] ?? false;
+                              final isHighNeeds = isHighNeedsRaw is bool
+                                  ? isHighNeedsRaw
+                                  : isHighNeedsRaw.toString().toLowerCase() == 'true';
                               final requestMessage =
                                   data['requestMessage']?.toString() ?? '';
                               final timestamp = data['date'] as Timestamp?;
@@ -150,6 +156,18 @@ class StudentActivityPage extends StatelessWidget {
                                     ),
                                   ),
                                   DataCell(Text(dateStr)),
+                                  DataCell(
+                                    Text(
+                                      isHighNeeds ? 'Yes' : 'No',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isHighNeeds
+                                            ? kAccentOrange
+                                            : Colors.grey[700],
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
                                   DataCell(
                                     Column(
                                       crossAxisAlignment:
