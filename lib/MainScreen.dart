@@ -28,7 +28,8 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _getPage() {
     if (_selectedIndex == 0) return HomePage(title: "Home");
-    if (_selectedIndex == 2) return const StudentActivityPage();
+    if (_selectedIndex == 2)
+      return const StudentActivityPage(showFooter: false);
     return _getLogPage();
   }
 

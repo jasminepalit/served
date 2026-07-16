@@ -11,7 +11,9 @@ const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
 class StudentActivityPage extends StatelessWidget {
-  const StudentActivityPage({super.key});
+  final bool showFooter;
+
+  const StudentActivityPage({super.key, this.showFooter = true});
 
   String _statusLabel(String status) {
     switch (status) {
@@ -73,6 +75,7 @@ class StudentActivityPage extends StatelessWidget {
         .snapshots();
 
     return Scaffold(
+      bottomNavigationBar: showFooter ? FooterBar() : null,
       appBar: AppBar(
         title: const Text('My Activities'),
         backgroundColor: kPrimaryColor,
@@ -133,10 +136,13 @@ class StudentActivityPage extends StatelessWidget {
                               final status = (data['status'] ?? 'pending')
                                   .toString();
                               final isHighNeedsRaw =
-                                  data['isHighNeeds'] ?? data['high_needs'] ?? false;
+                                  data['isHighNeeds'] ??
+                                  data['high_needs'] ??
+                                  false;
                               final isHighNeeds = isHighNeedsRaw is bool
                                   ? isHighNeedsRaw
-                                  : isHighNeedsRaw.toString().toLowerCase() == 'true';
+                                  : isHighNeedsRaw.toString().toLowerCase() ==
+                                        'true';
                               final requestMessage =
                                   data['requestMessage']?.toString() ?? '';
                               final timestamp = data['date'] as Timestamp?;
