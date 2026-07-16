@@ -209,16 +209,6 @@ class _HourDetailPageState extends State<HourDetailPage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: _requestMoreInformation,
-                        icon: const Icon(Icons.info, color: Colors.white),
-                        label: const Text('Request More Information'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kAccentOrange,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -296,35 +286,6 @@ class _HourDetailPageState extends State<HourDetailPage> {
     }
   }
 
-  Future<String?> _showRequestInformationDialog() {
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Request More Information'),
-          content: TextField(
-            controller: controller,
-            maxLines: 4,
-            decoration: const InputDecoration(
-              hintText: 'What additional details do you need?',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(controller.text),
-              child: const Text('Send'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(
       context,
@@ -339,14 +300,6 @@ class _HourDetailPageState extends State<HourDetailPage> {
 
   void _rejectHour() {
     _updateHourStatus('rejected').then((_) {
-      Navigator.of(context).pop();
-    });
-  }
-
-  void _requestMoreInformation() async {
-    final message = await _showRequestInformationDialog();
-    if (message == null || message.trim().isEmpty) return;
-    await _updateHourStatus('needs_information', message.trim()).then((_) {
       Navigator.of(context).pop();
     });
   }
