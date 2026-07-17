@@ -80,43 +80,73 @@ class _AdminActivityApprovalState extends State<AdminActivityApproval> {
                   ? '${activityDate.toLocal().year}-${activityDate.toLocal().month.toString().padLeft(2, '0')}-${activityDate.toLocal().day.toString().padLeft(2, '0')}'
                   : 'No date';
 
-              return ListTile(
-                title: Text(
-                  activityData['organization'] ?? 'Unknown Organization',
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Date: $formattedDate'),
-                    if (isHighNeeds)
-                      const Text(
-                        'High Needs: Yes',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 54, 244, 114),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    else
-                      const Text(
-                        'High Needs: No',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 255, 0, 0),
-                          fontWeight: FontWeight.bold,
+              return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                future: FirebaseFirestore.instance
+                    .collection('Users')
+                    .doc(studentId)
+                    .get(),
+                builder: (context, studentSnapshot) {
+                  final studentData =
+                      studentSnapshot.data?.data() ?? <String, dynamic>{};
+                  final studentName =
+                      '${studentData['firstName'] ?? ''} ${studentData['lastName'] ?? ''}'
+                          .trim();
+                  final studentEmail =
+                      studentData['email']?.toString() ?? 'No email';
+                  final displayName = studentName.isNotEmpty
+                      ? studentName
+                      : 'Unknown Student';
+
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        displayName,
+                        style: const TextStyle(
+                          fontSize: 16,
                         ),
                       ),
-                  ],
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ActivityApprovalDetailPage(
-                      studentId: studentId,
-                      activityId: activityDoc.id,
-                      activityData: activityData,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text('Email: $studentEmail'),
+                          Text('Date: $formattedDate'),
+                          if (isHighNeeds)
+                            const Text(
+                              'High Needs: Yes',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 72, 175, 77),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          else
+                            const Text(
+                              'High Needs: No',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 209, 65, 65),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                        ],
+                      ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ActivityApprovalDetailPage(
+                            studentId: studentId,
+                            activityId: activityDoc.id,
+                            activityData: activityData,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           );
