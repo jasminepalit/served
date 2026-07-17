@@ -114,6 +114,7 @@ class _AdminActivityApprovalState extends State<AdminActivityApproval> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 4),
+                          Text(activityData['organization']?.toString() ?? 'Unknown Organization'),
                           Text('Email: $studentEmail'),
                           Text('Date: $formattedDate'),
                           if (isHighNeeds)
