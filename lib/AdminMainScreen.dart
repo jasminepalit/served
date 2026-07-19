@@ -69,6 +69,107 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isNarrow = MediaQuery.of(context).size.width < 700;
+    final navActions = isNarrow
+        ? [
+            PopupMenuButton<int>(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              color: Colors.white,
+              onSelected: (value) {
+                setState(() {
+                  _selectedIndex = value;
+                });
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 0, child: Text('Admin Home')),
+                const PopupMenuItem(value: 1, child: Text('View User Data')),
+                const PopupMenuItem(value: 2, child: Text('Edit User Status')),
+                const PopupMenuItem(
+                  value: 3,
+                  child: Text('Approve Activities'),
+                ),
+                const PopupMenuItem(value: 4, child: Text('Approve Hours')),
+              ],
+            ),
+          ]
+        : [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedIndex = 0;
+                });
+              },
+              child: Text(
+                'Admin Home',
+                style: TextStyle(
+                  color: _selectedIndex == 0
+                      ? const Color(0xFFFF8600)
+                      : Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedIndex = 1;
+                });
+              },
+              child: Text(
+                'View User Data',
+                style: TextStyle(
+                  color: _selectedIndex == 1
+                      ? const Color(0xFFFF8600)
+                      : Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedIndex = 2;
+                });
+              },
+              child: Text(
+                'Edit User Status',
+                style: TextStyle(
+                  color: _selectedIndex == 2
+                      ? const Color(0xFFFF8600)
+                      : Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedIndex = 3;
+                });
+              },
+              child: Text(
+                'Approve Activities',
+                style: TextStyle(
+                  color: _selectedIndex == 3
+                      ? const Color(0xFFFF8600)
+                      : Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedIndex = 4;
+                });
+              },
+              child: Text(
+                'Approve Hours',
+                style: TextStyle(
+                  color: _selectedIndex == 4
+                      ? const Color(0xFFFF8600)
+                      : Colors.white,
+                ),
+              ),
+            ),
+          ];
+
     return Scaffold(
       bottomNavigationBar: FooterBar(),
       appBar: AppBar(
@@ -78,7 +179,13 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           children: [
             Image.asset('lib/images/servd.png', height: 40),
             const SizedBox(width: 8),
-            Text(firstName, style: const TextStyle(color: Colors.white)),
+            Flexible(
+              child: Text(
+                firstName,
+                style: const TextStyle(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         centerTitle: true,
@@ -98,74 +205,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             );
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 0;
-              });
-            },
-            child: Text(
-              'Admin Home',
-              style: TextStyle(
-                color: _selectedIndex == 0 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 1;
-              });
-            },
-            child: Text(
-              'View User Data',
-              style: TextStyle(
-                color: _selectedIndex == 1 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 2;
-              });
-            },
-            child: Text(
-              'Edit User Status',
-              style: TextStyle(
-                color: _selectedIndex == 2 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 3;
-              });
-            },
-            child: Text(
-              'Approve Activities',
-              style: TextStyle(
-                color: _selectedIndex == 3 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 4;
-              });
-            },
-            child: Text(
-              'Approve Hours',
-              style: TextStyle(
-                color: _selectedIndex == 4 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-        ],
+        actions: navActions,
       ),
       body: _getPage(),
     );
