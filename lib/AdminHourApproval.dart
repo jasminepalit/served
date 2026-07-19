@@ -17,28 +17,36 @@ class AdminHourApproval extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Hour Approvals'),
         backgroundColor: kPrimaryColor,
+        foregroundColor: Colors.white,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('Users').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collectionGroup('Hours')
+            .where('status', isEqualTo: 'pending')
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          
-          final users = snapshot.data!.docs;
-          
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: _getPendingHours(users),
+            future: _getPendingHours(snapshot.data!.docs),
             builder: (context, hoursSnapshot) {
-              if (!hoursSnapshot.hasData) return const Center(child: CircularProgressIndicator());
-              
-              final pendingHours = hoursSnapshot.data ?? [];
-              
-              if (pendingHours.isEmpty) {
-                return const Center(child: Text('No pending hours for approval.'));
+              if (!hoursSnapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
               }
-              
+
+              final pendingHours = hoursSnapshot.data ?? [];
+
+              if (pendingHours.isEmpty) {
+                return const Center(
+                  child: Text('No pending hours for approval.'),
+                );
+              }
+
               return ListView.builder(
                 itemCount: pendingHours.length,
                 itemBuilder: (context, index) {
@@ -51,9 +59,12 @@ class AdminHourApproval extends StatelessWidget {
                   final dateText = item['dateText'] as String;
                   final hourId = item['hourId'] as String;
                   final hourData = item['hourData'] as Map<String, dynamic>;
-                  
+
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     child: ListTile(
                       title: Text(studentName),
                       subtitle: Column(
@@ -86,45 +97,68 @@ class AdminHourApproval extends StatelessWidget {
       ),
     );
   }
-  
-  Future<List<Map<String, dynamic>>> _getPendingHours(List<QueryDocumentSnapshot> users) async {
-    final pendingHours = <Map<String, dynamic>>[];
-    
-    for (final userDoc in users) {
-      final userData = userDoc.data() as Map<String, dynamic>;
-      final firstName = userData['firstName'] ?? 'Unknown';
-      final lastName = userData['lastName'] ?? 'Student';
-      final studentName = '$firstName $lastName';
-      final studentEmail = userData['email'] ?? 'No email';
-      final studentId = userDoc.id;
-      
-      final hoursSnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(studentId)
-          .collection('Hours')
-          .where('status', isEqualTo: 'pending')
-          // .orderBy('date', descending: true)
-          .get();
-      
-      for (final hourDoc in hoursSnapshot.docs) {
-        final hourData = hourDoc.data();
-        final dateText = hourData['date']?.toDate()?.toString().split(' ')[0] ?? 'No date';
-        final place = hourData['place'] ?? 'Unknown Place';
-        final hoursValue = hourData['hours'] ?? 'N/A';
-        
-        pendingHours.add({
-          'studentName': studentName,
-          'studentEmail': studentEmail,
-          'studentId': studentId,
-          'hours': hoursValue,
-          'place': place,
-          'dateText': dateText,
-          'hourId': hourDoc.id,
-          'hourData': hourData,
-        });
-      }
+
+  Future<List<Map<String, dynamic>>> _getPendingHours(
+  List<QueryDocumentSnapshot> hourDocs,
+) async {
+  final futures = hourDocs.map((hourDoc) async {
+    final hourData = hourDoc.data() as Map<String, dynamic>;
+
+    final studentId = hourDoc.reference.parent.parent?.id ?? '';
+    if (studentId.isEmpty) return null;
+
+    final studentDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(studentId)
+        .get();
+
+    final userData = studentDoc.data() ?? {};
+
+    final firstName = userData['firstName'] ?? 'Unknown';
+    final lastName = userData['lastName'] ?? 'Student';
+
+    final rawDate = hourData['date'];
+    DateTime? parsedDate;
+
+    if (rawDate is Timestamp) {
+      parsedDate = rawDate.toDate();
+    } else if (rawDate is DateTime) {
+      parsedDate = rawDate;
     }
-      
-    return pendingHours;
-  }
+
+    final dateText =
+        parsedDate?.toLocal().toString().split(' ')[0] ?? 'No date';
+
+    return {
+      'studentName': '$firstName $lastName',
+      'studentEmail': userData['email'] ?? 'No email',
+      'studentId': studentId,
+      'hours': hourData['hours'] ?? 'N/A',
+      'place': hourData['place'] ?? 'Unknown Place',
+      'dateText': dateText,
+      'hourId': hourDoc.id,
+      'hourData': hourData,
+      'dateValue': parsedDate,
+    };
+  });
+
+  final results = await Future.wait(futures);
+
+  final pendingHours = results
+      .whereType<Map<String, dynamic>>()
+      .toList();
+
+  pendingHours.sort((a, b) {
+    final aDate = a['dateValue'] as DateTime?;
+    final bDate = b['dateValue'] as DateTime?;
+
+    if (aDate == null && bDate == null) return 0;
+    if (aDate == null) return 1;
+    if (bDate == null) return -1;
+
+    return aDate.compareTo(bDate);
+  });
+
+  return pendingHours;
+}
 }

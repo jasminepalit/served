@@ -99,7 +99,6 @@ Future<String> loadNameSpecific(uid) async {
       String f = doc['firstName'] as String? ?? 'Jane';
       String l = doc['lastName'] as String? ?? 'Doe';
       return '$f $l';
- 
     }
   } catch (e) {
     print("Error fetching user last name: $e");
@@ -107,13 +106,17 @@ Future<String> loadNameSpecific(uid) async {
   return 'Doe';
 }
 
-Future<User?> signUp(String email, String password, String firstName, String lastName, String yearOfGraduation) async {
+Future<User?> signUp(
+  String email,
+  String password,
+  String firstName,
+  String lastName,
+  String yearOfGraduation,
+) async {
   print("Received sign up request for email: $email");
   try {
-    final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    final credential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
 
     print("User signed up: ${credential.user?.uid}");
 
@@ -155,27 +158,30 @@ Future<void> signOut() async {
 }
 
 Future<double> fetchSpecificStudentHours(uid) async {
-    double total = 0;
-    final firestore = FirebaseFirestore.instance;
-    final students = await firestore.collection('Users').where('type', isEqualTo: 'user').get();
+  double total = 0;
+  final firestore = FirebaseFirestore.instance;
+  final students = await firestore
+      .collection('Users')
+      .where('type', isEqualTo: 'user')
+      .get();
 
-    final hoursSnapshot = await firestore
+  final hoursSnapshot = await firestore
       .collection('Users')
       .doc(uid)
       .collection('Hours')
       .get();
-    for (final hoursDoc in hoursSnapshot.docs) {
-        final data = hoursDoc.data();
-        final hoursValue = data['hours'];
-        final status = data['status'] as String?;
-        if (hoursValue is num && status == 'approved') {
-          total += hoursValue.toDouble();
-        } else if (hoursValue is String && status == 'approved') {
-          total += double.tryParse(hoursValue) ?? 0;
-        }
-      }
-    return total;
+  for (final hoursDoc in hoursSnapshot.docs) {
+    final data = hoursDoc.data();
+    final hoursValue = data['hours'];
+    final status = data['status'] as String?;
+    if (hoursValue is num && status == 'approved') {
+      total += hoursValue.toDouble();
+    } else if (hoursValue is String && status == 'approved') {
+      total += double.tryParse(hoursValue) ?? 0;
+    }
   }
+  return total;
+}
 
 Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
   double total = 0;
@@ -210,7 +216,9 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
     final place = data['place'] as String?;
     final hoursValue = data['hours'];
     final status = data['status'] as String?;
-    if (place != null && highNeedsOrganizations.contains(place) && status == 'approved') {
+    if (place != null &&
+        highNeedsOrganizations.contains(place) &&
+        status == 'approved') {
       if (hoursValue is num) {
         total += hoursValue.toDouble();
       } else if (hoursValue is String && status == 'approved') {
@@ -220,7 +228,6 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
   }
   return total;
 }
-
 
 Future<void> resetUserPassword(String email) async {
   try {

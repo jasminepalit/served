@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:served/footer_bar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:served/AdminHomePage.dart';
@@ -30,57 +31,53 @@ class _ResetPasswordState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: FooterBar(),
       appBar: AppBar(title: const Text('Reset Password')),
       body: Center(
         child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
-            const SizedBox(height: 20),
-            ElevatedButton(
-            onPressed: () async {
-              await resetUserPassword(
-                _emailController.text.trim()
-              );},
-            child: const Text('Reset Password'),
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await resetUserPassword(_emailController.text.trim());
+                    },
+                    child: const Text('Reset Password'),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      );
+                    },
+                    child: const Text('Login'),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignUpPage()),
+                      );
+                    },
+                    child: const Text('Sign Up'),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () async {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LoginPage(),
-                    ),
-                  );
-                
-              },
-              child: const Text('Login'),
-            ),
-            const SizedBox(height: 12),
-                        ElevatedButton(
-              onPressed: () async {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SignUpPage(),
-                    ),
-                  );
-                
-              },
-              child: const Text('Sign Up'),
-            ),
-          ],
         ),
-        ),
-        ),
-      ),
       ),
     );
   }
 }
-

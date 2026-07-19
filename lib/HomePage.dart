@@ -70,7 +70,6 @@ class _HomePageState extends State<HomePage> {
                       .snapshots(),
                   builder: (context, snapshot) {
                     double totalHours = 0;
-                    double highNeedsHours = 0;
                     if (snapshot.hasData) {
                       for (final doc in snapshot.data!.docs) {
                         final data = doc.data() as Map<String, dynamic>;
@@ -79,62 +78,95 @@ class _HomePageState extends State<HomePage> {
                           final h = data['hours'];
                           if (h is num) {
                             totalHours += h.toDouble();
-                            final isHighNeeds = data['high_needs'] ?? false;
-                            if (isHighNeeds) {
-                              highNeedsHours += h.toDouble();
-                            }
                           }
                         }
                       }
                     }
-                    final progress = (totalHours / 50).clamp(0.0, 1.0);
-                    final highNeedsProgress = (highNeedsHours / 50).clamp(0.0, 1.0);
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                    final goalReached = totalHours >= 50;
+                    final progress = goalReached
+                        ? 1.0
+                        : (totalHours / 50).clamp(0.0, 1.0);
+
+                    return FutureBuilder<double>(
+                      future: fetchSpecificStudentHighNeedsHours(user.uid),
+                      builder: (context, highNeedsSnapshot) {
+                        final highNeedsHours = highNeedsSnapshot.data ?? 0.0;
+                        final highNeedsProgress = goalReached
+                            ? 0.0
+                            : (highNeedsHours / 50).clamp(0.0, 1.0);
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              '${totalHours.toStringAsFixed(1)} / 50 hours',
-                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${totalHours.toStringAsFixed(1)} / 50 hours',
+                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                                ),
+                                Text(
+                                  totalHours >= 50 ? '🎉 Goal reached!' : '${(50 - totalHours).toStringAsFixed(1)} hrs to go',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: totalHours >= 50 ? Colors.green : Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              totalHours >= 50 ? '🎉 Goal reached!' : '${(50 - totalHours).toStringAsFixed(1)} hrs to go',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: totalHours >= 50 ? Colors.green : Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 6,
+                              children: [
+                                Text(
+                                  'High Needs: ${highNeedsHours.toStringAsFixed(1)} hrs',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: kAccentOrange,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  'Regular: ${(totalHours - highNeedsHours).toStringAsFixed(1)} hrs',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: kPrimaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Stack(
+                                children: [
+                                  LinearProgressIndicator(
+                                    value: progress,
+                                    minHeight: 16,
+                                    backgroundColor: kAccentColor.withOpacity(0.3),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      totalHours >= 50 ? Colors.green : kPrimaryColor,
+                                    ),
+                                  ),
+                                  LinearProgressIndicator(
+                                    value: highNeedsProgress,
+                                    minHeight: 16,
+                                    backgroundColor: Colors.transparent,
+                                    valueColor: const AlwaysStoppedAnimation<Color>(
+                                      kAccentOrange,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                            const SizedBox(height: 12),
                           ],
-                        ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Stack(
-                            children: [
-                              LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 16,
-                                backgroundColor: kAccentColor.withOpacity(0.3),
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  totalHours >= 50 ? Colors.green : kPrimaryColor,
-                                ),
-                              ),
-                              LinearProgressIndicator(
-                                value: highNeedsProgress,
-                                minHeight: 16,
-                                backgroundColor: Colors.transparent,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  kAccentOrange,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                        );
+                      },
                     );
                   },
                 ),

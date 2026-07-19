@@ -83,5 +83,4 @@ class DefaultFirebaseOptions {
     authDomain: 'servd-4430e.firebaseapp.com',
     storageBucket: 'servd-4430e.firebasestorage.app',
   );
-
 }
