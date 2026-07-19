@@ -19,21 +19,24 @@ class AdminHourApproval extends StatelessWidget {
         backgroundColor: kPrimaryColor,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('Users').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collectionGroup('Hours')
+            .where('status', isEqualTo: 'pending')
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          if (!snapshot.hasData)
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
-
-          final users = snapshot.data!.docs;
+          }
 
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: _getPendingHours(users),
+            future: _getPendingHours(snapshot.data!.docs),
             builder: (context, hoursSnapshot) {
-              if (!hoursSnapshot.hasData)
+              if (!hoursSnapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
+              }
 
               final pendingHours = hoursSnapshot.data ?? [];
 
@@ -95,64 +98,66 @@ class AdminHourApproval extends StatelessWidget {
   }
 
   Future<List<Map<String, dynamic>>> _getPendingHours(
-    List<QueryDocumentSnapshot> users,
-  ) async {
-    final pendingHours = <Map<String, dynamic>>[];
+  List<QueryDocumentSnapshot> hourDocs,
+) async {
+  final futures = hourDocs.map((hourDoc) async {
+    final hourData = hourDoc.data() as Map<String, dynamic>;
 
-    for (final userDoc in users) {
-      final userData = userDoc.data() as Map<String, dynamic>;
-      final firstName = userData['firstName'] ?? 'Unknown';
-      final lastName = userData['lastName'] ?? 'Student';
-      final studentName = '$firstName $lastName';
-      final studentEmail = userData['email'] ?? 'No email';
-      final studentId = userDoc.id;
+    final studentId = hourDoc.reference.parent.parent?.id ?? '';
+    if (studentId.isEmpty) return null;
 
-      final hoursSnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(studentId)
-          .collection('Hours')
-          .where('status', isEqualTo: 'pending')
-          .get();
+    final studentDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(studentId)
+        .get();
 
-      for (final hourDoc in hoursSnapshot.docs) {
-        final hourData = hourDoc.data();
-        final rawDate = hourData['date'];
-        DateTime? parsedDate;
-        if (rawDate is Timestamp) {
-          parsedDate = rawDate.toDate();
-        } else if (rawDate is DateTime) {
-          parsedDate = rawDate;
-        }
+    final userData = studentDoc.data() ?? {};
 
-        final dateText =
-            parsedDate?.toLocal().toString().split(' ')[0] ?? 'No date';
-        final place = hourData['place'] ?? 'Unknown Place';
-        final hoursValue = hourData['hours'] ?? 'N/A';
+    final firstName = userData['firstName'] ?? 'Unknown';
+    final lastName = userData['lastName'] ?? 'Student';
 
-        pendingHours.add({
-          'studentName': studentName,
-          'studentEmail': studentEmail,
-          'studentId': studentId,
-          'hours': hoursValue,
-          'place': place,
-          'dateText': dateText,
-          'hourId': hourDoc.id,
-          'hourData': hourData,
-          'dateValue': parsedDate,
-        });
-      }
+    final rawDate = hourData['date'];
+    DateTime? parsedDate;
+
+    if (rawDate is Timestamp) {
+      parsedDate = rawDate.toDate();
+    } else if (rawDate is DateTime) {
+      parsedDate = rawDate;
     }
 
-    pendingHours.sort((a, b) {
-      final aDate = a['dateValue'] as DateTime?;
-      final bDate = b['dateValue'] as DateTime?;
+    final dateText =
+        parsedDate?.toLocal().toString().split(' ')[0] ?? 'No date';
 
-      if (aDate == null && bDate == null) return 0;
-      if (aDate == null) return 1;
-      if (bDate == null) return -1;
-      return aDate.compareTo(bDate);
-    });
+    return {
+      'studentName': '$firstName $lastName',
+      'studentEmail': userData['email'] ?? 'No email',
+      'studentId': studentId,
+      'hours': hourData['hours'] ?? 'N/A',
+      'place': hourData['place'] ?? 'Unknown Place',
+      'dateText': dateText,
+      'hourId': hourDoc.id,
+      'hourData': hourData,
+      'dateValue': parsedDate,
+    };
+  });
 
-    return pendingHours;
-  }
+  final results = await Future.wait(futures);
+
+  final pendingHours = results
+      .whereType<Map<String, dynamic>>()
+      .toList();
+
+  pendingHours.sort((a, b) {
+    final aDate = a['dateValue'] as DateTime?;
+    final bDate = b['dateValue'] as DateTime?;
+
+    if (aDate == null && bDate == null) return 0;
+    if (aDate == null) return 1;
+    if (bDate == null) return -1;
+
+    return aDate.compareTo(bDate);
+  });
+
+  return pendingHours;
+}
 }

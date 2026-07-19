@@ -29,8 +29,24 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   final _descriptionController = TextEditingController();
   final _highNeedsDescriptionController = TextEditingController();
   bool _isHighNeeds = false;
+  bool _showEmailError = false;
+  bool _showPhoneError = false;
 
   final _firestore = FirebaseFirestore.instance;
+
+  bool _isValidEmail(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return false;
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    return emailRegex.hasMatch(trimmed);
+  }
+
+  bool _isValidPhone(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return false;
+    final digits = trimmed.replaceAll(RegExp(r'\D'), '');
+    return digits.length == 10;
+  }
 
   Future<void> _addEntry() async {
     final organization = _organizationController.text.trim();
@@ -44,15 +60,22 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
+    final hasValidEmail = _isValidEmail(advisorEmail);
+    final hasValidPhone = _isValidPhone(advisorNumber);
+
+    setState(() {
+      _showEmailError = !hasValidEmail;
+      _showPhoneError = !hasValidPhone;
+    });
+
     if (organization.isEmpty ||
         advisorName.isEmpty ||
         advisorEmail.isEmpty ||
         advisorNumber.isEmpty ||
         description.isEmpty ||
-        (_isHighNeeds && highNeedsDescription.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill out all required fields.')),
-      );
+        (_isHighNeeds && highNeedsDescription.isEmpty) ||
+        !hasValidEmail ||
+        !hasValidPhone) {
       return;
     }
 
@@ -177,18 +200,64 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                           TextField(
                             controller: _advisorEmailController,
                             keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
+                            onChanged: (_) => setState(() {
+                              _showEmailError = false;
+                            }),
+                            decoration: InputDecoration(
                               labelText: 'Advisor Email',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showEmailError
+                                      ? kAccentOrange
+                                      : Theme.of(context).primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showEmailError
+                                      ? kAccentOrange
+                                      : Colors.grey,
+                                  width: _showEmailError ? 2 : 1,
+                                ),
+                              ),
+                              errorText: _showEmailError
+                                  ? 'Enter a valid email'
+                                  : null,
+                              errorStyle: const TextStyle(color: kAccentOrange),
                             ),
                           ),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _advisorNumberController,
                             keyboardType: TextInputType.phone,
-                            decoration: const InputDecoration(
+                            onChanged: (_) => setState(() {
+                              _showPhoneError = false;
+                            }),
+                            decoration: InputDecoration(
                               labelText: 'Advisor Phone Number',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showPhoneError
+                                      ? kAccentOrange
+                                      : Theme.of(context).primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showPhoneError
+                                      ? kAccentOrange
+                                      : Colors.grey,
+                                  width: _showPhoneError ? 2 : 1,
+                                ),
+                              ),
+                              errorText: _showPhoneError
+                                  ? 'Enter a valid phone number'
+                                  : null,
+                              errorStyle: const TextStyle(color: kAccentOrange),
                             ),
                           ),
                           const SizedBox(height: 8),
