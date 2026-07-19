@@ -156,7 +156,7 @@ class AdminHourApproval extends StatelessWidget {
     if (aDate == null) return 1;
     if (bDate == null) return -1;
 
-    return aDate.compareTo(bDate);
+    return bDate.compareTo(aDate);
   });
 
   return pendingHours;
