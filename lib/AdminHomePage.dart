@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -222,12 +224,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
     // Available width after Column padding (16px on each side)
     final availableWidth = screenWidth - 32.0;
     
-    final cardWidth = isSmallScreen
-        ? (availableWidth - 12) / 2  // 2 columns on small screens, 12px gap
+    final double cardWidth = isSmallScreen
+        ? min((availableWidth - 12) / 2, 160).toDouble()  // 2 columns on small screens, cap width
         : isMediumScreen
-            ? (availableWidth - 16) / 2  // 2 columns on medium screens, 16px gap
-            : (availableWidth - 48) / 4;  // 4 columns on large screens, 48px total gaps (3 gaps × 16px)
-    final cardHeight = cardWidth;
+            ? min((availableWidth - 16) / 2, 220).toDouble()  // 2 columns on medium screens with max width
+            : min((availableWidth - 48) / 4, 220).toDouble();  // 4 columns on large screens with max width
+    final cardHeight = isSmallScreen ? 180.0 : 220.0;
     
     return Scaffold(
       backgroundColor: kBackgroundColor,
@@ -238,6 +240,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (!isSmallScreen) const SizedBox(height: 80),
                 ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: screenWidth - 32),
                   child: FittedBox(
@@ -354,8 +357,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 ),
                 const SizedBox(height: 20),
                 Wrap(
-                  spacing: isSmallScreen ? 12 : 16,
-                  runSpacing: isSmallScreen ? 12 : 16,
+                  spacing: isSmallScreen ? 12 : 150,
+                  runSpacing: isSmallScreen ? 12 : 150,
                   alignment: WrapAlignment.start,
                   children: List.generate(4, (index) {
                     Color cardColor;
