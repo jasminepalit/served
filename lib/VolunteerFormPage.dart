@@ -32,6 +32,15 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
   final _firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
 
+  void _resetForm() {
+    _selectedPlace = '';
+    _hoursController.clear();
+    _controller.clear();
+    setState(() {
+      _selectedDate = null;
+    });
+  }
+
   Future<void> _addEntry() async {
     print('Adding entry...');
     final place = _selectedPlace;
@@ -63,14 +72,16 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
 
     if (!context.mounted) return;
 
-    // Clear form
-    _selectedPlace = '';
-    _hoursController.clear();
-    setState(() {
-      _selectedDate = null;
-    });
-
+    _resetForm();
     widget.onSuccess?.call();
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => HomePage(title: 'Home')),
+      );
+    }
   }
 
   Future<void> _pickDate() async {
