@@ -50,6 +50,7 @@ class _HourDetailPageState extends State<HourDetailPage> {
         title: const Text('Hour Details'),
         backgroundColor: kPrimaryColor,
         elevation: 0,
+        foregroundColor: Colors.white,
       ),
       backgroundColor: kBackgroundColor,
       body: FutureBuilder<Map<String, dynamic>>(
@@ -280,16 +281,24 @@ class _HourDetailPageState extends State<HourDetailPage> {
             : status == 'rejected'
             ? 'Hour rejected'
             : 'Requested more information',
+        backgroundColor: status == 'approved'
+            ? Colors.green
+            : status == 'rejected'
+            ? Colors.red
+            : Colors.orange,
       );
     } catch (e) {
       _showSnackBar('Failed to update hour: $e');
     }
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  void _showSnackBar(String message, {Color? backgroundColor}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
   }
 
   void _approveHour() {

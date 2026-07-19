@@ -35,6 +35,7 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
   void initState() {
     super.initState();
     studentInfoFuture = _fetchStudentInfo();
+    print("ActivityApprovalDetailPage");
   }
 
   Future<Map<String, dynamic>> _fetchStudentInfo() async {

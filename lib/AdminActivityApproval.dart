@@ -20,6 +20,12 @@ class AdminActivityApproval extends StatefulWidget {
 class _AdminActivityApprovalState extends State<AdminActivityApproval> {
   String _searchQuery = '';
 
+  @override
+  void initState() {
+    super.initState();
+    
+    print("AdminActivityApproval");
+  }
   DateTime? _activityDate(Map<String, dynamic> activityData) {
     final dateValue = activityData['date'];
     if (dateValue is Timestamp) {
@@ -37,6 +43,7 @@ class _AdminActivityApprovalState extends State<AdminActivityApproval> {
       appBar: AppBar(
         title: const Text('Activity Approvals'),
         backgroundColor: kPrimaryColor,
+        foregroundColor: Colors.white,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance

@@ -17,6 +17,7 @@ class AdminHourApproval extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Hour Approvals'),
         backgroundColor: kPrimaryColor,
+        foregroundColor: Colors.white,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
