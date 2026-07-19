@@ -69,6 +69,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+    
     return Scaffold(
       bottomNavigationBar: FooterBar(),
       appBar: AppBar(
@@ -77,8 +80,6 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset('lib/images/servd.png', height: 40),
-            const SizedBox(width: 8),
-            Text(firstName, style: const TextStyle(color: Colors.white)),
           ],
         ),
         centerTitle: true,
@@ -98,74 +99,146 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             );
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 0;
-              });
-            },
-            child: Text(
-              'Admin Home',
-              style: TextStyle(
-                color: _selectedIndex == 0 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 1;
-              });
-            },
-            child: Text(
-              'View User Data',
-              style: TextStyle(
-                color: _selectedIndex == 1 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 2;
-              });
-            },
-            child: Text(
-              'Edit User Status',
-              style: TextStyle(
-                color: _selectedIndex == 2 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 3;
-              });
-            },
-            child: Text(
-              'Approve Activities',
-              style: TextStyle(
-                color: _selectedIndex == 3 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 4;
-              });
-            },
-            child: Text(
-              'Approve Hours',
-              style: TextStyle(
-                color: _selectedIndex == 4 ? Color(0xFFFF8600) : Colors.white,
-              ),
-            ),
-          ),
-        ],
+        actions: isSmallScreen
+            ? [
+                PopupMenuButton<int>(
+                  onSelected: (value) {
+                    setState(() {
+                      _selectedIndex = value;
+                    });
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 0,
+                      child: Text(
+                        'Admin Home',
+                        style: TextStyle(
+                          color: _selectedIndex == 0 ? const Color(0xFFFF8600) : Colors.black,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 1,
+                      child: Text(
+                        'View User Data',
+                        style: TextStyle(
+                          color: _selectedIndex == 1 ? const Color(0xFFFF8600) : Colors.black,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 2,
+                      child: Text(
+                        'Edit User Status',
+                        style: TextStyle(
+                          color: _selectedIndex == 2 ? const Color(0xFFFF8600) : Colors.black,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 3,
+                      child: Text(
+                        'Approve Activities',
+                        style: TextStyle(
+                          color: _selectedIndex == 3 ? const Color(0xFFFF8600) : Colors.black,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 4,
+                      child: Text(
+                        'Approve Hours',
+                        style: TextStyle(
+                          color: _selectedIndex == 4 ? const Color(0xFFFF8600) : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                  icon: const Icon(Icons.menu, color: Colors.white),
+                ),
+              ]
+            : [
+                Flexible(
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                      });
+                    },
+                    child: Text(
+                      'Admin Home',
+                      style: TextStyle(
+                        color: _selectedIndex == 0 ? const Color(0xFFFF8600) : Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 1;
+                      });
+                    },
+                    child: Text(
+                      'View User Data',
+                      style: TextStyle(
+                        color: _selectedIndex == 1 ? const Color(0xFFFF8600) : Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                      });
+                    },
+                    child: Text(
+                      'Edit User Status',
+                      style: TextStyle(
+                        color: _selectedIndex == 2 ? const Color(0xFFFF8600) : Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 3;
+                      });
+                    },
+                    child: Text(
+                      'Approve Activities',
+                      style: TextStyle(
+                        color: _selectedIndex == 3 ? const Color(0xFFFF8600) : Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 4;
+                      });
+                    },
+                    child: Text(
+                      'Approve Hours',
+                      style: TextStyle(
+                        color: _selectedIndex == 4 ? const Color(0xFFFF8600) : Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
       ),
       body: _getPage(),
     );
