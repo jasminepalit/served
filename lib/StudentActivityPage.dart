@@ -79,6 +79,7 @@ class StudentActivityPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('My Activities'),
         backgroundColor: kPrimaryColor,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

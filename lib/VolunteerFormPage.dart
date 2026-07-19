@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'HomePage.dart';
+import 'MainScreen.dart';
 import 'package:signature/signature.dart';
 import 'dart:developer';
 import 'dart:typed_data';
@@ -79,7 +79,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       Navigator.of(context).pop();
     } else {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomePage(title: 'Home')),
+        MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     }
   }
@@ -162,14 +162,14 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Signature uploaded successfully!')),
+        SnackBar(content: Text('Hours uploaded successfully!'), backgroundColor: Colors.green),
       );
 
       return downloadUrl;
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error uploading signature: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error uploading hours: $e'), backgroundColor: Colors.red));
       return null;
     }
   }
@@ -199,17 +199,32 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     if (!mounted) return;
   }
 
+  void _navigateBackToHome() {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Log Hours')),
+      appBar: AppBar(
+        title: const Text('Log Hours'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _navigateBackToHome,
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Log Hours', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 14),
+           
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -282,6 +297,8 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                         ),
                       ],
                     ),
+                                            const SizedBox(height: 16),
+
                     Signature(
                       controller: _controller,
                       width: 300,
@@ -295,23 +312,8 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                       child: const Text('Save Hours'),
                     ),
                     const SizedBox(height: 16),
-                    OutlinedButton(
-                      onPressed: () {
-                        if (Navigator.of(context).canPop()) {
-                          Navigator.of(context).pop();
-                        } else {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomePage(title: 'Home'),
-                            ),
-                          );
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: kPrimaryColor,
-                        side: BorderSide(color: kPrimaryColor),
-                      ),
+                    ElevatedButton(
+                      onPressed: _navigateBackToHome,
                       child: const Text('Back to Home'),
                     ),
                   ],

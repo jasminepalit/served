@@ -83,10 +83,10 @@ class _HomePageState extends State<HomePage> {
                       }
                     }
 
-                    final goalReached = totalHours >= 50;
+                    final goalReached = totalHours >= 100;
                     final progress = goalReached
                         ? 1.0
-                        : (totalHours / 50).clamp(0.0, 1.0);
+                        : (totalHours / 100).clamp(0.0, 1.0);
 
                     return FutureBuilder<double>(
                       future: fetchSpecificStudentHighNeedsHours(user.uid),
@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                         final highNeedsHours = highNeedsSnapshot.data ?? 0.0;
                         final highNeedsProgress = goalReached
                             ? 0.0
-                            : (highNeedsHours / 50).clamp(0.0, 1.0);
+                            : (highNeedsHours / 100).clamp(0.0, 1.0);
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,14 +103,14 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  '${totalHours.toStringAsFixed(1)} / 50 hours',
+                                  '${totalHours.toStringAsFixed(1)} / 100 hours',
                                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                                 ),
                                 Text(
-                                  totalHours >= 50 ? '🎉 Goal reached!' : '${(50 - totalHours).toStringAsFixed(1)} hrs to go',
+                                  totalHours >= 100 ? '🎉 Goal reached!' : '${(100 - totalHours).toStringAsFixed(1)} hrs to go',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: totalHours >= 50 ? Colors.green : Colors.grey[600],
+                                    color: totalHours >= 100 ? Colors.green : Colors.grey[600],
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -149,7 +149,7 @@ class _HomePageState extends State<HomePage> {
                                     minHeight: 16,
                                     backgroundColor: kAccentColor.withOpacity(0.3),
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      totalHours >= 50 ? Colors.green : kPrimaryColor,
+                                      totalHours >= 100 ? Colors.green : kPrimaryColor,
                                     ),
                                   ),
                                   LinearProgressIndicator(
@@ -229,58 +229,74 @@ class _HomePageState extends State<HomePage> {
                             thumbVisibility: true,
                             child: SingleChildScrollView(
                               scrollDirection: Axis.vertical,
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 32),
-                                child: DataTable(
-                                  headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
-                                  dataRowColor: MaterialStateProperty.all(Colors.white),
-                              dividerThickness: 1,
-                              headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-                              dataTextStyle: const TextStyle(color: Colors.black87),
-                              columnSpacing: 40,
-                              horizontalMargin: 24,
-                              columns: const [
-                              DataColumn(label: Text('Place')),
-                              DataColumn(label: Text('Hours')),
-                              DataColumn(label: Text('Date')),
-                              DataColumn(label: Text('Status')),
-                            ],
-                            rows: docs.map((doc) {
-                              final data = doc.data()! as Map<String, dynamic>;
-                              final timestamp = data['date'] as Timestamp?;
-                              final dateStr = timestamp != null ? timestamp.toDate().toLocal().toString().split(' ')[0] : '';
-                              final status = data['status'] ?? 'pending';
-                              
-                              Color statusColor;
-                              if (status == 'approved') {
-                                statusColor = Colors.green;
-                              } else if (status == 'rejected') {
-                                statusColor = Colors.red;
-                              } else {
-                                statusColor = kAccentOrange;
-                              }
+                              child: Scrollbar(
+                                thumbVisibility: true,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minWidth: MediaQuery.of(context).size.width - 32,
+                                    ),
+                                    child: DataTable(
+                                      headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
+                                      dataRowColor: MaterialStateProperty.all(Colors.white),
+                                      dividerThickness: 1,
+                                      headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+                                      dataTextStyle: const TextStyle(color: Colors.black87),
+                                      columnSpacing: 40,
+                                      horizontalMargin: 24,
+                                      columns: const [
+                                        DataColumn(label: Text('Place')),
+                                        DataColumn(label: Text('Hours')),
+                                        DataColumn(label: Text('Date')),
+                                        DataColumn(label: Text('Status')),
+                                      ],
+                                      rows: docs.map((doc) {
+                                        final data = doc.data()! as Map<String, dynamic>;
+                                        final timestamp = data['date'] as Timestamp?;
+                                        final dateStr = timestamp != null
+                                            ? timestamp.toDate().toLocal().toString().split(' ')[0]
+                                            : '';
+                                        final status = data['status'] ?? 'pending';
 
-                              switch (status) {
-                                case 'approved':
-                                  statusName = 'Approved';
-                                  break;
-                                case 'rejected':
-                                  statusName = 'Rejected';
-                                  break;
-                                default:
-                                  statusName = 'Pending';
-                              }
-                              
-                              return DataRow(cells: [
-                                DataCell(Text(data['place'] ?? '')),
-                                DataCell(Text(data['hours']?.toString() ?? '')),
-                                DataCell(Text(dateStr)),
-                                DataCell(Text(statusName, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold))),
-                              ]);
-                            }).toList(),
+                                        Color statusColor;
+                                        if (status == 'approved') {
+                                          statusColor = Colors.green;
+                                        } else if (status == 'rejected') {
+                                          statusColor = Colors.red;
+                                        } else {
+                                          statusColor = kAccentOrange;
+                                        }
+
+                                        switch (status) {
+                                          case 'approved':
+                                            statusName = 'Approved';
+                                            break;
+                                          case 'rejected':
+                                            statusName = 'Rejected';
+                                            break;
+                                          default:
+                                            statusName = 'Pending';
+                                        }
+
+                                        return DataRow(cells: [
+                                          DataCell(Text(data['place'] ?? '')),
+                                          DataCell(Text(data['hours']?.toString() ?? '')),
+                                          DataCell(Text(dateStr)),
+                                          DataCell(Text(
+                                            statusName,
+                                            style: TextStyle(
+                                              color: statusColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )),
+                                        ]);
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
                               ),
-                          ),
-                        ),
+                            ),
                           ),
                         ),
                       );
