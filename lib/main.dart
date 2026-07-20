@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Firestore Volunteer App',
+      title: 'Servd',
       theme: ThemeData(primarySwatch: Colors.deepOrange),
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),

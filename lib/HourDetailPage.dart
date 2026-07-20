@@ -67,6 +67,8 @@ class _HourDetailPageState extends State<HourDetailPage> {
           final hourDate = widget.hourData['date'] as Timestamp?;
           final place = widget.hourData['place'] ?? 'N/A';
           final hours = widget.hourData['hours'] ?? 'N/A';
+          final advisorName = widget.hourData['advisorName'] ?? 'N/A';
+          final advisorEmail = widget.hourData['advisorEmail'] ?? 'N/A';
           final signatureUrl = widget.hourData['signatureUrl'] ?? '';
 
           final formattedDate = hourDate != null
@@ -143,6 +145,8 @@ class _HourDetailPageState extends State<HourDetailPage> {
                       _buildDetailRow('Hours', hours.toString()),
                       _buildDetailRow('Place', place),
                       _buildDetailRow('Date', formattedDate),
+                      _buildDetailRow('Advisor Name', advisorName.toString()),
+                      _buildDetailRow('Advisor Email', advisorEmail.toString()),
                       Image.network(
                         signatureUrl,
                         height: 300,

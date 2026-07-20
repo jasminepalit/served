@@ -27,6 +27,8 @@ class VolunteerFormPage extends StatefulWidget {
 class _VolunteerFormPageState extends State<VolunteerFormPage> {
   String _selectedPlace = '';
   final _hoursController = TextEditingController();
+  final _advisorNameController = TextEditingController();
+  final _advisorEmailController = TextEditingController();
   DateTime? _selectedDate;
 
   final _firestore = FirebaseFirestore.instance;
@@ -35,6 +37,8 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
   void _resetForm() {
     _selectedPlace = '';
     _hoursController.clear();
+    _advisorNameController.clear();
+    _advisorEmailController.clear();
     _controller.clear();
     setState(() {
       _selectedDate = null;
@@ -45,6 +49,8 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     print('Adding entry...');
     final place = _selectedPlace;
     final hours = double.tryParse(_hoursController.text.trim());
+    final advisorName = _advisorNameController.text.trim();
+    final advisorEmail = _advisorEmailController.text.trim();
     final date = _selectedDate;
     final user = FirebaseAuth.instance.currentUser;
 
@@ -66,6 +72,8 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       'place': place,
       'hours': hours,
       'date': Timestamp.fromDate(date),
+      'advisorName': advisorName,
+      'advisorEmail': advisorEmail,
       'status': 'pending',
       'signatureUrl': signatureUrl,
     });
@@ -297,8 +305,23 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                         ),
                       ],
                     ),
-                                            const SizedBox(height: 16),
-
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _advisorNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Advisor Name'
+                        
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _advisorEmailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'Advisor Email',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Signature(
                       controller: _controller,
                       width: 300,
