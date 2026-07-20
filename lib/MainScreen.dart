@@ -57,6 +57,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+    
     return Scaffold(
       bottomNavigationBar: FooterBar(),
       appBar: AppBar(
@@ -82,35 +85,108 @@ class _MainScreenState extends State<MainScreen> {
             );
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => setState(() => _selectedIndex = 0),
-            child: const Text('Home', style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () => setState(() => _selectedIndex = 2),
-            child: const Text(
-              'Activities',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                _selectedIndex = 1;
-                _selectedLogOption = value;
-              });
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'Log Hours', child: Text('Log Hours')),
-              PopupMenuItem(value: 'Add Activity', child: Text('Add Activity')),
-            ],
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text('Log', style: TextStyle(color: Colors.white)),
-            ),
-          ),
-        ],
+        actions: isSmallScreen
+            ? [
+                PopupMenuButton<int>(
+                  onSelected: (value) {
+                    setState(() {
+                      if (value == 99) {
+                        // Log menu
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Select an option'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  title: const Text('Log Hours'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    setState(() {
+                                      _selectedIndex = 1;
+                                      _selectedLogOption = 'Log Hours';
+                                    });
+                                  },
+                                ),
+                                ListTile(
+                                  title: const Text('Add Activity'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    setState(() {
+                                      _selectedIndex = 1;
+                                      _selectedLogOption = 'Add Activity';
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else {
+                        _selectedIndex = value;
+                      }
+                    });
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 0,
+                      child: Text('Home'),
+                    ),
+                    const PopupMenuItem(
+                      value: 2,
+                      child: Text('Activities'),
+                    ),
+                    const PopupMenuItem(
+                      value: 99,
+                      child: Text('Log'),
+                    ),
+                  ],
+                  icon: const Icon(Icons.menu, color: Colors.white),
+                ),
+              ]
+            : [
+                Flexible(
+                  child: TextButton(
+                    onPressed: () => setState(() => _selectedIndex = 0),
+                    child: const Text('Home', 
+                      style: TextStyle(color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: TextButton(
+                    onPressed: () => setState(() => _selectedIndex = 2),
+                    child: const Text(
+                      'Activities',
+                      style: TextStyle(color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      setState(() {
+                        _selectedIndex = 1;
+                        _selectedLogOption = value;
+                      });
+                    },
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(value: 'Log Hours', child: Text('Log Hours')),
+                      PopupMenuItem(value: 'Add Activity', child: Text('Add Activity')),
+                    ],
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('Log', 
+                        style: TextStyle(color: Colors.white),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
       ),
       body: _getPage(),
     );
