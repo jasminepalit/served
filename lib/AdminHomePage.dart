@@ -217,26 +217,38 @@ class _AdminHomePageState extends State<AdminHomePage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = screenWidth < 600;
     final isMediumScreen = screenWidth >= 600 && screenWidth < 1000;
-    
+
     // Responsive font size
-    final headingFontSize = isSmallScreen ? 36.0 : isMediumScreen ? 48.0 : 64.0;
-    
+    final headingFontSize = isSmallScreen
+        ? 36.0
+        : isMediumScreen
+        ? 48.0
+        : 64.0;
+
     // Available width after Column padding (16px on each side)
     final availableWidth = screenWidth - 32.0;
-    
+
     final double cardWidth = isSmallScreen
-        ? min((availableWidth - 12) / 2, 160).toDouble()  // 2 columns on small screens, cap width
+        ? min((availableWidth - 12) / 2, 160)
+              .toDouble() // 2 columns on small screens, cap width
         : isMediumScreen
-            ? min((availableWidth - 16) / 2, 220).toDouble()  // 2 columns on medium screens with max width
-            : min((availableWidth - 48) / 4, 220).toDouble();  // 4 columns on large screens with max width
+        ? min((availableWidth - 16) / 2, 220)
+              .toDouble() // 2 columns on medium screens with max width
+        : min(
+            (availableWidth - 48) / 4,
+            220,
+          ).toDouble(); // 4 columns on large screens with max width
     final cardHeight = isSmallScreen ? 180.0 : 220.0;
-    
+
     return Scaffold(
       backgroundColor: kBackgroundColor,
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 20.0,
+              horizontal: 16.0,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -295,7 +307,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
                             ? Column(
                                 children: [
                                   ConstrainedBox(
-                                    constraints: BoxConstraints(maxWidth: screenWidth - 64),
+                                    constraints: BoxConstraints(
+                                      maxWidth: screenWidth - 64,
+                                    ),
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: const Text(
@@ -323,10 +337,13 @@ class _AdminHomePageState extends State<AdminHomePage> {
                             : SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     ConstrainedBox(
-                                      constraints: const BoxConstraints(maxWidth: 300),
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 300,
+                                      ),
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
                                         child: const Text(
@@ -356,37 +373,82 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                Wrap(
-                  spacing: isSmallScreen ? 12 : 150,
-                  runSpacing: isSmallScreen ? 12 : 150,
-                  alignment: WrapAlignment.start,
-                  children: List.generate(4, (index) {
-                    Color cardColor;
-                    String label;
-                    Future<dynamic> future;
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Responsive spacing:
+                    // - Max 100 px apart on large screens
+                    // - Shrinks as the window gets smaller
+                    // - Never goes below 20 px
+                    final double horizontalSpacing =
+                        ((constraints.maxWidth - (cardWidth * 4)) / 3).clamp(
+                          20.0,
+                          100.0,
+                        );
 
-                    if (index == 0) {
-                      cardColor = kAccentOrange;
-                      label = 'Avg Hours\nPer Student';
-                      future = _fetchAverageHoursPerStudent();
-                    } else if (index == 1) {
-                      cardColor = kPrimaryColor;
-                      label = 'Approved\nActivities';
-                      future = _fetchApprovedActivitiesCount();
-                    } else if (index == 2) {
-                      cardColor = kSecondaryColor;
-                      label = 'Pending\nActivities';
-                      future = _fetchPendingActivitiesCount();
-                    } else {
-                      cardColor = kAccentColor;
-                      label = 'Pending\nHours';
-                      future = _fetchPendingHoursCount();
-                    }
+                    final double verticalSpacing = horizontalSpacing;
 
-                    return FutureBuilder<dynamic>(
-                      future: future,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                    // Calculates when 4 cards no longer fit
+                    final double requiredWidth =
+                        (cardWidth * 4) + (horizontalSpacing * 3);
+
+                    final bool twoRows = constraints.maxWidth < requiredWidth;
+
+                    Widget buildCard(int index) {
+                      Color cardColor;
+                      String label;
+                      Future<dynamic> future;
+
+                      if (index == 0) {
+                        cardColor = kAccentOrange;
+                        label = 'Avg Hours\nPer Student';
+                        future = _fetchAverageHoursPerStudent();
+                      } else if (index == 1) {
+                        cardColor = kPrimaryColor;
+                        label = 'Approved\nActivities';
+                        future = _fetchApprovedActivitiesCount();
+                      } else if (index == 2) {
+                        cardColor = kSecondaryColor;
+                        label = 'Pending\nActivities';
+                        future = _fetchPendingActivitiesCount();
+                      } else {
+                        cardColor = kAccentColor;
+                        label = 'Pending\nHours';
+                        future = _fetchPendingHoursCount();
+                      }
+
+                      return FutureBuilder<dynamic>(
+                        future: future,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Container(
+                              width: cardWidth,
+                              height: cardHeight,
+                              decoration: BoxDecoration(
+                                color: cardColor,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white24,
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            );
+                          }
+
+                          final value = snapshot.data ?? 0;
+
+                          String displayValue;
+                          if (value is double) {
+                            displayValue = value.toStringAsFixed(1);
+                          } else {
+                            displayValue = value.toString();
+                          }
+
                           return Container(
                             width: cardWidth,
                             height: cardHeight,
@@ -398,35 +460,53 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                 width: 1.2,
                               ),
                             ),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
+                            child: _buildStatCardContent(displayValue, label),
                           );
-                        }
+                        },
+                      );
+                    }
 
-                        final value = snapshot.data ?? 0;
-                        String displayValue;
-                        if (value is double) {
-                          displayValue = value.toStringAsFixed(1);
-                        } else {
-                          displayValue = value.toString();
-                        }
+                    // 4 cards in one row
+                    if (!twoRows) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          buildCard(0),
+                          SizedBox(width: horizontalSpacing),
+                          buildCard(1),
+                          SizedBox(width: horizontalSpacing),
+                          buildCard(2),
+                          SizedBox(width: horizontalSpacing),
+                          buildCard(3),
+                        ],
+                      );
+                    }
 
-                        return Container(
-                          width: cardWidth,
-                          height: cardHeight,
-                          decoration: BoxDecoration(
-                            color: cardColor,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white24, width: 1.2),
-                          ),
-                          child: _buildStatCardContent(displayValue, label),
-                        );
-                      },
+                    // 2 x 2 layout
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            buildCard(0),
+                            SizedBox(width: horizontalSpacing),
+                            buildCard(1),
+                          ],
+                        ),
+
+                        SizedBox(height: verticalSpacing),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            buildCard(2),
+                            SizedBox(width: horizontalSpacing),
+                            buildCard(3),
+                          ],
+                        ),
+                      ],
                     );
-                  }),
+                  },
                 ),
               ],
             ),
