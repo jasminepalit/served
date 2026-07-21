@@ -23,9 +23,27 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _yogController = TextEditingController();
+  bool _passwordsMatch = true;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  void _updatePasswordMatch() {
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+    setState(() {
+      _passwordsMatch = password == confirmPassword;
+    });
+  }
+
+  bool get _hasPasswordInput =>
+      _passwordController.text.isNotEmpty &&
+      _confirmPasswordController.text.isNotEmpty;
+
+  bool get _canSubmit => _hasPasswordInput && _passwordsMatch;
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +60,48 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  icon: Icon(_obscurePassword
+                      ? Icons.visibility_off
+                      : Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
+              ),
+              obscureText: _obscurePassword,
+              onChanged: (_) => _updatePasswordMatch(),
             ),
+            TextField(
+              controller: _confirmPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Confirm Password',
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureConfirmPassword
+                      ? Icons.visibility_off
+                      : Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                    });
+                  },
+                ),
+              ),
+              obscureText: _obscureConfirmPassword,
+              onChanged: (_) => _updatePasswordMatch(),
+            ),
+            if (_hasPasswordInput && !_passwordsMatch)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: Text(
+                  'Passwords do not match',
+                  style: TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
             TextField(
               controller: _firstNameController,
               decoration: const InputDecoration(labelText: 'First Name'),
@@ -61,44 +118,46 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
-                print(
-                  "Attempting to sign up with email: ${_emailController.text.trim()}",
-                );
-                final user = await signUp(
-                  _emailController.text.trim(),
-                  _passwordController.text.trim(),
-                  _firstNameController.text.trim(),
-                  _lastNameController.text.trim(),
-                  _yogController.text.trim(),
-                );
-                print("User signed up: ${user?.uid}");
+              onPressed: _canSubmit
+                  ? () async {
+                      print(
+                        "Attempting to sign up with email: ${_emailController.text.trim()}",
+                      );
+                      final user = await signUp(
+                        _emailController.text.trim(),
+                        _passwordController.text.trim(),
+                        _firstNameController.text.trim(),
+                        _lastNameController.text.trim(),
+                        _yogController.text.trim(),
+                      );
+                      print("User signed up: ${user?.uid}");
 
-                if (!context.mounted) return;
+                      if (!context.mounted) return;
 
-                if (user != null) {
-                  // Check user role in Firestore
-                  DocumentSnapshot userDoc = await FirebaseFirestore.instance
-                      .collection('Users')
-                      .doc(user.uid)
-                      .get();
-                  if (userDoc.exists && userDoc['type'] == 'admin') {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminHomePage(),
-                      ),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MainScreen(),
-                      ),
-                    );
-                  }
-                }
-              },
+                      if (user != null) {
+                        // Check user role in Firestore
+                        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                            .collection('Users')
+                            .doc(user.uid)
+                            .get();
+                        if (userDoc.exists && userDoc['type'] == 'admin') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminHomePage(),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainScreen(),
+                            ),
+                          );
+                        }
+                      }
+                    }
+                  : null,
               child: const Text('Sign Up'),
             ),
             const SizedBox(height: 12),
