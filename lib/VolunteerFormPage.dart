@@ -170,14 +170,20 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hours uploaded successfully!'), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text('Hours uploaded successfully!'),
+          backgroundColor: Colors.green,
+        ),
       );
 
       return downloadUrl;
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error uploading hours: $e'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error uploading hours: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return null;
     }
   }
@@ -232,7 +238,6 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-           
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -309,8 +314,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                     TextField(
                       controller: _advisorNameController,
                       decoration: const InputDecoration(
-                        labelText: 'Advisor Name'
-                        
+                        labelText: 'Advisor Name',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -321,7 +325,17 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                         labelText: 'Advisor Email',
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+                    const SizedBox(
+                      height: 24,
+                      child: Center(
+                        child: Text(
+                          'Advisor Signature',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Signature(
                       controller: _controller,
                       width: 300,
