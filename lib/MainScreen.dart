@@ -59,7 +59,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
-    
+
     return Scaffold(
       bottomNavigationBar: FooterBar(),
       appBar: AppBar(
@@ -91,7 +91,6 @@ class _MainScreenState extends State<MainScreen> {
                   onSelected: (value) {
                     setState(() {
                       if (value == 99) {
-                        // Log menu
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -129,28 +128,65 @@ class _MainScreenState extends State<MainScreen> {
                     });
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 0,
-                      child: Text('Home'),
+                      child: Text(
+                        'Home',
+                        style: TextStyle(
+                          color: _selectedIndex == 0
+                              ? kAccentOrange
+                              : Colors.black,
+                        ),
+                      ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 2,
-                      child: Text('Activities'),
+                      child: Text(
+                        'Activities',
+                        style: TextStyle(
+                          color: _selectedIndex == 2
+                              ? kAccentOrange
+                              : Colors.black,
+                        ),
+                      ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 99,
-                      child: Text('Log'),
+                      child: Text(
+                        'Log',
+                        style: TextStyle(
+                          color: _selectedIndex == 1
+                              ? kAccentOrange
+                              : Colors.black,
+                        ),
+                      ),
                     ),
                   ],
-                  icon: const Icon(Icons.menu, color: Colors.white),
+                  icon: Icon(
+                    Icons.menu,
+                    color: _selectedIndex == 1 ? kAccentOrange : Colors.white,
+                  ),
                 ),
               ]
             : [
                 Flexible(
                   child: TextButton(
                     onPressed: () => setState(() => _selectedIndex = 0),
-                    child: const Text('Home', 
-                      style: TextStyle(color: Colors.white),
+                    style: TextButton.styleFrom(
+                      backgroundColor: _selectedIndex == 0
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Home',
+                      style: TextStyle(
+                        color: _selectedIndex == 0
+                            ? kAccentOrange
+                            : Colors.white,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -158,9 +194,21 @@ class _MainScreenState extends State<MainScreen> {
                 Flexible(
                   child: TextButton(
                     onPressed: () => setState(() => _selectedIndex = 2),
-                    child: const Text(
+                    style: TextButton.styleFrom(
+                      backgroundColor: _selectedIndex == 2
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
                       'Activities',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                        color: _selectedIndex == 2
+                            ? kAccentOrange
+                            : Colors.white,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -174,13 +222,33 @@ class _MainScreenState extends State<MainScreen> {
                       });
                     },
                     itemBuilder: (context) => const [
-                      PopupMenuItem(value: 'Log Hours', child: Text('Log Hours')),
-                      PopupMenuItem(value: 'Add Activity', child: Text('Add Activity')),
+                      PopupMenuItem(
+                        value: 'Log Hours',
+                        child: Text('Log Hours'),
+                      ),
+                      PopupMenuItem(
+                        value: 'Add Activity',
+                        child: Text('Add Activity'),
+                      ),
                     ],
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('Log', 
-                        style: TextStyle(color: Colors.white),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 8.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _selectedIndex == 1
+                            ? Colors.white.withOpacity(0.15)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Log',
+                        style: TextStyle(
+                          color: _selectedIndex == 1
+                              ? kAccentOrange
+                              : Colors.white,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
