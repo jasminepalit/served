@@ -371,7 +371,17 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                         labelText: 'Advisor Email',
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+                    const SizedBox(
+                      height: 24,
+                      child: Center(
+                        child: Text(
+                          'Advisor Signature',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Signature(
                       controller: _controller,
                       width: 300,
