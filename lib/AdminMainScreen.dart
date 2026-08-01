@@ -71,16 +71,14 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
-    
+
     return Scaffold(
       bottomNavigationBar: FooterBar(),
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('lib/images/servd.png', height: 40),
-          ],
+          children: [Image.asset('lib/images/servd.png', height: 40)],
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF5128B5),
@@ -113,7 +111,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                       child: Text(
                         'Admin Home',
                         style: TextStyle(
-                          color: _selectedIndex == 0 ? const Color(0xFFFF8600) : Colors.black,
+                          color: _selectedIndex == 0
+                              ? const Color(0xFFFF8600)
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -122,7 +122,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                       child: Text(
                         'View User Data',
                         style: TextStyle(
-                          color: _selectedIndex == 1 ? const Color(0xFFFF8600) : Colors.black,
+                          color: _selectedIndex == 1
+                              ? const Color(0xFFFF8600)
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -131,7 +133,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                       child: Text(
                         'Edit User Status',
                         style: TextStyle(
-                          color: _selectedIndex == 2 ? const Color(0xFFFF8600) : Colors.black,
+                          color: _selectedIndex == 2
+                              ? const Color(0xFFFF8600)
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -140,7 +144,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                       child: Text(
                         'Approve Activities',
                         style: TextStyle(
-                          color: _selectedIndex == 3 ? const Color(0xFFFF8600) : Colors.black,
+                          color: _selectedIndex == 3
+                              ? const Color(0xFFFF8600)
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -149,12 +155,17 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                       child: Text(
                         'Approve Hours',
                         style: TextStyle(
-                          color: _selectedIndex == 4 ? const Color(0xFFFF8600) : Colors.black,
+                          color: _selectedIndex == 4
+                              ? const Color(0xFFFF8600)
+                              : Colors.black,
                         ),
                       ),
                     ),
                   ],
-                  icon: const Icon(Icons.menu, color: Colors.white),
+                  icon: Icon(
+                    Icons.menu,
+                    color: _selectedIndex >= 0 ? Colors.white : Colors.white,
+                  ),
                 ),
               ]
             : [
@@ -165,10 +176,20 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                         _selectedIndex = 0;
                       });
                     },
+                    style: TextButton.styleFrom(
+                      backgroundColor: _selectedIndex == 0
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text(
                       'Admin Home',
                       style: TextStyle(
-                        color: _selectedIndex == 0 ? const Color(0xFFFF8600) : Colors.white,
+                        color: _selectedIndex == 0
+                            ? const Color(0xFFFF8600)
+                            : Colors.white,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -181,10 +202,20 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                         _selectedIndex = 1;
                       });
                     },
+                    style: TextButton.styleFrom(
+                      backgroundColor: _selectedIndex == 1
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text(
                       'View User Data',
                       style: TextStyle(
-                        color: _selectedIndex == 1 ? const Color(0xFFFF8600) : Colors.white,
+                        color: _selectedIndex == 1
+                            ? const Color(0xFFFF8600)
+                            : Colors.white,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -197,10 +228,20 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                         _selectedIndex = 2;
                       });
                     },
+                    style: TextButton.styleFrom(
+                      backgroundColor: _selectedIndex == 2
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text(
                       'Edit User Status',
                       style: TextStyle(
-                        color: _selectedIndex == 2 ? const Color(0xFFFF8600) : Colors.white,
+                        color: _selectedIndex == 2
+                            ? const Color(0xFFFF8600)
+                            : Colors.white,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -213,10 +254,20 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                         _selectedIndex = 3;
                       });
                     },
+                    style: TextButton.styleFrom(
+                      backgroundColor: _selectedIndex == 3
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text(
                       'Approve Activities',
                       style: TextStyle(
-                        color: _selectedIndex == 3 ? const Color(0xFFFF8600) : Colors.white,
+                        color: _selectedIndex == 3
+                            ? const Color(0xFFFF8600)
+                            : Colors.white,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -229,10 +280,20 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                         _selectedIndex = 4;
                       });
                     },
+                    style: TextButton.styleFrom(
+                      backgroundColor: _selectedIndex == 4
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text(
                       'Approve Hours',
                       style: TextStyle(
-                        color: _selectedIndex == 4 ? const Color(0xFFFF8600) : Colors.white,
+                        color: _selectedIndex == 4
+                            ? const Color(0xFFFF8600)
+                            : Colors.white,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
