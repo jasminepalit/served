@@ -16,6 +16,48 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
+const List<String> kDefaultVolunteerOrganizations = [
+  'Abby\'s House',
+  'Community Harvest',
+  'FRC 190',
+  'MACS',
+  'Mass Academy',
+  'Mustard Seed',
+  'Scouts',
+  'Project New Hope',
+  'Tatnuck Magnet School',
+  'Worcester Public Library',
+  'WRAP',
+  'United Way',
+];
+
+bool isHighNeedsOrganization(String? place) {
+  if (place == null) return false;
+  final normalized = place.trim().toLowerCase();
+  return {
+        'abby\'s house': true,
+        'community harvest': true,
+        'mustard seed': true,
+        'project new hope': true,
+        'wrap': true,
+      }[normalized] ??
+      false;
+}
+
+List<String> buildVolunteerOrganizations(
+  Iterable<String?> approvedOrganizations,
+) {
+  final organizations = <String>{...kDefaultVolunteerOrganizations};
+  for (final organization in approvedOrganizations) {
+    final cleanedOrganization = organization?.trim();
+    if (cleanedOrganization != null && cleanedOrganization.isNotEmpty) {
+      organizations.add(cleanedOrganization);
+    }
+  }
+  final sortedOrganizations = organizations.toList()..sort();
+  return sortedOrganizations;
+}
+
 class VolunteerFormPage extends StatefulWidget {
   final VoidCallback? onSuccess;
   const VolunteerFormPage({super.key, this.onSuccess});
@@ -68,6 +110,8 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     print('Getting signature...');
     final signatureUrl = await exportImage(context);
 
+    final isHighNeeds = isHighNeedsOrganization(place);
+
     await _firestore.collection('Users').doc(user.uid).collection('Hours').add({
       'place': place,
       'hours': hours,
@@ -76,6 +120,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       'advisorEmail': advisorEmail,
       'status': 'pending',
       'signatureUrl': signatureUrl,
+      'isHighNeeds': isHighNeeds,
     });
 
     if (!context.mounted) return;
@@ -170,14 +215,20 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hours uploaded successfully!'), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text('Hours uploaded successfully!'),
+          backgroundColor: Colors.green,
+        ),
       );
 
       return downloadUrl;
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error uploading hours: $e'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error uploading hours: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return null;
     }
   }
@@ -232,7 +283,6 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-           
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -254,10 +304,11 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                           );
                         }
                         final activities = snapshot.data!.docs;
-                        final organizations = activities
-                            .map((doc) => doc['organization'] as String)
-                            .toSet()
-                            .toList();
+                        final organizations = buildVolunteerOrganizations(
+                          activities.map(
+                            (doc) => doc['organization']?.toString(),
+                          ),
+                        );
                         return DropdownButtonFormField<String>(
                           value: _selectedPlace.isEmpty ? null : _selectedPlace,
                           decoration: const InputDecoration(labelText: 'Place'),
@@ -309,8 +360,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                     TextField(
                       controller: _advisorNameController,
                       decoration: const InputDecoration(
-                        labelText: 'Advisor Name'
-                        
+                        labelText: 'Advisor Name',
                       ),
                     ),
                     const SizedBox(height: 16),

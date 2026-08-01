@@ -196,7 +196,7 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
       .where('isHighNeeds', isEqualTo: true)
       .get();
 
-  // Collect unique organizations
+  // Collect unique organizations from approved high-needs activities.
   final highNeedsOrganizations = activitiesSnapshot.docs
       .map((doc) => doc.data()['organization'] as String?)
       .where((org) => org != null)
@@ -210,18 +210,21 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
       .where('status', isEqualTo: 'approved')
       .get();
 
-  // Sum hours where place is in high needs organizations
+  // Sum hours where the document is flagged as high needs or the place
+  // matches a high-needs organization from approved activities.
   for (final hoursDoc in hoursSnapshot.docs) {
     final data = hoursDoc.data();
     final place = data['place'] as String?;
     final hoursValue = data['hours'];
     final status = data['status'] as String?;
-    if (place != null &&
-        highNeedsOrganizations.contains(place) &&
-        status == 'approved') {
+    final isHighNeeds = data['isHighNeeds'] == true;
+    final matchesHighNeedsOrganization =
+        place != null && highNeedsOrganizations.contains(place);
+
+    if (status == 'approved' && (isHighNeeds || matchesHighNeedsOrganization)) {
       if (hoursValue is num) {
         total += hoursValue.toDouble();
-      } else if (hoursValue is String && status == 'approved') {
+      } else if (hoursValue is String) {
         total += double.tryParse(hoursValue) ?? 0;
       }
     }
