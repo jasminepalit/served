@@ -154,6 +154,8 @@ class StudentActivityPage extends StatelessWidget {
                                         .toString()
                                         .split(' ')[0]
                                   : 'No date';
+                              final isEditable =
+                                  status == 'pending' || status == 'more_info';
 
                               return DataRow(
                                 cells: [
@@ -201,7 +203,7 @@ class StudentActivityPage extends StatelessWidget {
                                     ),
                                   ),
                                   DataCell(
-                                    status == 'more_info'
+                                    isEditable
                                         ? TextButton(
                                             onPressed: () {
                                               Navigator.push(
@@ -294,6 +296,20 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
   Future<void> _saveChanges() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
+    final currentStatus =
+        widget.activityData['status']?.toString() ?? 'pending';
+    if (currentStatus != 'pending' && currentStatus != 'more_info') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This activity can no longer be edited.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      Navigator.pop(context);
+      return;
+    }
+
     if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -477,7 +493,8 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
             ElevatedButton(
               onPressed: _isSaving ? null : _saveChanges,
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimaryColor,
+                backgroundColor: const Color(0xFFFF8600),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: _isSaving
