@@ -87,6 +87,11 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     });
   }
 
+  bool get _isHoursValid {
+    final hours = double.tryParse(_hoursController.text.trim());
+    return hours != null && hours <= 100;
+  }
+
   Future<void> _addEntry() async {
     print('Adding entry...');
     final place = _selectedPlace;
@@ -103,6 +108,13 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
         const SnackBar(
           content: Text('Please fill out place, hours, date, and signature.'),
         ),
+      );
+      return;
+    }
+
+    if (!_isHoursValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Maximum 100 hours per submission.')),
       );
       return;
     }
@@ -330,7 +342,14 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                     TextField(
                       controller: _hoursController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Hours'),
+                      decoration: InputDecoration(
+                        labelText: 'Hours',
+                        helperText: 'Maximum 100 hours',
+                        errorText:
+                            _hoursController.text.isNotEmpty && !_isHoursValid
+                            ? 'Hours cannot be more than 100'
+                            : null,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(
