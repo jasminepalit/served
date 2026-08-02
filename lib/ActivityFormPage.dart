@@ -31,6 +31,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   bool _isHighNeeds = false;
   bool _showEmailError = false;
   bool _showPhoneError = false;
+  bool _showDescriptionError = false;
 
   final _firestore = FirebaseFirestore.instance;
 
@@ -66,13 +67,17 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     setState(() {
       _showEmailError = !hasValidEmail;
       _showPhoneError = !hasValidPhone;
+      _showDescriptionError = description.isEmpty;
     });
+
+    if (description.isEmpty) {
+      return;
+    }
 
     if (organization.isEmpty ||
         advisorName.isEmpty ||
         advisorEmail.isEmpty ||
         advisorNumber.isEmpty ||
-        description.isEmpty ||
         (_isHighNeeds && highNeedsDescription.isEmpty) ||
         !hasValidEmail ||
         !hasValidPhone) {
@@ -167,9 +172,32 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                           TextField(
                             controller: _descriptionController,
                             maxLines: 3,
-                            decoration: const InputDecoration(
+                            onChanged: (_) => setState(() {
+                              _showDescriptionError = false;
+                            }),
+                            decoration: InputDecoration(
                               labelText: 'Activity Description',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showDescriptionError
+                                      ? kAccentOrange
+                                      : Theme.of(context).primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showDescriptionError
+                                      ? kAccentOrange
+                                      : Colors.grey,
+                                  width: _showDescriptionError ? 2 : 1,
+                                ),
+                              ),
+                              errorText: _showDescriptionError
+                                  ? 'Please fill out the activity description.'
+                                  : null,
+                              errorStyle: const TextStyle(color: kAccentOrange),
                             ),
                           ),
                           const SizedBox(height: 8),

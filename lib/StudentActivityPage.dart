@@ -10,6 +10,14 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
+String? validateActivityDescription(String? description) {
+  final normalized = description?.trim();
+  if (normalized == null || normalized.isEmpty || normalized.toUpperCase() == 'N/A') {
+    return 'Activity description is required before this activity can be submitted.';
+  }
+  return null;
+}
+
 class StudentActivityPage extends StatelessWidget {
   final bool showFooter;
 
@@ -307,6 +315,19 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
         ),
       );
       Navigator.pop(context);
+      return;
+    }
+
+    final descriptionError = validateActivityDescription(
+      _descriptionController.text,
+    );
+    if (descriptionError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(descriptionError),
+          backgroundColor: Colors.orange,
+        ),
+      );
       return;
     }
 
