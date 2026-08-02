@@ -179,7 +179,7 @@ class _HomePageState extends State<HomePage> {
                         return const ActivityFormPage();
                       }));
                     },
-                    child: const Text('Log Activity'),
+                    child: const Text('Add Activity'),
                   ),
                 ),
                 const SizedBox(width: 14),
