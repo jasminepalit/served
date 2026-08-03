@@ -94,10 +94,10 @@ class _HomePageState extends State<HomePage> {
                   future: fetchSpecificStudentHighNeedsHours(user.uid),
                   builder: (context, highNeedsSnapshot) {
                     final highNeedsHours = highNeedsSnapshot.data ?? 0.0;
-                    final highNeedsProgress = (highNeedsHours / 10).clamp(
-                      0.0,
-                      1.0,
-                    );
+                    final highNeedsGoalReached = highNeedsHours >= 10;
+                    final highNeedsProgress = highNeedsGoalReached
+                        ? 1.0
+                        : (highNeedsHours / 10).clamp(0.0, 1.0);
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,13 +139,30 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Text(
-                          'High Needs: ${highNeedsHours.toStringAsFixed(1)} / 10 hours',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: kAccentOrange,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'High Needs: ${highNeedsHours.toStringAsFixed(1)} / 10 hours',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: kAccentOrange,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              highNeedsGoalReached
+                                  ? '🎉 Goal reached!'
+                                  : '${(10 - highNeedsHours).toStringAsFixed(1)} hrs to go',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: highNeedsGoalReached
+                                    ? Colors.green
+                                    : Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         ClipRRect(
@@ -154,8 +171,10 @@ class _HomePageState extends State<HomePage> {
                             value: highNeedsProgress,
                             minHeight: 14,
                             backgroundColor: kAccentColor.withOpacity(0.2),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              kAccentOrange,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              highNeedsGoalReached
+                                  ? Colors.green
+                                  : kAccentOrange,
                             ),
                           ),
                         ),
