@@ -35,6 +35,14 @@ Future<String> loadUserStatus({String? uid}) async {
   return 'active';
 }
 
+bool isValidPassword(String password) {
+  if (password.length < 8) return false;
+  if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
+  if (!RegExp(r'\d').hasMatch(password)) return false;
+  if (!RegExp(r'[^A-Za-z0-9]').hasMatch(password)) return false;
+  return true;
+}
+
 Future<String> loadFirstName() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return 'Jane';
@@ -114,6 +122,11 @@ Future<User?> signUp(
   String yearOfGraduation,
 ) async {
   print("Received sign up request for email: $email");
+  if (!isValidPassword(password)) {
+    print('Password does not meet the required strength requirements.');
+    return null;
+  }
+
   try {
     final credential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
