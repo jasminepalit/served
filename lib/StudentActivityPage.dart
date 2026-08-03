@@ -10,6 +10,64 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
+String formatActivityStatus(String? status) {
+  switch (status) {
+    case 'approved':
+      return 'Approved';
+    case 'rejected':
+      return 'Rejected';
+    case 'more_info':
+      return 'More Info Requested';
+    case 'pending':
+    default:
+      return 'Pending';
+  }
+}
+
+List<MapEntry<String, String>> buildActivityDetailRows(
+  Map<String, dynamic> data,
+) {
+  final isHighNeedsRaw = data['isHighNeeds'] ?? data['high_needs'] ?? false;
+  final isHighNeeds = isHighNeedsRaw is bool
+      ? isHighNeedsRaw
+      : isHighNeedsRaw.toString().toLowerCase() == 'true';
+  final timestamp = data['date'] as Timestamp?;
+  final dateStr = timestamp != null
+      ? timestamp.toDate().toLocal().toString().split(' ')[0]
+      : 'Not provided';
+
+  String displayValue(dynamic value, {String fallback = 'Not provided'}) {
+    if (value == null) return fallback;
+    if (value is Timestamp) {
+      return value.toDate().toLocal().toString().split(' ')[0];
+    }
+    if (value is bool) {
+      return value ? 'Yes' : 'No';
+    }
+    final stringValue = value.toString().trim();
+    return stringValue.isEmpty ? fallback : stringValue;
+  }
+
+  return [
+    MapEntry('Organization Name', displayValue(data['organization'])),
+    MapEntry('Activity Description', displayValue(data['description'])),
+    MapEntry('Advisor Name', displayValue(data['advisorName'])),
+    MapEntry('Advisor Email', displayValue(data['advisorEmail'])),
+    MapEntry('Advisor Phone Number', displayValue(data['advisorNumber'])),
+    MapEntry('Date', dateStr),
+    MapEntry('High Needs', isHighNeeds ? 'Yes' : 'No'),
+    MapEntry(
+      'High Needs Description',
+      displayValue(data['highNeedsDescription']),
+    ),
+    MapEntry('Status', formatActivityStatus(data['status']?.toString())),
+    MapEntry(
+      'Admin Request Message',
+      displayValue(data['requestMessage'], fallback: 'No requests'),
+    ),
+  ];
+}
+
 class StudentActivityPage extends StatelessWidget {
   final bool showFooter;
 
@@ -203,8 +261,86 @@ class StudentActivityPage extends StatelessWidget {
                                     ),
                                   ),
                                   DataCell(
-                                    isEditable
-                                        ? TextButton(
+                                    Wrap(
+                                      spacing: 8,
+                                      children: [
+                                        if (status == 'approved')
+                                          TextButton(
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (dialogContext) {
+                                                  return AlertDialog(
+                                                    title: const Text(
+                                                      'Activity Details',
+                                                    ),
+                                                    content: SizedBox(
+                                                      width: 500,
+                                                      child: SingleChildScrollView(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            const Text(
+                                                              'These are the details you submitted when this activity was first created.',
+                                                            ),
+                                                            const SizedBox(
+                                                              height: 12,
+                                                            ),
+                                                            ...buildActivityDetailRows(
+                                                              data,
+                                                            ).map(
+                                                              (entry) => Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                  bottom: 12,
+                                                                ),
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      entry.key,
+                                                                      style: const TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .bold,
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Text(
+                                                                      entry.value,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              dialogContext,
+                                                            ),
+                                                        child: const Text('Close'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            child: const Text('View'),
+                                          ),
+                                        if (isEditable)
+                                          TextButton(
                                             onPressed: () {
                                               Navigator.push(
                                                 context,
@@ -220,8 +356,9 @@ class StudentActivityPage extends StatelessWidget {
                                             child: const Text(
                                               'Edit & Resubmit',
                                             ),
-                                          )
-                                        : const SizedBox.shrink(),
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               );
