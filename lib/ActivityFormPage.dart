@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
 import 'HomePage.dart';
 import 'VolunteerFormPage.dart';
+import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -34,13 +35,6 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
 
   final _firestore = FirebaseFirestore.instance;
 
-  bool _isValidEmail(String value) {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return false;
-    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    return emailRegex.hasMatch(trimmed);
-  }
-
   bool _isValidPhone(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return false;
@@ -60,7 +54,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final hasValidEmail = _isValidEmail(advisorEmail);
+    final hasValidEmail = isValidEmail(advisorEmail);
     final hasValidPhone = _isValidPhone(advisorNumber);
 
     setState(() {

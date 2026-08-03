@@ -35,6 +35,12 @@ Future<String> loadUserStatus({String? uid}) async {
   return 'active';
 }
 
+bool isValidEmail(String email) {
+  final trimmed = email.trim();
+  if (trimmed.isEmpty) return false;
+  return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(trimmed);
+}
+
 bool isValidPassword(String password) {
   if (password.length < 8) return false;
   if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
@@ -122,6 +128,11 @@ Future<User?> signUp(
   String yearOfGraduation,
 ) async {
   print("Received sign up request for email: $email");
+  if (!isValidEmail(email)) {
+    print('Email address is not valid.');
+    return null;
+  }
+
   if (!isValidPassword(password)) {
     print('Password does not meet the required strength requirements.');
     return null;
@@ -154,6 +165,11 @@ Future<User?> signUp(
 }
 
 Future<User?> signIn(String email, String password) async {
+  if (!isValidEmail(email)) {
+    print('Email address is not valid.');
+    return null;
+  }
+
   try {
     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: email,
@@ -246,6 +262,11 @@ Future<double> fetchSpecificStudentHighNeedsHours(uid) async {
 }
 
 Future<void> resetUserPassword(String email) async {
+  if (!isValidEmail(email)) {
+    print('Email address is not valid.');
+    return;
+  }
+
   try {
     // Call the Firebase method to send the reset link
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());

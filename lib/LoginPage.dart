@@ -46,7 +46,18 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   TextField(
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => setState(() {
+                      _errorMessage = '';
+                    }),
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      errorText:
+                          _emailController.text.isNotEmpty &&
+                              !isValidEmail(_emailController.text)
+                          ? 'Enter a valid email'
+                          : null,
+                    ),
                   ),
                   TextField(
                     controller: _passwordController,
@@ -54,7 +65,9 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: 'Password',
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                         ),
                         onPressed: () {
                           setState(() {
@@ -81,6 +94,13 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
+                      if (!isValidEmail(_emailController.text)) {
+                        setState(() {
+                          _errorMessage = 'Please enter a valid email.';
+                        });
+                        return;
+                      }
+
                       final user = await signIn(
                         _emailController.text.trim(),
                         _passwordController.text.trim(),
