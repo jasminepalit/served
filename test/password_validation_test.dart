@@ -14,5 +14,17 @@ void main() {
       expect(isValidPassword('Password'), isFalse);
       expect(isValidPassword('Password1'), isFalse);
     });
+
+    test('tracks individual password requirements', () {
+      expect(hasMinLength('Password1!'), isTrue);
+      expect(hasUppercase('Password1!'), isTrue);
+      expect(hasNumber('Password1!'), isTrue);
+      expect(hasSpecialCharacter('Password1!'), isTrue);
+
+      expect(hasMinLength('short'), isFalse);
+      expect(hasUppercase('password1!'), isFalse);
+      expect(hasNumber('Password!'), isFalse);
+      expect(hasSpecialCharacter('Password1'), isFalse);
+    });
   });
 }
