@@ -68,6 +68,7 @@ class VolunteerFormPage extends StatefulWidget {
 
 class _VolunteerFormPageState extends State<VolunteerFormPage> {
   String _selectedPlace = '';
+  String? _selectedAdvisorKey;
   final _hoursController = TextEditingController();
   final _advisorNameController = TextEditingController();
   final _advisorEmailController = TextEditingController();
@@ -78,6 +79,7 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
 
   void _resetForm() {
     _selectedPlace = '';
+    _selectedAdvisorKey = null;
     _hoursController.clear();
     _advisorNameController.clear();
     _advisorEmailController.clear();
@@ -321,20 +323,79 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                             (doc) => doc['organization']?.toString(),
                           ),
                         );
-                        return DropdownButtonFormField<String>(
-                          value: _selectedPlace.isEmpty ? null : _selectedPlace,
-                          decoration: const InputDecoration(labelText: 'Place'),
-                          items: organizations.map((org) {
-                            return DropdownMenuItem<String>(
-                              value: org,
-                              child: Text(org),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedPlace = value ?? '';
-                            });
-                          },
+                        // build a map from organization -> list of advisors (name/email)
+                        final Map<String, List<Map<String, String>>> orgAdvisors = {};
+                        for (final doc in activities) {
+                          final org = doc['organization']?.toString() ?? '';
+                          final name = doc['advisorName']?.toString() ?? '';
+                          final email = doc['advisorEmail']?.toString() ?? '';
+                          if (org.isEmpty) continue;
+                          final list = orgAdvisors.putIfAbsent(org, () => []);
+                          // avoid duplicates by email
+                          if (!list.any((a) => a['email'] == email && email.isNotEmpty)) {
+                            list.add({'name': name, 'email': email});
+                          }
+                        }
+
+                        final advisorsForSelected = orgAdvisors[_selectedPlace] ?? [];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            DropdownButtonFormField<String>(
+                              value: _selectedPlace.isEmpty ? null : _selectedPlace,
+                              decoration: const InputDecoration(labelText: 'Place'),
+                              items: organizations.map((org) {
+                                return DropdownMenuItem<String>(
+                                  value: org,
+                                  child: Text(org),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedPlace = value ?? '';
+                                  // reset advisor selection when place changes
+                                  _selectedAdvisorKey = null;
+                                  _advisorNameController.clear();
+                                  _advisorEmailController.clear();
+                                  // if exactly one advisor for this place, prefill
+                                  final list = orgAdvisors[_selectedPlace] ?? [];
+                                  if (list.length == 1) {
+                                    final a = list.first;
+                                    _selectedAdvisorKey = '${a['name']}|${a['email']}' ;
+                                    _advisorNameController.text = a['name'] ?? '';
+                                    _advisorEmailController.text = a['email'] ?? '';
+                                  }
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            // Advisor dropdown populated from selected place's activity data
+                            DropdownButtonFormField<String>(
+                              value: _selectedAdvisorKey,
+                              decoration: const InputDecoration(labelText: 'Advisor (select)'),
+                              items: advisorsForSelected.map((a) {
+                                final display = '${a['name'] ?? ''} (${a['email'] ?? ''})';
+                                final key = '${a['name'] ?? ''}|${a['email'] ?? ''}';
+                                return DropdownMenuItem<String>(
+                                  value: key,
+                                  child: Text(display),
+                                );
+                              }).toList(),
+                              onChanged: advisorsForSelected.isEmpty
+                                  ? null
+                                  : (val) {
+                                      setState(() {
+                                        _selectedAdvisorKey = val;
+                                        if (val != null) {
+                                          final parts = val.split('|');
+                                          _advisorNameController.text = parts.isNotEmpty ? parts[0] : '';
+                                          _advisorEmailController.text = parts.length > 1 ? parts[1] : '';
+                                        }
+                                      });
+                                    },
+                            ),
+                          ],
                         );
                       },
                     ),
