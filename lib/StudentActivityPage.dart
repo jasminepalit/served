@@ -452,13 +452,10 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
       return;
     }
 
-    final descriptionError = validateActivityDescription(
-      _descriptionController.text,
-    );
-    if (descriptionError != null) {
+    if (_descriptionController.text == '') {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(descriptionError),
+          content: Text('Please enter a description.'),
           backgroundColor: Colors.orange,
         ),
       );
