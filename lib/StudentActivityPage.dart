@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'footer_bar.dart';
+import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -291,12 +292,14 @@ class StudentActivityPage extends StatelessWidget {
                                                             ...buildActivityDetailRows(
                                                               data,
                                                             ).map(
-                                                              (entry) => Padding(
+                                                              (
+                                                                entry,
+                                                              ) => Padding(
                                                                 padding:
-                                                                    const EdgeInsets
-                                                                        .only(
-                                                                  bottom: 12,
-                                                                ),
+                                                                    const EdgeInsets.only(
+                                                                      bottom:
+                                                                          12,
+                                                                    ),
                                                                 child: Column(
                                                                   crossAxisAlignment:
                                                                       CrossAxisAlignment
@@ -306,15 +309,15 @@ class StudentActivityPage extends StatelessWidget {
                                                                       entry.key,
                                                                       style: const TextStyle(
                                                                         fontWeight:
-                                                                            FontWeight
-                                                                                .bold,
+                                                                            FontWeight.bold,
                                                                       ),
                                                                     ),
                                                                     const SizedBox(
                                                                       height: 4,
                                                                     ),
                                                                     Text(
-                                                                      entry.value,
+                                                                      entry
+                                                                          .value,
                                                                     ),
                                                                   ],
                                                                 ),
@@ -330,7 +333,9 @@ class StudentActivityPage extends StatelessWidget {
                                                             Navigator.pop(
                                                               dialogContext,
                                                             ),
-                                                        child: const Text('Close'),
+                                                        child: const Text(
+                                                          'Close',
+                                                        ),
                                                       ),
                                                     ],
                                                   );
@@ -469,6 +474,14 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
       return;
     }
 
+    final advisorEmail = _advisorEmailController.text.trim();
+    if (!isValidEmail(advisorEmail)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid advisor email.')),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
     try {
       await FirebaseFirestore.instance
@@ -479,7 +492,7 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
           .update({
             'organization': _organizationController.text.trim(),
             'advisorName': _advisorNameController.text.trim(),
-            'advisorEmail': _advisorEmailController.text.trim(),
+            'advisorEmail': advisorEmail,
             'advisorNumber': _advisorNumberController.text.trim(),
             'description': _descriptionController.text.trim(),
             'date': Timestamp.fromDate(_selectedDate!),
@@ -606,9 +619,15 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
             TextField(
               controller: _advisorEmailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
                 labelText: 'Advisor Email',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
+                errorText:
+                    _advisorEmailController.text.isNotEmpty &&
+                        !isValidEmail(_advisorEmailController.text)
+                    ? 'Enter a valid email'
+                    : null,
               ),
             ),
             const SizedBox(height: 12),

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'MainScreen.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:signature/signature.dart';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:signature/signature.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'MainScreen.dart';
+import 'auth_helpers.dart';
 
 const Color kPrimaryColor = Color(0xFF5128B5);
 const Color kSecondaryColor = Color(0xFF758BFD);
@@ -115,6 +114,13 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
     if (!_isHoursValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Maximum 100 hours per submission.')),
+      );
+      return;
+    }
+
+    if (!isValidEmail(advisorEmail)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid advisor email.')),
       );
       return;
     }

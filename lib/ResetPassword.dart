@@ -43,11 +43,29 @@ class _ResetPasswordState extends State<ResetPassword> {
                 children: [
                   TextField(
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      errorText:
+                          _emailController.text.isNotEmpty &&
+                              !isValidEmail(_emailController.text)
+                          ? 'Enter a valid email'
+                          : null,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
+                      if (!isValidEmail(_emailController.text)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter a valid email.'),
+                          ),
+                        );
+                        return;
+                      }
+
                       await resetUserPassword(_emailController.text.trim());
                     },
                     child: const Text('Reset Password'),

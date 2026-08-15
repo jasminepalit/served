@@ -45,8 +45,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool get _isPasswordValid => isValidPassword(_passwordController.text);
 
+  bool get _isEmailValid => isValidEmail(_emailController.text);
+
   bool get _canSubmit =>
-      _hasPasswordInput && _passwordsMatch && _isPasswordValid;
+      _hasPasswordInput && _passwordsMatch && _isPasswordValid && _isEmailValid;
 
   Widget _buildPasswordRequirement(String label, bool isMet) {
     return Padding(
@@ -82,7 +84,14 @@ class _SignUpPageState extends State<SignUpPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                errorText: _emailController.text.isNotEmpty && !_isEmailValid
+                    ? 'Enter a valid email'
+                    : null,
+              ),
             ),
             TextField(
               controller: _passwordController,
