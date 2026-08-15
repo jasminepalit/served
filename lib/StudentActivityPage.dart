@@ -447,6 +447,19 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
       return;
     }
 
+    final descriptionError = validateActivityDescription(
+      _descriptionController.text,
+    );
+    if (descriptionError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(descriptionError),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

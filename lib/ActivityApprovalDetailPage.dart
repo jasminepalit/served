@@ -10,6 +10,14 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
+String? validateActivityDescription(String? description) {
+  final normalized = description?.trim();
+  if (normalized == null || normalized.isEmpty || normalized.toUpperCase() == 'N/A') {
+    return 'Activity description is required before this activity can be submitted.';
+  }
+  return null;
+}
+
 class ActivityApprovalDetailPage extends StatefulWidget {
   final String studentId;
   final String activityId;
@@ -47,6 +55,21 @@ class _ActivityApprovalDetailPageState extends State<ActivityApprovalDetailPage>
   }
 
   Future<void> _approveActivity() async {
+    final descriptionError = validateActivityDescription(
+      widget.activityData['description']?.toString(),
+    );
+
+    if (descriptionError != null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(descriptionError),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
     try {
       await FirebaseFirestore.instance
