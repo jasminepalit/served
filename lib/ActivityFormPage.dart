@@ -33,6 +33,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   bool _showEmailError = false;
   bool _showPhoneError = false;
   bool _showDescriptionError = false;
+  bool _showOrganizationError = false;
+  bool _showAdvisorNameError = false;
 
   final _firestore = FirebaseFirestore.instance;
 
@@ -59,12 +61,14 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final hasValidPhone = _isValidPhone(advisorNumber);
 
     setState(() {
+      _showOrganizationError = organization.isEmpty;
+      _showAdvisorNameError = advisorName.isEmpty;
       _showEmailError = !hasValidEmail;
       _showPhoneError = !hasValidPhone;
       _showDescriptionError = description.isEmpty;
     });
 
-    if (description.isEmpty) {
+    if (description.isEmpty || organization.isEmpty || advisorName.isEmpty) {
       return;
     }
 
@@ -157,9 +161,32 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                           const SizedBox(height: 8),
                           TextField(
                             controller: _organizationController,
-                            decoration: const InputDecoration(
+                            onChanged: (_) => setState(() {
+                              _showOrganizationError = false;
+                            }),
+                            decoration: InputDecoration(
                               labelText: 'Organization Name',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showOrganizationError
+                                      ? kAccentOrange
+                                      : Theme.of(context).primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showOrganizationError
+                                      ? kAccentOrange
+                                      : Colors.grey,
+                                  width: _showOrganizationError ? 2 : 1,
+                                ),
+                              ),
+                              errorText: _showOrganizationError
+                                  ? 'Please enter the organization name.'
+                                  : null,
+                              errorStyle: const TextStyle(color: kAccentOrange),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -213,9 +240,32 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                           const SizedBox(height: 8),
                           TextField(
                             controller: _advisorNameController,
-                            decoration: const InputDecoration(
+                            onChanged: (_) => setState(() {
+                              _showAdvisorNameError = false;
+                            }),
+                            decoration: InputDecoration(
                               labelText: 'Advisor Name',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showAdvisorNameError
+                                      ? kAccentOrange
+                                      : Theme.of(context).primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _showAdvisorNameError
+                                      ? kAccentOrange
+                                      : Colors.grey,
+                                  width: _showAdvisorNameError ? 2 : 1,
+                                ),
+                              ),
+                              errorText: _showAdvisorNameError
+                                  ? 'Please enter the advisor name.'
+                                  : null,
+                              errorStyle: const TextStyle(color: kAccentOrange),
                             ),
                           ),
                           const SizedBox(height: 8),

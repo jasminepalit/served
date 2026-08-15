@@ -43,6 +43,17 @@ bool hasNumber(String password) => RegExp(r'\d').hasMatch(password);
 
 bool hasSpecialCharacter(String password) => RegExp(r'[^A-Za-z0-9]').hasMatch(password);
 
+bool isValidEmail(String email) {
+  final trimmedEmail = email.trim();
+  if (trimmedEmail.isEmpty) return false;
+
+  final emailRegex = RegExp(
+    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$",
+  );
+
+  return emailRegex.hasMatch(trimmedEmail);
+}
+
 bool isValidPassword(String password) {
   if (!hasMinLength(password)) return false;
   if (!hasUppercase(password)) return false;
