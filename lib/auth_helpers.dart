@@ -35,17 +35,19 @@ Future<String> loadUserStatus({String? uid}) async {
   return 'active';
 }
 
-bool isValidEmail(String email) {
-  final trimmed = email.trim();
-  if (trimmed.isEmpty) return false;
-  return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(trimmed);
-}
+bool hasMinLength(String password) => password.length >= 8;
+
+bool hasUppercase(String password) => RegExp(r'[A-Z]').hasMatch(password);
+
+bool hasNumber(String password) => RegExp(r'\d').hasMatch(password);
+
+bool hasSpecialCharacter(String password) => RegExp(r'[^A-Za-z0-9]').hasMatch(password);
 
 bool isValidPassword(String password) {
-  if (password.length < 8) return false;
-  if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
-  if (!RegExp(r'\d').hasMatch(password)) return false;
-  if (!RegExp(r'[^A-Za-z0-9]').hasMatch(password)) return false;
+  if (!hasMinLength(password)) return false;
+  if (!hasUppercase(password)) return false;
+  if (!hasNumber(password)) return false;
+  if (!hasSpecialCharacter(password)) return false;
   return true;
 }
 

@@ -50,6 +50,29 @@ class _SignUpPageState extends State<SignUpPage> {
   bool get _canSubmit =>
       _hasPasswordInput && _passwordsMatch && _isPasswordValid && _isEmailValid;
 
+  Widget _buildPasswordRequirement(String label, bool isMet) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        children: [
+          Icon(
+            isMet ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 16,
+            color: isMet ? Colors.green : Colors.grey,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: isMet ? Colors.green : Colors.black54,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,6 +116,31 @@ class _SignUpPageState extends State<SignUpPage> {
               obscureText: _obscurePassword,
               onChanged: (_) => _updatePasswordMatch(),
             ),
+            if (_passwordController.text.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPasswordRequirement(
+                      'At least 8 characters',
+                      hasMinLength(_passwordController.text),
+                    ),
+                    _buildPasswordRequirement(
+                      'At least 1 uppercase letter',
+                      hasUppercase(_passwordController.text),
+                    ),
+                    _buildPasswordRequirement(
+                      'At least 1 number',
+                      hasNumber(_passwordController.text),
+                    ),
+                    _buildPasswordRequirement(
+                      'At least 1 special character',
+                      hasSpecialCharacter(_passwordController.text),
+                    ),
+                  ],
+                ),
+              ),
             TextField(
               controller: _confirmPasswordController,
               decoration: InputDecoration(
