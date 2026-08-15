@@ -43,7 +43,10 @@ class _SignUpPageState extends State<SignUpPage> {
       _passwordController.text.isNotEmpty &&
       _confirmPasswordController.text.isNotEmpty;
 
-  bool get _canSubmit => _hasPasswordInput && _passwordsMatch;
+  bool get _isPasswordValid => isValidPassword(_passwordController.text);
+
+  bool get _canSubmit =>
+      _hasPasswordInput && _passwordsMatch && _isPasswordValid;
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +65,15 @@ class _SignUpPageState extends State<SignUpPage> {
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
+                helperText:
+                    'Must be 8+ characters, include 1 uppercase letter, 1 number, and 1 special character.',
+                errorText: _hasPasswordInput && !_isPasswordValid
+                    ? 'Password does not meet the requirements'
+                    : null,
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword
-                      ? Icons.visibility_off
-                      : Icons.visibility),
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  ),
                   onPressed: () {
                     setState(() {
                       _obscurePassword = !_obscurePassword;
@@ -81,9 +89,11 @@ class _SignUpPageState extends State<SignUpPage> {
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureConfirmPassword
-                      ? Icons.visibility_off
-                      : Icons.visibility),
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
                   onPressed: () {
                     setState(() {
                       _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -123,6 +133,17 @@ class _SignUpPageState extends State<SignUpPage> {
                       print(
                         "Attempting to sign up with email: ${_emailController.text.trim()}",
                       );
+                      if (!_isPasswordValid) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Password must be 8+ characters with 1 uppercase letter, 1 number, and 1 special character.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
                       final user = await signUp(
                         _emailController.text.trim(),
                         _passwordController.text.trim(),
@@ -136,7 +157,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       if (user != null) {
                         // Check user role in Firestore
-                        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                        DocumentSnapshot userDoc = await FirebaseFirestore
+                            .instance
                             .collection('Users')
                             .doc(user.uid)
                             .get();

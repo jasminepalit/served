@@ -12,7 +12,6 @@ const Color kAccentColor = Color(0xFFAEB8FE);
 const Color kBackgroundColor = Color(0xFFF2F1F6);
 const Color kAccentOrange = Color(0xFFFF8600);
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
   final String title;
@@ -60,135 +59,161 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-                Text('Service Hours', style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 12),
-                StreamBuilder<QuerySnapshot>(
-                  stream: _firestore
-                      .collection('Users')
-                      .doc(user.uid)
-                      .collection('Hours')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    double totalHours = 0;
-                    if (snapshot.hasData) {
-                      for (final doc in snapshot.data!.docs) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final status = data['status'] ?? 'pending';
-                        if (status == 'approved') {
-                          final h = data['hours'];
-                          if (h is num) {
-                            totalHours += h.toDouble();
-                          }
-                        }
+            Text(
+              'Service Hours',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 12),
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('Users')
+                  .doc(user.uid)
+                  .collection('Hours')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                double totalHours = 0;
+                if (snapshot.hasData) {
+                  for (final doc in snapshot.data!.docs) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final status = data['status'] ?? 'pending';
+                    if (status == 'approved') {
+                      final h = data['hours'];
+                      if (h is num) {
+                        totalHours += h.toDouble();
                       }
                     }
+                  }
+                }
 
-                    final goalReached = totalHours >= 100;
-                    final progress = goalReached
+                final goalReached = totalHours >= 100;
+                final progress = goalReached
+                    ? 1.0
+                    : (totalHours / 100).clamp(0.0, 1.0);
+
+                return FutureBuilder<double>(
+                  future: fetchSpecificStudentHighNeedsHours(user.uid),
+                  builder: (context, highNeedsSnapshot) {
+                    final highNeedsHours = highNeedsSnapshot.data ?? 0.0;
+                    final highNeedsGoalReached = highNeedsHours >= 10;
+                    final highNeedsProgress = highNeedsGoalReached
                         ? 1.0
-                        : (totalHours / 100).clamp(0.0, 1.0);
+                        : (highNeedsHours / 10).clamp(0.0, 1.0);
 
-                    return FutureBuilder<double>(
-                      future: fetchSpecificStudentHighNeedsHours(user.uid),
-                      builder: (context, highNeedsSnapshot) {
-                        final highNeedsHours = highNeedsSnapshot.data ?? 0.0;
-                        final highNeedsProgress = goalReached
-                            ? 0.0
-                            : (highNeedsHours / 100).clamp(0.0, 1.0);
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '${totalHours.toStringAsFixed(1)} / 100 hours',
-                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                                ),
-                                Text(
-                                  totalHours >= 100 ? '🎉 Goal reached!' : '${(100 - totalHours).toStringAsFixed(1)} hrs to go',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: totalHours >= 100 ? Colors.green : Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 6,
-                              children: [
-                                Text(
-                                  'High Needs: ${highNeedsHours.toStringAsFixed(1)} hrs',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: kAccentOrange,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  'Regular: ${(totalHours - highNeedsHours).toStringAsFixed(1)} hrs',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: kPrimaryColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Stack(
-                                children: [
-                                  LinearProgressIndicator(
-                                    value: progress,
-                                    minHeight: 16,
-                                    backgroundColor: kAccentColor.withOpacity(0.3),
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      totalHours >= 100 ? Colors.green : kPrimaryColor,
-                                    ),
-                                  ),
-                                  LinearProgressIndicator(
-                                    value: highNeedsProgress,
-                                    minHeight: 16,
-                                    backgroundColor: Colors.transparent,
-                                    valueColor: const AlwaysStoppedAnimation<Color>(
-                                      kAccentOrange,
-                                    ),
-                                  ),
-                                ],
+                            Text(
+                              '${totalHours.toStringAsFixed(1)} / 100 hours',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            Text(
+                              totalHours >= 100
+                                  ? '🎉 Goal reached!'
+                                  : '${(100 - totalHours).toStringAsFixed(1)} hrs to go',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: totalHours >= 100
+                                    ? Colors.green
+                                    : Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ],
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 16,
+                            backgroundColor: kAccentColor.withOpacity(0.3),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              totalHours >= 100 ? Colors.green : kPrimaryColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'High Needs: ${highNeedsHours.toStringAsFixed(1)} / 10 hours',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: kAccentOrange,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              highNeedsGoalReached
+                                  ? '🎉 Goal reached!'
+                                  : '${(10 - highNeedsHours).toStringAsFixed(1)} hrs to go',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: highNeedsGoalReached
+                                    ? Colors.green
+                                    : Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: highNeedsProgress,
+                            minHeight: 14,
+                            backgroundColor: kAccentColor.withOpacity(0.2),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              highNeedsGoalReached
+                                  ? Colors.green
+                                  : kAccentOrange,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                     );
                   },
-                ),
+                );
+              },
+            ),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) {
-                        return const ActivityFormPage();
-                      }));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return const ActivityFormPage();
+                          },
+                        ),
+                      );
                     },
-                    child: const Text('Log Activity'),
+                    child: const Text('Add Activity'),
                   ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) {
-                        return const VolunteerFormPage();
-                      }));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return const VolunteerFormPage();
+                          },
+                        ),
+                      );
                     },
                     child: const Text('Log Hours'),
                   ),
@@ -198,9 +223,14 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const StudentActivityPage();
-                }));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return const StudentActivityPage();
+                    },
+                  ),
+                );
               },
               child: const Text('View Submitted Activities'),
             ),
@@ -218,9 +248,11 @@ class _HomePageState extends State<HomePage> {
                         .orderBy('date', descending: true)
                         .snapshots(),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                      if (!snapshot.hasData)
+                        return const Center(child: CircularProgressIndicator());
                       final docs = snapshot.data!.docs;
-                      if (docs.isEmpty) return const Center(child: Text('No entries yet.'));
+                      if (docs.isEmpty)
+                        return const Center(child: Text('No entries yet.'));
 
                       return Center(
                         child: SizedBox(
@@ -235,14 +267,26 @@ class _HomePageState extends State<HomePage> {
                                   scrollDirection: Axis.horizontal,
                                   child: ConstrainedBox(
                                     constraints: BoxConstraints(
-                                      minWidth: MediaQuery.of(context).size.width - 32,
+                                      minWidth:
+                                          MediaQuery.of(context).size.width -
+                                          32,
                                     ),
                                     child: DataTable(
-                                      headingRowColor: MaterialStateProperty.all(kSecondaryColor.withOpacity(0.18)),
-                                      dataRowColor: MaterialStateProperty.all(Colors.white),
+                                      headingRowColor:
+                                          MaterialStateProperty.all(
+                                            kSecondaryColor.withOpacity(0.18),
+                                          ),
+                                      dataRowColor: MaterialStateProperty.all(
+                                        Colors.white,
+                                      ),
                                       dividerThickness: 1,
-                                      headingTextStyle: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-                                      dataTextStyle: const TextStyle(color: Colors.black87),
+                                      headingTextStyle: const TextStyle(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      dataTextStyle: const TextStyle(
+                                        color: Colors.black87,
+                                      ),
                                       columnSpacing: 40,
                                       horizontalMargin: 24,
                                       columns: const [
@@ -252,12 +296,19 @@ class _HomePageState extends State<HomePage> {
                                         DataColumn(label: Text('Status')),
                                       ],
                                       rows: docs.map((doc) {
-                                        final data = doc.data()! as Map<String, dynamic>;
-                                        final timestamp = data['date'] as Timestamp?;
+                                        final data =
+                                            doc.data()! as Map<String, dynamic>;
+                                        final timestamp =
+                                            data['date'] as Timestamp?;
                                         final dateStr = timestamp != null
-                                            ? timestamp.toDate().toLocal().toString().split(' ')[0]
+                                            ? timestamp
+                                                  .toDate()
+                                                  .toLocal()
+                                                  .toString()
+                                                  .split(' ')[0]
                                             : '';
-                                        final status = data['status'] ?? 'pending';
+                                        final status =
+                                            data['status'] ?? 'pending';
 
                                         Color statusColor;
                                         if (status == 'approved') {
@@ -279,18 +330,26 @@ class _HomePageState extends State<HomePage> {
                                             statusName = 'Pending';
                                         }
 
-                                        return DataRow(cells: [
-                                          DataCell(Text(data['place'] ?? '')),
-                                          DataCell(Text(data['hours']?.toString() ?? '')),
-                                          DataCell(Text(dateStr)),
-                                          DataCell(Text(
-                                            statusName,
-                                            style: TextStyle(
-                                              color: statusColor,
-                                              fontWeight: FontWeight.bold,
+                                        return DataRow(
+                                          cells: [
+                                            DataCell(Text(data['place'] ?? '')),
+                                            DataCell(
+                                              Text(
+                                                data['hours']?.toString() ?? '',
+                                              ),
                                             ),
-                                          )),
-                                        ]);
+                                            DataCell(Text(dateStr)),
+                                            DataCell(
+                                              Text(
+                                                statusName,
+                                                style: TextStyle(
+                                                  color: statusColor,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
                                       }).toList(),
                                     ),
                                   ),
