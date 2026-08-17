@@ -374,26 +374,33 @@ class _VolunteerFormPageState extends State<VolunteerFormPage> {
                             DropdownButtonFormField<String>(
                               value: _selectedAdvisorKey,
                               decoration: const InputDecoration(labelText: 'Advisor (select)'),
-                              items: advisorsForSelected.map((a) {
-                                final display = '${a['name'] ?? ''} (${a['email'] ?? ''})';
-                                final key = '${a['name'] ?? ''}|${a['email'] ?? ''}';
-                                return DropdownMenuItem<String>(
-                                  value: key,
-                                  child: Text(display),
-                                );
-                              }).toList(),
-                              onChanged: advisorsForSelected.isEmpty
-                                  ? null
-                                  : (val) {
-                                      setState(() {
-                                        _selectedAdvisorKey = val;
-                                        if (val != null) {
-                                          final parts = val.split('|');
-                                          _advisorNameController.text = parts.isNotEmpty ? parts[0] : '';
-                                          _advisorEmailController.text = parts.length > 1 ? parts[1] : '';
-                                        }
-                                      });
-                                    },
+                              items: [
+                                ...advisorsForSelected.map((a) {
+                                  final display = '${a['name'] ?? ''} (${a['email'] ?? ''})';
+                                  final key = '${a['name'] ?? ''}|${a['email'] ?? ''}';
+                                  return DropdownMenuItem<String>(
+                                    value: key,
+                                    child: Text(display),
+                                  );
+                                }).toList(),
+                                const DropdownMenuItem<String>(
+                                  value: 'Other',
+                                  child: Text('Other'),
+                                ),
+                              ],
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedAdvisorKey = val;
+                                  if (val == null || val == 'Other') {
+                                    _advisorNameController.clear();
+                                    _advisorEmailController.clear();
+                                  } else {
+                                    final parts = val.split('|');
+                                    _advisorNameController.text = parts.isNotEmpty ? parts[0] : '';
+                                    _advisorEmailController.text = parts.length > 1 ? parts[1] : '';
+                                  }
+                                });
+                              },
                             ),
                           ],
                         );
