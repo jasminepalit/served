@@ -43,6 +43,20 @@ bool hasNumber(String password) => RegExp(r'\d').hasMatch(password);
 
 bool hasSpecialCharacter(String password) => RegExp(r'[^A-Za-z0-9]').hasMatch(password);
 
+bool isValidPhoneNumber(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return false;
+
+  final normalized = trimmed
+      .toLowerCase()
+      .replaceAll(RegExp(r'[\s\./-]+'), '');
+
+  if (normalized == 'na') return true;
+
+  final digits = trimmed.replaceAll(RegExp(r'\D'), '');
+  return digits.length == 10;
+}
+
 bool isValidEmail(String email) {
   final trimmedEmail = email.trim();
   if (trimmedEmail.isEmpty) return false;
