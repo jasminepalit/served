@@ -472,9 +472,18 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
     }
 
     final advisorEmail = _advisorEmailController.text.trim();
+    final advisorNumber = _advisorNumberController.text.trim();
     if (!isValidEmail(advisorEmail)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid advisor email.')),
+      );
+      return;
+    }
+    if (!isValidPhoneNumber(advisorNumber)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid advisor phone number or N/A.'),
+        ),
       );
       return;
     }
@@ -490,7 +499,7 @@ class _ActivityEditPageState extends State<ActivityEditPage> {
             'organization': _organizationController.text.trim(),
             'advisorName': _advisorNameController.text.trim(),
             'advisorEmail': advisorEmail,
-            'advisorNumber': _advisorNumberController.text.trim(),
+            'advisorNumber': advisorNumber,
             'description': _descriptionController.text.trim(),
             'date': Timestamp.fromDate(_selectedDate!),
             'isHighNeeds': _isHighNeeds,

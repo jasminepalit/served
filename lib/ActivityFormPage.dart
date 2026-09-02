@@ -38,12 +38,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
 
   final _firestore = FirebaseFirestore.instance;
 
-  bool _isValidPhone(String value) {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return false;
-    final digits = trimmed.replaceAll(RegExp(r'\D'), '');
-    return digits.length == 10;
-  }
+  bool _isValidPhone(String value) => isValidPhoneNumber(value);
 
   Future<void> _addEntry() async {
     final organization = _organizationController.text.trim();
@@ -327,7 +322,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                                 ),
                               ),
                               errorText: _showPhoneError
-                                  ? 'Enter a valid phone number'
+                                  ? 'Enter a valid phone number or N/A'
                                   : null,
                               errorStyle: const TextStyle(color: kAccentOrange),
                             ),
