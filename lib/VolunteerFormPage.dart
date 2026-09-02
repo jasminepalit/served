@@ -17,6 +17,8 @@ const Color kAccentOrange = Color(0xFFFF8600);
 
 const List<String> kDefaultVolunteerOrganizations = [
   'Abby\'s House',
+  'Class of 2027 High Needs',
+  'Class of 2027 Regular',
   'Community Harvest',
   'FRC 190',
   'MACS',
@@ -35,6 +37,7 @@ bool isHighNeedsOrganization(String? place) {
   final normalized = place.trim().toLowerCase();
   return {
         'abby\'s house': true,
+        'class of 2027 high needs': true,
         'community harvest': true,
         'mustard seed': true,
         'project new hope': true,
