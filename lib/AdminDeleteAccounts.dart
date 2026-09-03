@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'VolunteerFormPage.dart';
 import 'auth_helpers.dart';
@@ -118,6 +119,7 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                             DataColumn(label: Text('Change Role')),
                             DataColumn(label: Text('Status')),
                             DataColumn(label: Text('Change Status')),
+                            DataColumn(label: Text('Delete Account')),
                           ],
                           rows: filteredDocs.map((doc) {
                             final data = doc.data()! as Map<String, dynamic>;
@@ -222,6 +224,66 @@ class _AdminDeleteAccountsState extends State<AdminDeleteAccounts> {
                                           ? 'Deactivate'
                                           : 'Activate',
                                     ),
+                                  ),
+                                ),
+                                DataCell(
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    onPressed: () async {
+                                      final currentUser = FirebaseAuth.instance.currentUser;
+                                      if (currentUser != null && currentUser.uid == doc.id) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('You cannot delete your own account from here.'),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Confirm Delete'),
+                                          content: Text('Permanently delete account for ${data['firstName'] ?? ''} ${data['lastName'] ?? ''}? This will remove their Auth account and Firestore data.'),
+                                          actions: [
+                                            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                              onPressed: () => Navigator.pop(context, true),
+                                              child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      if (confirmed != true) return;
+
+                                      try {
+                                        // Call the existing wipe-by-YOG callable by passing the user's UID via a new callable that deletes a single user.
+                                        final FirebaseFunctions functions = FirebaseFunctions.instanceFor(region: 'us-east1');
+                                        final HttpsCallable callable = functions.httpsCallable('delete_user_callable');
+                                        final HttpsCallableResult result = await callable.call({'uid': doc.id});
+                                        final resData = result.data as Map?;
+                                        final message = resData != null ? (resData['message'] ?? 'User deleted.') : 'User deleted.';
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(message), backgroundColor: Colors.green),
+                                        );
+                                      } on FirebaseFunctionsException catch (e) {
+                                        final details = e.details;
+                                        final messageParts = <String>[e.message ?? 'Cloud function error', if (details != null) details.toString()];
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(messageParts.join(' - ')), backgroundColor: Colors.red),
+                                        );
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Error deleting user: $e'), backgroundColor: Colors.red),
+                                        );
+                                      }
+                                    },
+                                    child: const Text('Delete'),
                                   ),
                                 ),
                               ],

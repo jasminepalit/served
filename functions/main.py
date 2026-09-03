@@ -138,3 +138,71 @@ def delete_users_by_yog_callable(req: https_fn.CallableRequest) -> dict:
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=f"Failed to wipe users: {exc}"
         ) from exc
+
+
+@https_fn.on_call(region="us-east1")
+def delete_user_callable(req: https_fn.CallableRequest) -> dict:
+    """Deletes a single user from Firebase Auth and their Firestore document.
+    Callable only by authenticated admins.
+    """
+    # Security checks
+    if not req.auth:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.UNAUTHENTICATED,
+            message="The function must be called while authenticated."
+        )
+
+    is_admin = req.auth.token.get("admin", False)
+    if not is_admin:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
+            message="Only system administrators can execute this action."
+        )
+
+    uid = req.data.get("uid")
+    if not uid:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message="A target user UID must be provided."
+        )
+
+    try:
+        db = firestore.client()
+
+        # Delete common subcollections if present
+        for subcol in ("Hours", "Activities"):
+            try:
+                docs = db.collection("Users").document(uid).collection(subcol).stream()
+                for d in docs:
+                    d.reference.delete()
+            except Exception:
+                # Non-fatal if subcollection doesn't exist or deletion partially fails
+                pass
+
+        # Delete the main user document
+        try:
+            db.collection("Users").document(uid).delete()
+        except Exception:
+            # Continue to attempt Auth deletion even if Firestore doc deletion has issues
+            pass
+
+        # Delete the Firebase Auth user
+        try:
+            auth.delete_user(uid)
+        except Exception as exc:
+            # If auth deletion fails, surface the error
+            logger.exception("auth.delete_user failed")
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INTERNAL,
+                message=f"Failed to delete auth user: {exc}"
+            ) from exc
+
+        return {"success": True, "message": f"Successfully deleted user {uid}."}
+    except https_fn.HttpsError:
+        raise
+    except Exception as exc:
+        logger.exception("delete_user_callable failed")
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message=f"Failed to delete user: {exc}"
+        ) from exc
