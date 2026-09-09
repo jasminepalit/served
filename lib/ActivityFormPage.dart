@@ -38,7 +38,15 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
 
   final _firestore = FirebaseFirestore.instance;
 
-  bool _isValidPhone(String value) => isValidPhoneNumber(value);
+  bool _isNotApplicable(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'[^a-z]'), '') == 'na';
+
+  bool _isValidEmail(String value) =>
+      _isNotApplicable(value) || isValidEmail(value);
+
+  bool _isValidPhone(String value) {
+    return value.trim().isNotEmpty;
+  }
 
   Future<void> _addEntry() async {
     final organization = _organizationController.text.trim();
@@ -52,7 +60,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final hasValidEmail = isValidEmail(advisorEmail);
+    final hasValidEmail = _isValidEmail(advisorEmail);
     final hasValidPhone = _isValidPhone(advisorNumber);
 
     setState(() {
